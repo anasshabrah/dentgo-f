@@ -13,7 +13,9 @@ export const AuthProvider = ({ children }) => {
           credentials: 'include',
           mode: 'cors',
         });
-        if (!response.ok) {
+        if (response.status === 401) {
+          setUser(null);
+        } else if (!response.ok) {
           console.error('AuthContext: Failed to fetch user (status:', response.status, ')');
           setUser(null);
         } else {

@@ -1,7 +1,7 @@
 // src/api/payments.js
 import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_URL || '';
+const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
 export async function createStripeCustomer(token) {
   const resp = await axios.post(
@@ -29,7 +29,6 @@ export async function createSubscription(token, priceId, paymentMethodId) {
     }
   );
   return resp.data;
-  // { subscriptionId: 'sub_...', clientSecret: 'pi_...', status: 'active' }
 }
 
 export async function fetchActiveSubscription(token) {
