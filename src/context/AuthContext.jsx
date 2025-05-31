@@ -7,27 +7,57 @@ export const AuthProvider = ({ children }) => {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_SERVER_URL}/api/users/me`, {
-      credentials: 'include',
-      mode: 'cors',
-    })
-      .then(r => (r.ok ? r.json() : null))
-      .then(data => setUser(data?.user || null))
-      .catch(() => setUser(null))
-      .finally(() => setInitializing(false));
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/users/me`, {
+          credentials: 'include',
+          mode: 'cors',
+        });
+        if (!response.ok) {
+          console.error('AuthContext: Failed to fetch user (status:', response.status, ')');
+          setUser(null);
+        } else {
+          const data = await response.json();
+          setUser(data?.user || null);
+        }
+      } catch (error) {
+        console.error('AuthContext: Error fetching user:', error);
+        setUser(null);
+      } finally {
+        setInitializing(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
-  const login = userData => setUser(userData);
+  const login = (userData) => {
+    setUser(userData);
+  };
 
   const logout = async () => {
-    await import('../api/auth').then(m => m.logout());
-    setUser(null);
+    try {
+      const { logout } = await import('../api/auth');
+      await logout();
+      setUser(null);
+    } catch (error) {
+      console.error('AuthContext: Error logging out:', error);
+      setUser(null);
+    }
   };
 
   const isAuthenticated = Boolean(user);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, initializing }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated,
+        initializing,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
