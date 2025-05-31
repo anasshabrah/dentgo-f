@@ -1,4 +1,3 @@
-// src/pages/LetsYouIn.jsx
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -36,7 +35,7 @@ export default function LetsYouIn() {
         const user = await loginWithGoogle(credential);
         login(user);
       } catch (err) {
-        console.error(err);
+        console.error('Google login error:', err);
         alert('Authentication failed');
       }
     },
@@ -47,11 +46,19 @@ export default function LetsYouIn() {
   useGoogleIdentity();
   useEffect(() => {
     loadGoogle(() => {
-      if (!window.google?.accounts?.id) return;
+      if (!window.google?.accounts?.id) {
+        console.error('Google Identity not loaded.');
+        return;
+      }
+      if (!CLIENT_ID) {
+        console.error('Missing REACT_APP_GOOGLE_CLIENT_ID!');
+        alert('Google Login misconfigured: missing client ID.');
+        return;
+      }
       window.google.accounts.id.initialize({
         client_id: CLIENT_ID,
         callback: handleCredential,
-        ux_mode: 'popup', // Ensures popup flow on button click
+        ux_mode: 'popup',
       });
     });
   }, [handleCredential]);
@@ -92,7 +99,7 @@ export default function LetsYouIn() {
                   if (window.google?.accounts?.id) {
                     window.google.accounts.id.prompt();
                   } else {
-                    alert('Google login is not initialized yet. Please try again.');
+                    alert('Google login is not ready yet.');
                   }
                 }}
               >
