@@ -1,0 +1,52 @@
+{
+  "name": "dentgo-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.3.0",
+    "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
+    "firebase": "^11.7.1",
+    "gray-matter": "^4.0.3",
+    "jquery": "^3.7.1",
+    "malihu-custom-scrollbar-plugin": "^3.1.5",
+    "marked": "^15.0.12",
+    "react": "^18.2.0",
+    "react-datepicker": "^8.2.1",
+    "react-dom": "^18.2.0",
+    "react-flags-select": "^2.4.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.4.1",
+    "react-scripts": "^5.0.1",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "uuid": "^9.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
