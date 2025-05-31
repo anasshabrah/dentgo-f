@@ -14,7 +14,7 @@ import { loadGoogle } from '../lib/google';
 import { useAuth } from '../context/AuthContext';
 import { loginWithGoogle, loginWithApple } from '../api/auth';
 
-const API_BASE  = process.env.REACT_APP_SERVER_URL;
+const API_BASE = process.env.REACT_APP_SERVER_URL;
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function LetsYouIn() {
@@ -22,7 +22,7 @@ export default function LetsYouIn() {
   const { login, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  // Redirect away as soon as we're logged in:
+  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/DentgoGptHome', { replace: true });
@@ -51,11 +51,12 @@ export default function LetsYouIn() {
       window.google.accounts.id.initialize({
         client_id: CLIENT_ID,
         callback: handleCredential,
+        ux_mode: 'popup', // Ensures popup flow on button click
       });
     });
   }, [handleCredential]);
 
-  // Simple loader
+  // Loader
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -74,7 +75,7 @@ export default function LetsYouIn() {
           </header>
           <div className="Dentgo_img_main">
             <img className="Dentgo_img" src={logo} alt="Dentgo logo" />
-			<h1 className="Dentgo_title">DentGo AI</h1>
+            <h1 className="Dentgo_title">DentGo AI</h1>
           </div>
         </div>
 
@@ -87,7 +88,13 @@ export default function LetsYouIn() {
               <button
                 type="button"
                 className="oauth-btn"
-                onClick={() => window.google.accounts.id.prompt()}
+                onClick={() => {
+                  if (window.google?.accounts?.id) {
+                    window.google.accounts.id.prompt();
+                  } else {
+                    alert('Google login is not initialized yet. Please try again.');
+                  }
+                }}
               >
                 <img src={GoogleIcon} alt="Google logo" />
                 <span>Continue with Google</span>
