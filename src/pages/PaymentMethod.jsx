@@ -160,7 +160,7 @@ const PaymentMethodForm = () => {
             {/* ====== “Add New Payment” button ====== */}
             <div className="print-continue-btn-head">
               <div
-                className="onboarding-next-btn-new-payment bottom-fix-btn"
+                className="onboarding-next-btn-new-payment"
                 onClick={handleAddNew}
               >
                 Add New Payment
