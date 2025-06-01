@@ -3,48 +3,7 @@ Project: Dentgo GPT
 Author: The_Krishna       
 Last change: 01/02/2024  
 -------------------------------------------------------------------*/
-/*----------------Table of contents Start---------------------------
-1.Default CSS
-2.Splash Screen CSS
-3.Onboarding Screen CSS
-4.All Screen Page loader CSS
-5.Sticky Header CSS
-6.let-you-screen-in CSS
-7.Sign in CSS
-8.Sign Up CSS
-9.Verify-section-main CSS
-10.Notification Allow CSS
-11.Forget Password CSS
-12.Confirm OTP CSS
-13.Create New Password
-14.Personal Information CSS
-15.Personal Information Loader Screen CSS
-16.Finger Print Scanner Screen CSS
-17.Preferred Language Screen CSS
-18.Reason Screen CSS
-19.Dentgo GPT HOME Screen CSS
-20.Dentgo GPT Plus Subscription Screen CSS
-21.Payment Method screen
-22.Subscription Screen Css
-23.Thank You For Subscripation Screen Css
-24.Dentgo Chat Screen Css
-25.The Side Navigation Menu Chat Screen Css
-26.Notification Screen Css
-27.Setting Screen Css
-28.Switch Button Dark Light Mode Css
-29.History Scrren Css
-30.Add New Card Screen Css
-31.Security Screen Css
-32.Marketing Preferences Screen Css
-33.Faq Screen
-34.Data & Privacy Screen CSS
-35.About Screen CSS
-36.Feedback Screen CSS
-37.Contact Us Screen CSS
-38.Friend Invite Screen CSS
-39.Delete or Deactivate Screen CSS
-40.Log Out Screen CSS
----------Table of contents End-----------------------------------*/
+
 /************************ 1.Default CSS ***************************/
 body {
     margin: 0;
@@ -412,10 +371,7 @@ body::-webkit-scrollbar {
     font-weight: 700;
 }
 
-/************************ 7.Sign in CSS ***************************/
-/************************ Flag CSS ***************************/
-/************************ 8.Sign Up CSS ***************************/
-/************************ 9.Verify-section-main CSS ***************************/
+/************************ 7.Verify-section-main CSS ***************************/
 .verification-main {
     background-position: top center;
     background-repeat: no-repeat;
@@ -451,7 +407,7 @@ body::-webkit-scrollbar {
 .resend-otp {
     padding-bottom: 35px;
 }
-/************************ 10.Notification Allow CSS ***************************/
+/************************ 8.Notification Allow CSS ***************************/
 .notified {
     padding-bottom: 20px;
 }
@@ -459,7 +415,7 @@ body::-webkit-scrollbar {
     position: fixed;
     bottom: 20px;
 }
-/************************ 11.Forget Password CSS ***************************/
+/************************ 9.Forget Password CSS ***************************/
 .form {
     max-width: 600px;
     width: 100%;
@@ -513,8 +469,8 @@ body::-webkit-scrollbar {
 .form-item input:focus+label {
     color: var(--sub-text-color);
 }
-/************************ 12.Confirm OTP CSS ***************************/
-/************************ 13.Create New Password CSS ***************************/
+
+/************************ 10.Create New Password CSS ***************************/
 .new_password_input label {
     margin-bottom: 15px;
     width: 100%;
@@ -548,7 +504,7 @@ body::-webkit-scrollbar {
     line-height: 20px;
     font-size: 16px;
 }
-/************************ 14.Personal Information CSS ***************************/
+/************************ 11.Personal Information CSS ***************************/
 .profile-pic {
     width: 200px;
     max-height: 200px;
@@ -583,7 +539,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     filter: var(--cal-icon);
     font-size: 25px;
 }
-/************************ 15.Personal Information Loader Screen CSS ***************************/
+/************************ 12.Personal Information Loader Screen CSS ***************************/
 @keyframes sk-circleFadeDelay {
     0%,
     39%,
@@ -622,7 +578,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     line-height: 40px;
     padding: 15px 0;
 }
-/************************ 16.Finger Print Scanner Screen CSS ***************************/
+/************************ 13.Finger Print Scanner Screen CSS ***************************/
 @keyframes animate {
     0%,
     100% {
@@ -645,7 +601,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     padding-top: 10px;
     padding-bottom: 20px;
 }
-/************************ 17.Preferred Language Screen CSS ***************************/
+/************************ 14.Preferred Language Screen CSS ***************************/
 .main-text-group {
     display: flex;
     flex-direction: column;
@@ -746,7 +702,7 @@ label.custom-radio-sel-lang {
     padding-top: 10px;
     text-align: left;
 }
-/************************ 18.Reason Screen CSS ***************************/
+/************************ 15.Reason Screen CSS ***************************/
 .change-lan-sec {
     padding: 17px 0px !important;
     border-bottom: 2px solid var(--border-colors);
@@ -795,7 +751,7 @@ label.custom-radio-sel-lang {
     padding-bottom: 15px;
     border-bottom: 2px solid var(--border-colors);
 }
-/************************ 19.Dentgo GPT HOME Screen CSS ***************************/
+/************************ 16.Dentgo GPT HOME Screen CSS ***************************/
 .Dentgo-home-header {
     display: flex;
     align-items: center;
@@ -1008,7 +964,7 @@ label.custom-radio-sel-lang {
         transform: rotate(360deg);
     }
 }
-/************************ 20.Dentgo GPT Plus Subscription Screen CSS ***************************/
+/************************ 17.Dentgo GPT Plus Subscription Screen CSS ***************************/
 .premium-features-main {
     display: flex;
     gap: 16px;
@@ -1037,7 +993,7 @@ label.custom-radio-sel-lang {
     position: fixed;
     bottom: 20px;
 }
-/************************ 21.Payment Method Screen ***************************/
+/************************ 18.Payment Method Screen ***************************/
 .back-btn.back-btn2 {}
 
 .site_content {
@@ -1214,7 +1170,7 @@ label.custom-radio-sel-lang {
   background-color: #0064ba;
 }
 
-/************************ 22.Subscription Screen Css ***************************/
+/************************ 19.Subscription Screen Css ***************************/
 .subscription-Dentgo-logo-main {
     display: flex;
     align-items: center;
@@ -1271,7 +1227,7 @@ label.custom-radio-sel-lang {
     font-size: 20px;
     color: var(--text-color);
 }
-/************************ 23.Thank You For Subscripation Screen Css ***************************/
+/************************ 20.Thank You For Subscripation Screen Css ***************************/
 .thank-you-subscriptions {
     color: var(--text-color);
     text-align: center;
@@ -1322,7 +1278,7 @@ label.custom-radio-sel-lang {
 }
 
 
-/************************ 24.Dentgo Chat Screen Css ***************************/
+/************************ 21.Dentgo Chat Screen Css ***************************/
 
 .message-bot h1,
 .message-bot h2,
@@ -1450,7 +1406,7 @@ label.custom-radio-sel-lang {
   cursor: pointer;
 }
 
-/************************ 25.The Side Navigation Menu Chat Screen Css ***************************/
+/************************ 22.The Side Navigation Menu Chat Screen Css ***************************/
 .chat-menu-svg {
     margin-right: 8px;
 }
@@ -1532,7 +1488,7 @@ label.custom-radio-sel-lang {
   color: #0078D7;
   padding: 12px 24px;
 }
-/************************ 26.Notification Screen Css ***************************/
+/************************ 23.Notification Screen Css ***************************/
 .security-main {
     margin-top: 12px;
 }
@@ -1572,7 +1528,7 @@ label.custom-radio-sel-lang {
     padding: 12px 0;
     border-bottom: 2px solid var(--border-colors);
 }
-/************************ 27.Setting Screen Css ***************************/
+/************************ 24.Setting Screen Css ***************************/
 .settings-main {
     display: flex;
     align-items: center;
@@ -1623,7 +1579,7 @@ label.custom-radio-sel-lang {
 .offcanvas-header .btn-close {
     margin-right: 0 !important;
 }
-/************************ 28.Switch Button Dark Light Mode Css ***************************/
+/************************ 25.Switch Button Dark Light Mode Css ***************************/
 .switch {
     position: relative;
     right: 45px;
@@ -1675,7 +1631,7 @@ label.custom-radio-sel-lang {
     line-height: 20px;
     padding-left: 56px;
 }
-/************************ 29.History Scrren Css ***************************/
+/************************ 26.History Scrren Css ***************************/
 .active-chats {
     color: var(--text-color);
     font-size: 20px;
@@ -1691,7 +1647,7 @@ label.custom-radio-sel-lang {
 .history-bottom {
     margin-bottom: 20px;
 }
-/************************ 30.Add New Card Screen ***************************/
+/************************ 27.Add New Card Screen ***************************/
 .onboarding-next-btn-plus {
   position: fixed;
   bottom: 20px;
@@ -1822,7 +1778,7 @@ label.custom-radio-sel-lang {
   cursor: pointer;
 }
 
-/************************ 32.Marketing Preferences Screen Css ***************************/
+/************************ 28.Marketing Preferences Screen Css ***************************/
 .will-notify {
     color: var(--text-color);
     font-size: 16px;
@@ -1836,7 +1792,7 @@ label.custom-radio-sel-lang {
 .email-me {
     margin-bottom: 20px !important;
 }
-/************************ 34.Data & Privacy Screen CSS ***************************/
+/************************ 29.Data & Privacy Screen CSS ***************************/
 .privacy_manage {
     color: var(--text-color);
     font-size: 18px;
@@ -1847,7 +1803,7 @@ label.custom-radio-sel-lang {
 .data {
     padding-top: 24px;
 }
-/************************ 35.About Screen CSS ***************************/
+/************************ 30.About Screen CSS ***************************/
 .about_text_content {
     padding: 10px 0 18px 0;
     border-bottom: 2px solid var(--border-colors);
@@ -1861,13 +1817,13 @@ label.custom-radio-sel-lang {
     line-height: 24px;
     padding-bottom: 8px;
 }
-/************************ 36.Feedback Screen CSS ***************************/
+/************************ 31.Feedback Screen CSS ***************************/
 .ri-arrow-down-s-line {
     color: var(--text-color);
     font-size: 26px;
     float: right;
 }
-/************************ 37.Contact Us Screen CSS ***************************/
+/************************ 32.Contact Us Screen CSS ***************************/
 .contact-us-text-main {
     color: var(--text-color);
     text-align: center;
@@ -1907,7 +1863,7 @@ label.custom-radio-sel-lang {
 .contact-icon {
     padding-right: 12px;
 }
-/************************ 38.Friend Invite Screen CSS ***************************/
+/************************ 33.Friend Invite Screen CSS ***************************/
 .friend-name {
     color: var(--text-color);
     font-family: Satoshi;
@@ -1967,7 +1923,7 @@ label.custom-radio-sel-lang {
 .friend-invite {
     margin-left: auto;
 }
-/************************ 39.Delete or Deactivate Screen CSS ***************************/
+/************************ 34.Delete or Deactivate Screen CSS ***************************/
 .leave-text {
     color: var(--sub-text-color);
     text-align: center;
@@ -2002,7 +1958,7 @@ label.custom-radio-sel-lang {
     position: fixed;
     bottom: 20px;
 }
-/************************ 40.Log Out Screen CSS ***************************/
+/************************ 35.Log Out Screen CSS ***************************/
 .offcanvas-backdrop {
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.56) 0%, rgba(18, 18, 18, 0.24) 100%);
     backdrop-filter: blur(2px);
@@ -2077,10 +2033,8 @@ button.text-reset {
     padding: 18px 20px;
 }
 
-/* ------------- SSO BUTTONS ------------- */
-/* Unified spacing for login boxes */
 .lets_you_in_box {
-  margin-top: -40px; /* float box up slightly over header */
+  margin-top: -40px;
   padding: 2rem 1rem;
   background-color: var(--primary-color);
   border-radius: 24px;
