@@ -3213,3 +3213,29 @@ button.text-reset {
   color: var(--sub-text-color);
   margin-top: 8px;
 }
+/************************ Custom Stripe Card Element Styling ***************************/
+.stripe-card-input {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 2px solid var(--border-colors);
+    border-radius: 30px;
+    padding: 20px 16px 8px 16px;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.stripe-card-input .StripeElement {
+    background: transparent;
+    font-family: 'Satoshi', sans-serif;
+    font-size: 18px;
+    color: var(--text-color);
+    width: 100%;
+    outline: none;
+    border: none;
+}

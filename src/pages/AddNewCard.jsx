@@ -10,7 +10,7 @@ import {
   Elements,
   CardElement,
   useStripe,
-  useElements
+  useElements,
 } from "@stripe/react-stripe-js";
 import { stripePromise } from "../lib/stripeClient";
 
@@ -29,7 +29,6 @@ const AddNewCardForm = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Simulate brief loader on mount
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -56,7 +55,6 @@ const AddNewCardForm = () => {
     setSubmitting(true);
 
     try {
-      // 1) Ensure user has a Stripe Customer ID
       await fetch(`${API_BASE}/api/payments/create-customer`, {
         method: "POST",
         credentials: "include",
@@ -75,10 +73,9 @@ const AddNewCardForm = () => {
         return;
       }
 
-      const { token, error: stripeError } = await stripe.createToken(
-        cardElement,
-        { name: cardName }
-      );
+      const { token, error: stripeError } = await stripe.createToken(cardElement, {
+        name: cardName,
+      });
 
       if (stripeError) {
         setError(stripeError.message);
@@ -146,24 +143,27 @@ const AddNewCardForm = () => {
                 </label>
               </div>
 
-              {/* Stripe CardElement styled to match your UI */}
+              {/* Stripe CardElement styled to match UI */}
               <div className="form-item mb-3">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: "16px",
-                        color: "#333",
-                        "::placeholder": {
-                          color: "#aaa",
+                <label className="info-person" htmlFor="card-element">
+                  Card Number
+                </label>
+                <div className="stripe-card-input">
+                  <CardElement
+                    id="card-element"
+                    options={{
+                      style: {
+                        base: {
+                          fontSize: "18px",
+                          color: "var(--text-color)",
+                          fontFamily: "'Satoshi', sans-serif",
+                          "::placeholder": { color: "var(--sub-text-color)" },
                         },
+                        invalid: { color: "#FF484D" },
                       },
-                      invalid: {
-                        color: "#FF484D",
-                      },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="date-number-cvv d-flex gap-3">
@@ -214,7 +214,6 @@ const AddNewCardForm = () => {
   );
 };
 
-// Wrap with Stripe Elements provider
 const AddNewCard = () => {
   return (
     <Elements stripe={stripePromise}>
