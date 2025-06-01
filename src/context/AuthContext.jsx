@@ -6,30 +6,44 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch(`${process.env.REACT_APP_SERVER_URL}/api/users/me`, {
-          credentials: 'include',
-          mode: 'cors',
-        });
-        if (response.status === 401) {
-          setUser(null);
-        } else if (!response.ok) {
-          console.error('AuthContext: Failed to fetch user (status:', response.status, ')');
-          setUser(null);
-        } else {
-          const data = await response.json();
-          setUser(data?.user || null);
-        }
-      } catch (error) {
-        console.error('AuthContext: Error fetching user:', error);
-        setUser(null);
-      } finally {
-        setInitializing(false);
-      }
-    };
+  const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
+  const fetchUser = async () => {
+    try {
+      let response = await fetch(`${API_BASE}/api/users/me`, {
+        credentials: 'include',
+        mode: 'cors',
+      });
+
+      if (response.status === 401) {
+        const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+
+        if (refreshResp.ok) {
+          response = await fetch(`${API_BASE}/api/users/me`, {
+            credentials: 'include',
+            mode: 'cors',
+          });
+        }
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data?.user || null);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('AuthContext: Error fetching user:', error);
+      setUser(null);
+    } finally {
+      setInitializing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUser();
   }, []);
 
