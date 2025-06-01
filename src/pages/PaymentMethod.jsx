@@ -15,7 +15,7 @@ const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 const PaymentMethodForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [cards, setCards] = useState([]);               // ← saved cards
+  const [cards, setCards] = useState([]);
   const [fetchError, setFetchError] = useState("");
   const [paymentRequest, setPaymentRequest] = useState(null);
   const [canMakePayment, setCanMakePayment] = useState(false);
