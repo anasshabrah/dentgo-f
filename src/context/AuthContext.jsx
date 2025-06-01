@@ -13,18 +13,28 @@ export const AuthProvider = ({ children }) => {
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: 'include',
         mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.status === 401) {
         const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
         if (refreshResp.ok) {
           response = await fetch(`${API_BASE}/api/users/me`, {
             credentials: 'include',
             mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
           });
         }
       }
