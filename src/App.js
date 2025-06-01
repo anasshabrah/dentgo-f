@@ -1,16 +1,9 @@
 import React from "react";
-import "./App.css";
-import "./assets/css/swap.css";
-import "./assets/css/bootstrap.min.css";
-import "./assets/css/style.css";
-import "./assets/css/mediaQuery.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Splash from "./pages/Splash.jsx";
 import LetsYouIn from "./pages/LetsYouIn.jsx";
 import NotificationAllow from "./pages/NotificationAllow.jsx";
-import ChooseInterests from "./pages/ChooseInterests.jsx";
-import ReasonUsing from "./pages/ReasonUsing.jsx";
 
 import DentgoGptHome from "./pages/DentgoGptHome.jsx";
 import DentgoChat from "./pages/DentgoChat.jsx";
@@ -31,7 +24,6 @@ import ContactUs from "./pages/ContactUs.jsx";
 import SubscriptionPayment from "./pages/SubscriptionPayment.jsx";
 import SelectPaymentMethod from "./pages/SelectPaymentMethod.jsx";
 import Notification from "./pages/Notification.jsx";
-import InviteFriends from "./pages/InviteFriends.jsx";
 import Delete from "./pages/Delete.jsx";
 
 import PrivateRoute from "./components/PrivateRoute";
@@ -44,8 +36,6 @@ function App() {
         <Route path="/" element={<Splash />} />
         <Route path="/LetsYouIn" element={<LetsYouIn />} />
         <Route path="/NotificationAllow" element={<NotificationAllow />} />
-        <Route path="/ChooseInterests" element={<ChooseInterests />} />
-        <Route path="/ReasonUsing" element={<ReasonUsing />} />
 
         {/* Protected flows */}
         <Route element={<PrivateRoute />}>
@@ -70,7 +60,6 @@ function App() {
         <Route path="/SubscriptionPayment" element={<SubscriptionPayment />} />
         <Route path="/SelectPaymentMethod" element={<SelectPaymentMethod />} />
         <Route path="/Notification" element={<Notification />} />
-        <Route path="/InviteFriends" element={<InviteFriends />} />
         <Route path="/Delete" element={<Delete />} />
       </Routes>
     </BrowserRouter>

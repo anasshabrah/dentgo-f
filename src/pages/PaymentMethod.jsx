@@ -15,18 +15,16 @@ const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 const PaymentMethodForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [cards, setCards] = useState([]);               // ← saved cards
+  const [cards, setCards] = useState([]);
   const [fetchError, setFetchError] = useState("");
   const [paymentRequest, setPaymentRequest] = useState(null);
   const [canMakePayment, setCanMakePayment] = useState(false);
 
-  // Simulate page loader
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Once loader is done, fetch saved cards
   useEffect(() => {
     if (loading) return;
     async function loadCards() {
@@ -41,7 +39,6 @@ const PaymentMethodForm = () => {
     loadCards();
   }, [loading]);
 
-  // Initialize Apple/Google Pay PaymentRequest if possible
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -54,7 +51,6 @@ const PaymentMethodForm = () => {
           requestPayerName: true,
         });
         pr.on("paymentmethod", async (event) => {
-          // TODO: send event.paymentMethod.id to your backend to attach & save
           event.complete("success");
         });
         if (await pr.canMakePayment()) {
@@ -73,49 +69,48 @@ const PaymentMethodForm = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="site_content">
-      <div className="verification-main">
-        <div className="container verify-screen-main p-0">
-          {/* Header styled like LetsYouIn */}
-          <header className="back-btn back-btn2 top-navbar d-flex align-items-center px-3">
-            <Link onClick={handleBack} className="btn-link me-3" aria-label="Go back">
-              <img className="profile-pic" src={buttonBack} alt="Go Back" />
-            </Link>
-            <h1 className="m-0">Payment Method</h1>
+    <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
+      <div className="bg-blue-800 pt-4 pb-8">
+        <div className="mx-auto max-w-lg px-4">
+          <header className="pt-8 flex items-center px-3">
+            <button onClick={handleBack} className="mr-3 p-0" aria-label="Go back">
+              <img
+                className="inline-block w-8 h-auto"
+                src={buttonBack}
+                alt="Go Back"
+              />
+            </button>
+            <h1 className="m-0 text-white text-lg font-medium">Payment Method</h1>
           </header>
 
-          <div className="verify-section-main align-items-stretch">
-            {/* Apple/Google Pay button (if available) */}
+          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
             {canMakePayment && paymentRequest ? (
-              <div className="form-check border-bottom px-0 custom-radio">
+              <div className="border-b-2 border-gray-200">
                 <PaymentRequestButtonElement options={{ paymentRequest }} />
               </div>
             ) : (
-              <div className="form-check border-bottom px-0 custom-radio">
-                <p className="not-connect">
+              <div className="border-b-2 border-gray-200">
+                <p className="text-sm text-gray-500 my-4">
                   Apple Pay / Google Pay currently unavailable
                 </p>
-                <small className="not-connect-subtext">
-                  Make sure you’re on a supported browser (Safari for Apple Pay, Chrome for Google Pay), using HTTPS or localhost, and that <code>REACT_APP_STRIPE_PUBLISHABLE_KEY</code> is set.
+                <small className="block text-xs text-gray-500 mb-4">
+                  Make sure you’re on a supported browser (Safari for Apple Pay, Chrome for Google Pay),
+                  using HTTPS or localhost, and that <code>REACT_APP_STRIPE_PUBLISHABLE_KEY</code> is set.
                 </small>
               </div>
             )}
 
-            {/* Display any fetch error */}
             {fetchError && (
-              <div className="error-message text-danger mb-3">{fetchError}</div>
+              <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
+                {fetchError}
+              </div>
             )}
 
-            {/* Render each saved card from Prisma */}
             {cards.length > 0 ? (
               cards.map((card) => (
-                <div
-                  key={card.id}
-                  className="form-check border-bottom px-0 custom-radio"
-                >
-                  <div className="form-check-label checkout-modal-lbl-payment d-flex align-items-center gap-2">
-                    {/* Minimal placeholder icon showing the network */}
-                    <span className="payment-type">
+                <div key={card.id} className="border-b-2 border-gray-200">
+                  <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
+                    <span className="border border-gray-200 px-5 py-2 rounded flex items-center justify-center w-12 h-8">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="32"
@@ -135,16 +130,12 @@ const PaymentMethodForm = () => {
                         </text>
                       </svg>
                     </span>
-                    <div className="card-text-america">
-                      <div className="bank-america-text">{card.network}</div>
-                      <div className="america-card-number">
-                        <span
-                          className={
-                            card.isActive
-                              ? "america-card-active"
-                              : "america-card-inactive"
-                          }
-                        >
+                    <div className="pl-4">
+                      <div className="text-gray-800 text-base font-semibold leading-6">
+                        {card.network}
+                      </div>
+                      <div className="text-gray-500 text-sm font-medium leading-5">
+                        <span className={card.isActive ? "text-blue-800" : "text-red"}>
                           {card.isActive ? "Active" : "Inactive"}
                         </span>{" "}
                         | Card Number **** {card.last4}
@@ -154,13 +145,12 @@ const PaymentMethodForm = () => {
                 </div>
               ))
             ) : (
-              <p className="sub-text my-3">No saved cards found.</p>
+              <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
             )}
 
-            {/* “Add New Payment” button */}
-            <div className="print-continue-btn-head">
+            <div className="flex flex-col items-center justify-center">
               <div
-                className="onboarding-next-btn-new-payment bottom-fix-btn"
+                className="w-full bg-blue-800 text-white text-lg font-medium rounded-xl py-4 my-4 flex justify-center items-center transition hover:bg-blue-700 cursor-pointer"
                 onClick={handleAddNew}
               >
                 Add New Payment

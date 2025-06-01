@@ -10,11 +10,8 @@ const BankCards = () => {
   const [cards, setCards] = useState([]);
   const [fetchError, setFetchError] = useState("");
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
+  const handleBackClick = () => navigate(-1);
 
-  // Fetch cards on mount
   useEffect(() => {
     async function loadCards() {
       try {
@@ -30,75 +27,67 @@ const BankCards = () => {
     loadCards();
   }, []);
 
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading) return <Loader />;
 
   return (
-    <div className="site_content">
-      {/* ====================================== Bank Card Screen ===================================== */}
-      <div className="verification-main">
-        <div className="container verify-screen-main p-0">
-          <div className="back-btn back-btn2">
-            <Link onClick={handleBackClick}>
-              <img className="profile-pic" src={buttonBack} alt="Button-Back" />
-            </Link>
-            <h1>Banks & Cards</h1>
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="bg-blue-700 pt-4 pb-8">
+        <div className="mx-auto max-w-lg px-4">
+          <div className="pt-2 flex items-center px-3">
+            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
+              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
+            </button>
+            <h1 className="text-white text-lg font-medium">Banks &amp; Cards</h1>
           </div>
-          <div className="verify-section-main align-items-stretch">
-            <form>
-              {fetchError && (
-                <div className="error-message text-danger mb-3">
-                  {fetchError}
-                </div>
-              )}
+          <div className="bg-primary pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+            {fetchError && (
+              <div className="text-sm p-2 border border-red-400 rounded bg-red-100 mb-3 text-red-600">
+                {fetchError}
+              </div>
+            )}
 
-              {cards.length > 0 ? (
-                cards.map((card) => (
-                  <Link to="/AddNewCard" key={card.id}>
-                    <div className="form-check border-bottom px-0 custom-radio">
-                      <div className="form-check-label checkout-modal-lbl-payment">
-                        <span className="payment-type border-0">
-                          {/* Placeholder card icon */}
-                          <svg width="32" height="32">
-                            <circle cx="16" cy="16" r="16" fill="#0078D7" />
-                          </svg>
-                        </span>
-                        <div className="card-text-america">
-                          <div className="bank-america-text">
-                            {card.network || "Unknown Network"}
-                          </div>
-                          <div className="america-card-number">
-                            <span
-                              className={
-                                card.isActive
-                                  ? "america-card-active"
-                                  : "america-card-inactive"
-                              }
-                            >
-                              {card.isActive ? "Active" : "Inactive"}
-                            </span>{" "}
-                            | Card Number **** {card.last4}
-                          </div>
+            {cards.length > 0 ? (
+              cards.map((card) => (
+                <Link to="/AddNewCard" key={card.id}>
+                  <div className="border-b-2 border-gray-200 dark:border-gray-700 px-0">
+                    <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
+                      <span className="w-8 h-8 flex items-center justify-center">
+                        <svg width="32" height="32" className="text-blue">
+                          <circle cx="16" cy="16" r="16" fill="currentColor" />
+                        </svg>
+                      </span>
+                      <div className="pl-4">
+                        <div className="text-gray-800 dark:text-gray-200 text-base font-semibold leading-6">
+                          {card.network || "Unknown Network"}
+                        </div>
+                        <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
+                          <span className={card.isActive ? "text-blue-700" : "text-red-600"}>
+                            {card.isActive ? "Active" : "Inactive"}
+                          </span>{" "}
+                          | Card Number **** {card.last4}
                         </div>
                       </div>
                     </div>
-                  </Link>
-                ))
-              ) : (
-                <p className="sub-text my-3">No saved cards found.</p>
-              )}
-            </form>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 my-3 text-sm">
+                No saved cards found.
+              </p>
+            )}
 
-            <div className="print-continue-btn-head">
-              <div className="onboarding-next-btn-plus bottom-fix-btn">
-                <Link to="/AddNewCard">+ Link a New Card</Link>
-              </div>
+            <div className="flex flex-col items-center justify-center mt-auto">
+              <Link
+                to="/AddNewCard"
+                className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-primary text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-200 dark:hover:bg-gray-600"
+              >
+                + Link a New Card
+              </Link>
             </div>
           </div>
         </div>
       </div>
-      {/* ====================================== Bank Card Screen End ===================================== */}
     </div>
   );
 };

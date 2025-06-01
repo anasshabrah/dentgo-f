@@ -1,5 +1,3 @@
-// src/pages/ConfirmPaymentPin.jsx
-
 import React, { useEffect, useState } from "react";
 import buttonBack from "../assets/images/Button-Back.png";
 import createNewPinImg from "../assets/images/create-new-pin-img.png";
@@ -24,36 +22,30 @@ const ConfirmPaymentPin = () => {
   }
 
   return (
-    <div className="site_content">
-      {/* ====================================== Confirm payment pin Screen ===================================== */}
-      <div className="verification-main">
-        <div className="container verify-screen-main p-0">
-          <div className="back-btn back-btn2">
-            <Link onClick={handleBackClick}>
-              <img
-                className="profile-pic"
-                src={buttonBack}
-                alt="Button-Back"
-              />
-            </Link>
-            <h1>Confirm Your Payment</h1>
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="bg-blue-600 pt-4 pb-8">
+        <div className="mx-auto max-w-lg px-4">
+          <div className="pt-2 flex items-center px-3">
+            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
+              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
+            </button>
+            <h1 className="text-white text-lg font-medium">Confirm Your Payment</h1>
           </div>
-          <div className="verify-section-main">
+          <div className="bg-blue-700 pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
             <img
-              className="verify-img"
+              className="max-w-full pb-4"
               src={createNewPinImg}
-              alt="confirm-payment-img"
+              alt="Confirm payment"
             />
-            <p className="sub-text">
+            <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 mb-8">
               Authentication is required to continue your payment.
             </p>
-            <div className="bottom-fix-btn onboarding-next-btn-Subscribe">
+            <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-gray-100 dark:bg-gray-800 text-blue text-lg font-medium rounded-xl py-4 text-center hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
               <Link to="/LetYouIn">Continue with Google or Apple</Link>
             </div>
           </div>
         </div>
       </div>
-      {/* ====================================== Confirm payment pin Screen End ===================================== */}
     </div>
   );
 };

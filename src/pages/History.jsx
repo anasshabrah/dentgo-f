@@ -24,40 +24,36 @@ export default function History() {
 
   if (error) {
     return (
-      <div className="site_content">
-        <div className="verification-main">
-          <div className="container verify-screen-main p-0">
-            <button
-              className="btn btn-link p-0 mb-3"
-              onClick={() => navigate(-1)}
-            >
-              <img src={buttonBack} alt="Back" className="profile-pic" />
+      <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
+        <div className="bg-blue-800 pt-4 pb-8">
+          <div className="mx-auto max-w-lg px-4">
+            <button className="p-0 mb-3" onClick={() => navigate(-1)}>
+              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
             </button>
-            <h2 className="text-danger">Error: {error}</h2>
+            <h2 className="text-red text-base font-medium">Error: {error}</h2>
           </div>
         </div>
       </div>
     );
   }
 
-  // Helpers to render each list
   const renderList = (items, isEnded) =>
     items.map((s) => (
       <Link
         key={s.id}
         to={`/DentgoChat?sessionId=${s.id}`}
-        className="notification-security-box mb-3 d-flex align-items-center"
+        className="flex items-center mb-3"
       >
         <img
           src={chatMenuImg}
           alt="Chat icon"
-          className="history-menu-img me-3"
+          className="w-6 h-6 mr-3"
         />
         <div>
-          <h3 className="security-update-text">
+          <h3 className="text-gray-800 font-sans text-base font-bold leading-6 pb-1">
             {s.title ?? `Chat #${s.id}`}
           </h3>
-          <p className="today-text">
+          <p className="text-gray-500 text-sm leading-5">
             {isEnded
               ? `Ended ${new Date(s.endedAt).toLocaleString()}`
               : `Started ${new Date(s.startedAt).toLocaleString()}`}
@@ -70,37 +66,41 @@ export default function History() {
   const ended = sessions.filter((s) => !!s.endedAt);
 
   return (
-    <div className="site_content">
-      <div className="verification-main">
-        <div className="container verify-screen-main p-0">
-          {/* Back button + header */}
-          <div className="back-btn back-btn2 d-flex align-items-center mb-4">
-            <button
-              className="btn btn-link p-0 me-2"
-              onClick={() => navigate(-1)}
-            >
-              <img src={buttonBack} alt="Back" className="profile-pic" />
+    <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
+      <div className="bg-blue-800 pt-4 pb-8">
+        <div className="mx-auto max-w-lg px-4">
+          <div className="flex items-center mb-4">
+            <button className="p-0 mr-2" onClick={() => navigate(-1)}>
+              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
             </button>
-            <h1>History</h1>
+            <h1 className="text-white text-lg font-medium leading-6">
+              History
+            </h1>
           </div>
-
-          <div className="verify-section-main align-items-stretch">
-            {/* Active Chats */}
-            <h2 className="active-chats">Active Chats</h2>
-            {active.length > 0 ? (
-              renderList(active, false)
-            ) : (
-              <p className="today-text">No active chats.</p>
-            )}
-
-            {/* Ended Chats */}
-            <h2 className="active-chats ended-chats mt-5">Ended Chats</h2>
-            {ended.length > 0 ? (
-              renderList(ended, true)
-            ) : (
-              <p className="today-text">No ended chats.</p>
-            )}
-          </div>
+        </div>
+      </div>
+      <div className="bg-white mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto">
+        <div className="pt-4">
+          <h2 className="text-gray-800 text-xl font-semibold leading-7">
+            Active Chats
+          </h2>
+          {active.length > 0 ? (
+            renderList(active, false)
+          ) : (
+            <p className="text-gray-500 text-sm leading-5">
+              No active chats.
+            </p>
+          )}
+          <h2 className="text-gray-800 text-xl font-semibold leading-7 pt-6">
+            Ended Chats
+          </h2>
+          {ended.length > 0 ? (
+            renderList(ended, true)
+          ) : (
+            <p className="text-gray-500 text-sm leading-5">
+              No ended chats.
+            </p>
+          )}
         </div>
       </div>
     </div>

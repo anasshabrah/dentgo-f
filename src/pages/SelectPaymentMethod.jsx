@@ -1,4 +1,3 @@
-// src/pages/SelectPaymentMethod.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchCards } from "../api/cards";
@@ -18,7 +17,6 @@ const InnerSelectPaymentMethod = () => {
   const [fetchError, setFetchError] = useState("");
   const [paymentRequest, setPaymentRequest] = useState(null);
 
-  // Simulate loader
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -31,7 +29,7 @@ const InnerSelectPaymentMethod = () => {
         const pr = await createPaymentRequest({
           country: "US",
           currency: "usd",
-          total: { label: "Your Order", amount: 5000 }, // $50.00
+          total: { label: "Your Order", amount: 5000 },
           requestPayerName: true,
           requestPayerEmail: true,
         });
@@ -41,7 +39,6 @@ const InnerSelectPaymentMethod = () => {
           }
         });
         pr.on("paymentmethod", (ev) => {
-          // In real app, confirm PaymentIntent on backend
           ev.complete("success");
           navigate("/ConfirmPaymentPin");
         });
@@ -73,17 +70,21 @@ const InnerSelectPaymentMethod = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="site_content">
-      <div className="verification-main">
-        <div className="container verify-screen-main p-0">
-          <div className="back-btn back-btn2 d-flex align-items-center px-3 py-2">
-            <button onClick={handleBackClick} className="btn-reset-style me-3">
-              <img className="profile-pic" src={buttonBack} alt="Back" />
+    <div className="bg-gray-100 min-h-screen pb-4">
+      <div className="bg-blue pt-4 pb-8">
+        <div className="mx-auto max-w-[480px] px-4">
+          <header className="flex items-center px-3 py-2">
+            <button
+              onClick={handleBackClick}
+              className="mr-3 p-0 bg-transparent"
+              aria-label="Go back"
+            >
+              <img className="w-6 h-6" src={buttonBack} alt="Back" />
             </button>
-            <h1>Payment Method</h1>
-          </div>
-          <div className="verify-section-main align-items-stretch">
-            {/* Apple/Google Pay button if available */}
+            <h1 className="text-white text-lg font-medium">Payment Method</h1>
+          </header>
+
+          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
             {paymentRequest && (
               <div className="mb-4">
                 <PaymentRequestButtonElement options={{ paymentRequest }} />
@@ -91,18 +92,16 @@ const InnerSelectPaymentMethod = () => {
             )}
 
             {fetchError && (
-              <div className="error-message text-danger mb-3">{fetchError}</div>
+              <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
+                {fetchError}
+              </div>
             )}
 
-            {/* List saved cards from Prisma */}
             {cards.length > 0 ? (
               cards.map((card) => (
-                <div
-                  key={card.id}
-                  className="form-check border-bottom px-0 custom-radio"
-                >
-                  <div className="form-check-label checkout-modal-lbl-payment d-flex align-items-center gap-2">
-                    <span className="payment-type">
+                <div key={card.id} className="border-b-2 border-gray-200 px-0">
+                  <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer transition-colors hover:bg-gray-50">
+                    <span className="flex items-center justify-center w-12 h-8 border border-gray-200 rounded">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="32"
@@ -111,27 +110,17 @@ const InnerSelectPaymentMethod = () => {
                         fill="none"
                       >
                         <rect width="32" height="20" rx="3" fill="#E0E0E0" />
-                        <text
-                          x="16"
-                          y="13"
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#333"
-                        >
+                        <text x="16" y="13" textAnchor="middle" fontSize="10" fill="#333">
                           {card.network}
                         </text>
                       </svg>
                     </span>
-                    <div className="card-text-america">
-                      <div className="bank-america-text">{card.network}</div>
-                      <div className="america-card-number">
-                        <span
-                          className={
-                            card.isActive
-                              ? "america-card-active"
-                              : "america-card-inactive"
-                          }
-                        >
+                    <div className="pl-4">
+                      <div className="text-gray-800 text-base font-bold leading-6">
+                        {card.network}
+                      </div>
+                      <div className="text-gray-500 text-sm font-medium leading-5">
+                        <span className={card.isActive ? "text-blue" : "text-red"}>
                           {card.isActive ? "Active" : "Inactive"}
                         </span>{" "}
                         | Card Number **** {card.last4}
@@ -141,19 +130,18 @@ const InnerSelectPaymentMethod = () => {
                 </div>
               ))
             ) : (
-              <p className="sub-text my-3">No saved cards found.</p>
+              <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
             )}
 
-            {/* Link a New Card */}
-            <div className="new-card-link-btn-main mb-4">
-              <Link to="/AddNewCard" className="new-card-link-btn">
+            <div className="mb-4">
+              <Link to="/AddNewCard" className="text-blue text-base font-medium">
                 + Link a New Card
               </Link>
             </div>
 
-            <div className="print-continue-btn-head">
+            <div className="flex items-center justify-center flex-col mt-auto mb-4">
               <div
-                className="bottom-fix-btn onboarding-next-btn"
+                className="w-full py-4 bg-white text-blue text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-50"
                 onClick={handleContinue}
               >
                 Continue

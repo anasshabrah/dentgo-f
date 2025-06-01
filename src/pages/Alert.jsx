@@ -5,62 +5,65 @@ import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 
 const Alert = () => {
-    const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
-    const handleBackClick = () => {
-        navigate(-1);
-    };
+  const handleBackClick = () => navigate(-1);
+  const goToLetYouIn = () => navigate("/LetsYouIn");
+  const goToHome = () => navigate("/DentgoGptHome");
 
-    const goToLetYouIn = () => {
-        navigate("/LetYouIn");
-    };
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
 
-    const goToHome = () => {
-        navigate("/DentgoGptHome");
-    };
+  if (loading) return <Loader />;
 
-    useEffect(() => {
-        setTimeout(() => setLoading(false), 500);
-    }, []);
-
-    if (loading) {
-        return <Loader />;
-    }
-
-    return (
-        <div className="site_content">
-            {/* <!-- ====================================== Alert Screen ===================================== --> */}
-            <div className="verification-main">
-                <div className="container verify-screen-main p-0">
-                    <div className="back-btn back-btn2">
-                        <Link onClick={handleBackClick}>
-                            <img className="profile-pic" src={buttonBack} alt="Button-Back" />
-                        </Link>
-                        <h1>Alert</h1>
-                    </div>
-                    <div className="verify-section-main">
-                        <div className="subscription-Dentgo-logo-main">
-                            <img className="verify-img" src={alertImg} alt="alert-img" />
-                        </div>
-                        <h2 className="thank-you-subscriptions">Sorry! Your Order Has Failed!</h2>
-                        <p className="sub-text tellus">
-                            Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
-                        </p>
-
-                        <div className="try_again_button" onClick={goToLetYouIn}>
-                            <Link to="/LetYouIn">Try Again</Link>
-                        </div>
-
-                        <div className="go-to-home" onClick={goToHome}>
-                            <Link to="/DentgoGptHome">Go to Home</Link>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
+      <div className="bg-blue-700 pt-4 pb-8">
+        <div className="mx-auto max-w-lg px-4">
+          <div className="pt-2 flex items-center px-3">
+            <button onClick={handleBackClick} className="mr-3">
+              <img
+                className="inline-block w-6 h-auto"
+                src={buttonBack}
+                alt="Go back"
+              />
+            </button>
+            <h1 className="text-white text-lg font-medium">Alert</h1>
+          </div>
+          <div className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto">
+            <div className="flex items-center justify-center">
+              <img className="max-w-full pb-4" src={alertImg} alt="Alert" />
             </div>
-            {/* <!-- ====================================== Alert Screen End===================================== --> */}
+            <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
+              Sorry! Your Order Has Failed!
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 text-center text-lg leading-6 pb-5 my-4">
+              Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
+            </p>
+
+            <button
+              onClick={goToLetYouIn}
+              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10"
+            >
+              <Link to="/LetsYouIn" className="text-blue-700 dark:text-primary">
+                Try Again
+              </Link>
+            </button>
+
+            <button
+              onClick={goToHome}
+              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10"
+            >
+              <Link to="/DentgoGptHome">Go to Home</Link>
+            </button>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Alert;

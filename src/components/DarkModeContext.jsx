@@ -1,20 +1,16 @@
-// context/DarkModeContext.jsx
+// src/context/DarkModeContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 
-// hold dark mode state
 const DarkModeContext = createContext();
 
-// a provider component
 export const DarkModeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Check localStorage for saved preference
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true';
     }
-    return false; // Default to light mode
+    return false;
   });
 
-  // dark mode class to <html> element
   useEffect(() => {
     const htmlElement = document.documentElement;
     if (isDarkMode) {
@@ -26,7 +22,6 @@ export const DarkModeProvider = ({ children }) => {
     }
   }, [isDarkMode]);
 
-  // Toggle function
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev);
   };
@@ -38,5 +33,4 @@ export const DarkModeProvider = ({ children }) => {
   );
 };
 
-// Custom hook for easy access
 export const useDarkMode = () => useContext(DarkModeContext);
