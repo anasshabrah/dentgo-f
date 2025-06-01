@@ -143,7 +143,6 @@ const AddNewCardForm = () => {
                 </label>
               </div>
 
-              {/* Stripe CardElement styled to match UI */}
               <div className="form-item mb-3">
                 <label className="info-person" htmlFor="card-element">
                   Card Number

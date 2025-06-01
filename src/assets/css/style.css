@@ -279,7 +279,7 @@ a {
 .shapes {
     width: 44.8px;
     height: 44.8px;
-    color: #2aeb84;
+    color: #0078D7;
     position: relative;
     background: radial-gradient(11.2px, currentColor 94%, #0000);
 }
@@ -3238,4 +3238,14 @@ button.text-reset {
     width: 100%;
     outline: none;
     border: none;
+}
+
+.stripe-card-input {
+  display: block;
+  width: 100%;
+  height: 64px;
+  background: var(--border-colors);
+  border-radius: 12px;
+  padding: 20px 16px 0px 16px;
+  box-sizing: border-box;
 }
