@@ -15,7 +15,7 @@ const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 const PaymentMethodForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [cards, setCards] = useState([]);
+  const [cards, setCards] = useState([]);               // ← saved cards
   const [fetchError, setFetchError] = useState("");
   const [paymentRequest, setPaymentRequest] = useState(null);
   const [canMakePayment, setCanMakePayment] = useState(false);
@@ -76,8 +76,8 @@ const PaymentMethodForm = () => {
     <div className="site_content">
       <div className="verification-main">
         <div className="container verify-screen-main p-0">
-          {/* ====== Header / Back (Unified: do not modify) ====== */}
-          <header className="back-btn back-btn2 top-navbar d-flex align-items-center px-3 py-2">
+          {/* Header styled like LetsYouIn */}
+          <header className="back-btn back-btn2 top-navbar d-flex align-items-center px-3">
             <Link onClick={handleBack} className="btn-link me-3" aria-label="Go back">
               <img className="profile-pic" src={buttonBack} alt="Go Back" />
             </Link>
@@ -85,7 +85,7 @@ const PaymentMethodForm = () => {
           </header>
 
           <div className="verify-section-main align-items-stretch">
-            {/* ====== Apple/Google Pay button (if available) ====== */}
+            {/* Apple/Google Pay button (if available) */}
             {canMakePayment && paymentRequest ? (
               <div className="form-check border-bottom px-0 custom-radio">
                 <PaymentRequestButtonElement options={{ paymentRequest }} />
@@ -101,12 +101,12 @@ const PaymentMethodForm = () => {
               </div>
             )}
 
-            {/* ====== Display any fetch error ====== */}
+            {/* Display any fetch error */}
             {fetchError && (
               <div className="error-message text-danger mb-3">{fetchError}</div>
             )}
 
-            {/* ====== Render each saved card from Prisma ====== */}
+            {/* Render each saved card from Prisma */}
             {cards.length > 0 ? (
               cards.map((card) => (
                 <div
@@ -154,13 +154,13 @@ const PaymentMethodForm = () => {
                 </div>
               ))
             ) : (
-              <p className="sub-text">No saved cards found.</p>
+              <p className="sub-text my-3">No saved cards found.</p>
             )}
 
-            {/* ====== “Add New Payment” button ====== */}
+            {/* “Add New Payment” button */}
             <div className="print-continue-btn-head">
               <div
-                className="onboarding-next-btn-new-payment"
+                className="onboarding-next-btn-new-payment bottom-fix-btn"
                 onClick={handleAddNew}
               >
                 Add New Payment
