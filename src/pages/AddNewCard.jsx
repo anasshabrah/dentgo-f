@@ -18,6 +18,7 @@ const AddNewCard = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Simulate brief loader on mount
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -64,7 +65,7 @@ const AddNewCard = () => {
       }
 
       if (!token?.id) {
-        setError("Failed to generate card token.");
+        setError("Failed to generate card token");
         setSubmitting(false);
         return;
       }
@@ -72,6 +73,7 @@ const AddNewCard = () => {
       // 3) Send stripeToken.id + optional nickName to our backend to save in Prisma
       await createCard({ paymentMethodId: token.id, nickName: cardName || null });
 
+      // 4) On success, navigate back to PaymentMethod
       navigate("/PaymentMethod");
     } catch (err) {
       console.error("AddNewCard error:", err);
@@ -104,6 +106,7 @@ const AddNewCard = () => {
                 <p className="card-name-jessica">
                   {cardName || "Jessica Smith"}
                 </p>
+                {/* No CVV & expiry date since Stripe Elements handles those */}
               </div>
             </div>
 
