@@ -1037,8 +1037,7 @@ label.custom-radio-sel-lang {
     position: fixed;
     bottom: 20px;
 }
-/************************ 21.Payment Method screen ***************************/
-
+/************************ 21.Payment Method Screen ***************************/
 .back-btn.back-btn2 {}
 
 .site_content {
@@ -1091,201 +1090,6 @@ label.custom-radio-sel-lang {
   }
 }
 
-.demo-visa {
-  position: relative;
-  width: 320px;
-  height: 200px;
-  background: #1a1f36;
-  border-radius: 12px;
-  color: #ffffff;
-  padding: 16px;
-  overflow: hidden;
-  margin: 0 auto 1.5rem;
-}
-
-.card-preview-label {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: #ffffff;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  z-index: 2;
-}
-
-.hello-visa {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: auto;
-  height: auto;
-}
-
-.card-hidden-number {
-  position: absolute;
-  bottom: 56px;
-  left: 16px;
-  font-size: 20px;
-  letter-spacing: 2px;
-  margin: 0;
-}
-
-.card-name-jessica-main {
-  position: absolute;
-  bottom: 24px;
-  left: 16px;
-}
-
-.card-name-jessica {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.card-name-jessica-main-sub {
-  display: flex;
-  gap: 1rem;
-}
-
-.card-date-cvv {
-  margin: 0;
-  font-size: 14px;
-}
-
-.form-item {
-  position: relative;
-}
-
-.form-item input {
-  width: 100%;
-  border: 1px solid var(--border-colors);
-  border-radius: 4px;
-  padding: 12px 8px;
-  font-family: 'Satoshi', sans-serif;
-  font-size: 16px;
-  color: var(--text-color);
-  background: #ffffff;
-  box-sizing: border-box;
-}
-
-.form-item label.info-person {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--sub-text-color);
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.form-item input:focus + label,
-.form-item input:not(:placeholder-shown) + label {
-  top: -8px;
-  left: 8px;
-  font-size: 12px;
-  background: #ffffff;
-  padding: 0 4px;
-  color: var(--text-color);
-}
-
-.form-item input:not([value=""]) + label {
-  top: -8px;
-  left: 8px;
-  font-size: 12px;
-  background: #ffffff;
-  padding: 0 4px;
-  color: var(--text-color);
-}
-
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-.stripe-card-input {
-  display: block;
-  width: 100%;
-  height: 64px;
-  background: var(--border-colors);
-  border: 2px solid var(--border-colors);
-  border-radius: 12px;
-  padding: 20px 16px 0px 16px;
-  box-sizing: border-box;
-  font-family: 'Satoshi', sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.stripe-card-input:focus-within {
-  border-color: var(--focus-color);
-  outline: none;
-}
-
-.date-number-cvv {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.date-number-cvv .form-item {
-  flex: 1 1 48%;
-}
-
-@media (max-width: 575px) {
-  .date-number-cvv .form-item {
-    flex: 1 1 100%;
-  }
-}
-
-.bottom-fix-btn {
-  position: static !important;
-  width: 100%;
-  padding: 16px 0;
-  background-color: var(--sign-in-bg);
-  color: #0078D7;
-  font-family: Poppins, sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  border: none;
-  border-radius: 12px;
-  margin: 16px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.onboarding-next-btn-new-payment {
-  position: static;
-  background-color: #0078D7;
-  color: #ffffff;
-  font-family: Poppins, sans-serif;
-  font-size: 18px;
-  font-weight: 500;
-  border: none;
-  border-radius: 12px;
-  margin: 16px 0;
-  padding: 16px 0;
-  text-align: center;
-  cursor: pointer;
-  opacity: 1;
-  transition: background 0.2s ease;
-}
-
-.onboarding-next-btn-new-payment:hover {
-  background-color: #0064ba;
-}
-
 .checkout-modal-lbl-payment {
   padding: 16px 0;
   display: flex;
@@ -1310,11 +1114,6 @@ input[type="number"] {
 .custom-radio {
   position: relative;
   margin-bottom: 0;
-}
-
-.form-check-input {
-  margin-top: 0;
-  background: transparent;
 }
 
 .payment-type {
@@ -1376,22 +1175,43 @@ input[type="number"] {
   margin: 1rem 0;
 }
 
-.mb-3 {
-  margin-bottom: 1rem !important;
+.bottom-fix-btn {
+  position: static !important;
+  width: 100%;
+  padding: 16px 0;
+  background-color: var(--sign-in-bg);
+  color: #0078D7;
+  font-family: Poppins, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
-.mx-0 {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+.onboarding-next-btn-new-payment {
+  position: static;
+  background-color: #0078D7;
+  color: #ffffff;
+  font-family: Poppins, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  margin: 16px 0;
+  padding: 16px 0;
+  text-align: center;
+  cursor: pointer;
+  opacity: 1;
+  transition: background 0.2s ease;
 }
 
-.px-0 {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-
-.p-0 {
-  padding: 0 !important;
+.onboarding-next-btn-new-payment:hover {
+  background-color: #0064ba;
 }
 
 /************************ 22.Subscription Screen Css ***************************/
@@ -1871,200 +1691,137 @@ input[type="number"] {
 .history-bottom {
     margin-bottom: 20px;
 }
-/************************ 30.Add New Card Screen Css ***************************/
+/************************ 30.Add New Card Screen ***************************/
 .onboarding-next-btn-plus {
-    position: fixed;
-    bottom: 20px;
+  position: fixed;
+  bottom: 20px;
 }
-.no-spinners::-webkit-outer-spin-button,
-.no-spinners::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+
+.site_content {
+  background: var(--background-color);
+  min-height: 100vh;
+  padding-bottom: 1rem;
 }
-.react-datepicker {
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 13px !important;
-    background-color: #fff;
-    border: 1px solid transparent !important;
-    border-radius: 20px !important;
-    font-weight: 500;
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1) !important;
+
+.verification-main {
+  padding-top: 1rem;
+  padding-bottom: 2rem;
 }
-/* 
-#ui-datepicker-div {
-    display: none;
-    background-color: #fff;
-    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.2);
-    margin-top: 0.25rem;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
+
+.container.verify-screen-main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+
+.verify-section-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
-.ui-datepicker-calendar thead th {
-    padding: 0.25rem 0;
-    text-align: center;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: #78909C;
+
+.form-item {
+  position: relative;
 }
-.ui-datepicker-calendar tbody td {
-    width: 2.5rem;
-    text-align: center;
-    padding: 0;
+
+.form-item input {
+  width: 100%;
+  border: 1px solid var(--border-colors);
+  border-radius: 4px;
+  padding: 12px 8px;
+  font-family: 'Satoshi', sans-serif;
+  font-size: 16px;
+  color: var(--text-color);
+  background: #ffffff;
+  box-sizing: border-box;
 }
-div#ui-datepicker-div {
-    z-index: 500 !important;
+
+.form-item label.info-person {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--sub-text-color);
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
-.ui-datepicker-calendar tbody td a {
-    display: block;
-    border-radius: 0.25rem;
-    line-height: 2rem;
-    transition: 0.3s all;
-    color: #546E7A;
-    font-size: 0.875rem;
-    text-decoration: none;
+
+.form-item input:focus + label,
+.form-item input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 8px;
+  font-size: 12px;
+  background: #ffffff;
+  padding: 0 4px;
+  color: var(--text-color);
 }
-.ui-datepicker-calendar tbody td a:hover {
-    background: #00d06138;
+
+.error-message {
+  font-size: 14px;
+  padding: 8px;
+  border: 1px solid #FF484D;
+  border-radius: 4px;
+  background: rgba(255, 72, 77, 0.1);
+  color: #FF484D;
 }
-.ui-datepicker-calendar tbody td a.ui-state-active {
-    background-color: #0078D7;
-    color: white;
+
+.btn-spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
 }
-.ui-datepicker-header a.ui-corner-all {
-    cursor: pointer;
-    position: absolute;
-    top: 0;
-    width: 2rem;
-    height: 2rem;
-    margin: 0.5rem;
-    border-radius: 0.25rem;
-    transition: 0.3s all;
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
-.ui-datepicker-title {
-    text-align: center;
-    line-height: 32px;
-    margin-bottom: 10px;
-    font-size: 16px;
-    font-weight: 500;
-} */
-#new-card-inputs {
-    margin-top: 20px;
+
+.stripe-card-input {
+  display: block;
+  width: 100%;
+  height: 64px;
+  background: var(--border-colors);
+  border: 2px solid var(--border-colors);
+  border-radius: 12px;
+  padding: 20px 16px 0px 16px;
+  box-sizing: border-box;
+  font-family: 'Satoshi', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-color);
 }
-.date-number-cvv {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
+
+.stripe-card-input:focus-within {
+  border-color: var(--focus-color);
+  outline: none;
 }
-.form-check-input-radio:checked+.checkout-modal-lbl-payment .payment-type {
-    border-color: #FF484D;
+
+.bottom-fix-btn {
+  position: static !important;
+  width: 100%;
+  padding: 16px 0;
+  background-color: var(--sign-in-bg);
+  color: #0078D7;
+  font-family: Poppins, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  margin: 16px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
-.not-connect {
-    color: var(--4, #FF484D);
-}
-.demo-visa {
-    background-image: url(../images/demo_visa_card.png);
-    background-position: center;
-    background-repeat: no-repeat;
-    max-height: 200px;
-    height: 100%;
-    max-width: 343px;
-    width: 100%;
-    margin: 0 auto;
-    border-radius: 24px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-}
-.card-hidden-number {
-    color: #FFF;
-    font-size: 25px;
-    font-weight: 400;
-    line-height: 30px;
-    font-family: "Satoshi";
-}
-.card-name-jessica {
-    color: #FFF;
-    font-size: 18px;
-    font-weight: 400;
-    line-height: 30px;
-    font-family: "Satoshi";
-    text-transform: uppercase;
-    width: 100%;
-    max-width: 170px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.card-date-cvv {
-    color: #FFF;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 30px;
-    font-family: "Satoshi";
-}
-.card-name-jessica-main {
-    display: flex;
-    justify-content: space-around;
-    column-gap: 25px;
-}
-.card-name-jessica-main-sub {
-    display: flex;
-    justify-content: space-around;
-    column-gap: 25px;
-}
-/************************ 31.Security Screen Css ***************************/
-.remember {
-    color: var(--text-color);
-    font-size: 16px;
-    line-height: 24px;
-}
-.check-box {
-    display: flex;
-}
-.swiches-toggle input[type="checkbox"] {
-    position: relative;
-    appearance: none;
-    width: 40px;
-    height: 24px;
-    background: var(--sign-in-bg);
-    border-radius: 50px;
-    cursor: pointer;
-    border: 2px solid var(--border-colors);
-    transition: 0.4s;
-}
-.swiches-toggle input:checked[type="checkbox"] {
-    background: #0078D7;
-}
-.swiches-toggle input[type="checkbox"]::after {
-    position: absolute;
-    content: "";
-    width: 18px;
-    height: 18px;
-    top: 1px;
-    left: 0;
-    background: #fff;
-    border-radius: 50%;
-    box-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.05), 0px 1px 1px 0px rgba(0, 0, 0, 0.08), 0px 3px 8px 0px rgba(0, 0, 0, 0.08);
-    transform: scale(1.1);
-    transition: 0.4s;
-}
-.swiches-toggle input:checked[type="checkbox"]::after {
-    left: 46%;
-}
-.swiches-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--border-colors);
-}
+
 /************************ 32.Marketing Preferences Screen Css ***************************/
 .will-notify {
     color: var(--text-color);
@@ -2079,7 +1836,6 @@ div#ui-datepicker-div {
 .email-me {
     margin-bottom: 20px !important;
 }
-/************************ 33.Faq Screen ***************************/
 /************************ 34.Data & Privacy Screen CSS ***************************/
 .privacy_manage {
     color: var(--text-color);
