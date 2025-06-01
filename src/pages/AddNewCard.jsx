@@ -55,6 +55,7 @@ const AddNewCardForm = () => {
     setSubmitting(true);
 
     try {
+      // Ensure customer is created (server handles session cookie)
       await fetch(`${API_BASE}/api/payments/create-customer`, {
         method: "POST",
         credentials: "include",
@@ -84,7 +85,7 @@ const AddNewCardForm = () => {
       }
 
       if (!token?.id) {
-        setError("Failed to generate card token");
+        setError("Failed to generate card token.");
         setSubmitting(false);
         return;
       }
@@ -93,7 +94,7 @@ const AddNewCardForm = () => {
       navigate("/PaymentMethod");
     } catch (err) {
       console.error("AddNewCard error:", err);
-      setError(err.message || "Failed to save card");
+      setError(err.message || "Failed to save card.");
       setSubmitting(false);
     }
   };
@@ -104,6 +105,7 @@ const AddNewCardForm = () => {
     <div className="site_content">
       <div className="verification-main">
         <div className="container verify-screen-main p-0">
+          {/* ====== Header / Back (Unified: do not modify) ====== */}
           <div className="back-btn back-btn2 d-flex align-items-center px-3 py-2">
             <Link onClick={handleBack} className="btn-link me-3" aria-label="Go back">
               <img className="profile-pic" src={buttonBack} alt="Go back" />
@@ -115,14 +117,13 @@ const AddNewCardForm = () => {
             className="verify-section-main align-items-stretch"
             onSubmit={handleSubmit}
           >
-            {/* ====== Card Preview (clearly labeled as Static) ====== */}
+            {/* ====== Card Preview (Static, clearly labeled) ====== */}
             <div className="position-relative demo-visa mb-4">
               <span className="card-preview-label">Sample Card Preview</span>
               <img className="hello-visa" src={visaIcon} alt="Visa logo" />
               <p className="card-hidden-number">{maskedCardNumber}</p>
               <div className="card-name-jessica-main">
                 <p className="card-name-jessica">
-                  {/* Use generic placeholder when empty */}
                   {cardName || "Cardholder Name"}
                 </p>
                 <div className="card-name-jessica-main-sub">
@@ -132,73 +133,75 @@ const AddNewCardForm = () => {
               </div>
             </div>
 
-            <div className="new_password_input" id="new-card-inputs">
-              <div className="form-item mb-3">
-                <input
-                  type="text"
-                  id="cardName"
-                  autoComplete="off"
-                  required
-                  value={cardName}
-                  onChange={handleCardNameChange}
-                />
-                <label className="info-person" htmlFor="cardName">
-                  Card Name
-                </label>
-              </div>
+            {/* ====== Card Holder Name ====== */}
+            <div className="form-item mb-3">
+              <input
+                type="text"
+                id="cardName"
+                autoComplete="off"
+                required
+                value={cardName}
+                onChange={handleCardNameChange}
+                placeholder=" "
+              />
+              <label className="info-person" htmlFor="cardName">
+                Card Name
+              </label>
+            </div>
 
-              <div className="form-item mb-3">
-                <div className="stripe-card-input">
-                  <CardElement
-                    id="card-element"
-                    onChange={() => {
-                      /* No interactive masked number—preview is labeled static */
-                    }}
-                    options={{
-                      style: {
-                        base: {
-                          fontSize: "18px",
-                          color: "var(--text-color)",
-                          fontFamily: "'Satoshi', sans-serif",
-                          "::placeholder": { color: "var(--sub-text-color)" },
-                        },
-                        invalid: { color: "#FF484D" },
+            {/* ====== Stripe CardElement (Card Number + built-in Expiry + CVC) ====== */}
+            <div className="form-item mb-3">
+              <div className="stripe-card-input">
+                <CardElement
+                  id="card-element"
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "18px",
+                        color: "var(--text-color)",
+                        fontFamily: "'Satoshi', sans-serif",
+                        "::placeholder": { color: "var(--sub-text-color)" },
                       },
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="date-number-cvv d-flex gap-3">
-                <div className="form-item flex-fill">
-                  <DatePicker
-                    selected={expiryDate}
-                    onChange={handleDateChange}
-                    dateFormat="MM/yy"
-                    className="no-spinners"
-                    placeholderText="MM/YY"
-                    required
-                    showMonthYearPicker
-                    id="expiryDate"
-                  />
-                </div>
-                <div className="form-item flex-fill">
-                  <input
-                    type="number"
-                    id="cvv"
-                    className="no-spinners"
-                    max="999"
-                    value={cvv}
-                    onChange={handleCvvChange}
-                    required
-                  />
-                  <label className="info-person" htmlFor="cvv">
-                    CVV
-                  </label>
-                </div>
+                      invalid: { color: "#FF484D" },
+                    },
+                    hidePostalCode: true,
+                  }}
+                />
               </div>
             </div>
 
+            {/* ====== DatePicker + CVV (Still shown, but will be ignored by Stripe since CardElement already collects them) ====== */}
+            <div className="date-number-cvv d-flex gap-3">
+              <div className="form-item flex-fill">
+                <DatePicker
+                  selected={expiryDate}
+                  onChange={handleDateChange}
+                  dateFormat="MM/yy"
+                  className="no-spinners"
+                  placeholderText="MM/YY"
+                  required
+                  showMonthYearPicker
+                  id="expiryDate"
+                />
+              </div>
+              <div className="form-item flex-fill">
+                <input
+                  type="number"
+                  id="cvv"
+                  className="no-spinners"
+                  max="999"
+                  value={cvv}
+                  onChange={handleCvvChange}
+                  required
+                  placeholder=" "
+                />
+                <label className="info-person" htmlFor="cvv">
+                  CVV
+                </label>
+              </div>
+            </div>
+
+            {/* ====== Error Message ====== */}
             {error && (
               <div
                 className="error-message text-danger mb-3"
@@ -209,6 +212,7 @@ const AddNewCardForm = () => {
               </div>
             )}
 
+            {/* ====== Submit Button ====== */}
             <div className="print-continue-btn-head">
               <button
                 type="submit"
