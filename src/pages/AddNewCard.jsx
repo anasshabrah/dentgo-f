@@ -144,9 +144,6 @@ const AddNewCardForm = () => {
               </div>
 
               <div className="form-item mb-3">
-                <label className="info-person" htmlFor="card-element">
-                  Card Number
-                </label>
                 <div className="stripe-card-input">
                   <CardElement
                     id="card-element"
