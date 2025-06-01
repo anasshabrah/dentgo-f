@@ -18,7 +18,7 @@ const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function LetsYouIn() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, error, setError } = useAuth();
   const [loading, setLoading] = useState(true);
 
   // Redirect if already authenticated
@@ -36,10 +36,13 @@ export default function LetsYouIn() {
         login(user);
       } catch (err) {
         console.error('Google login error:', err);
-        alert('Authentication failed');
+        // Additional fallback in case AuthContext does not catch
+        setError(
+          'Authentication failed. Please try again or use a different browser mode.'
+        );
       }
     },
-    [login]
+    [login, setError]
   );
 
   // Initialize Google Identity
@@ -48,6 +51,9 @@ export default function LetsYouIn() {
     loadGoogle(() => {
       if (!window.google?.accounts?.id) {
         console.error('Google Identity not loaded.');
+        setError(
+          'Google login is not available at the moment. Please try again later.'
+        );
         return;
       }
       if (!CLIENT_ID) {
@@ -89,6 +95,24 @@ export default function LetsYouIn() {
         <div className="footer_box">
           <div className="lets_you_in_box lets_you_in_box2">
             <h2 className="lets_you_in_text">Welcome</h2>
+
+            {/* Show error message if present */}
+            {error && (
+              <div
+                className="alert alert-warning"
+                style={{
+                  backgroundColor: '#fff3cd',
+                  color: '#856404',
+                  padding: '10px 15px',
+                  borderRadius: '5px',
+                  marginBottom: '15px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setError(null)}
+              >
+                {error}
+              </div>
+            )}
 
             <div className="icons_main icons_main2">
               {/* Google */}

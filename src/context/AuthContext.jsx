@@ -1,10 +1,13 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { loginWithGoogle as loginWithGoogleAPI } from '../api/auth';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
+  const [error, setError] = useState(null);
 
   const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
@@ -13,9 +16,7 @@ export const AuthProvider = ({ children }) => {
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: 'include',
         mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (response.status === 401) {
@@ -23,18 +24,14 @@ export const AuthProvider = ({ children }) => {
           method: 'POST',
           credentials: 'include',
           mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (refreshResp.ok) {
           response = await fetch(`${API_BASE}/api/users/me`, {
             credentials: 'include',
             mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
           });
         }
       }
@@ -61,6 +58,26 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
+  const loginWithGoogle = async (credential) => {
+    setError(null);
+    try {
+      const user = await loginWithGoogleAPI(credential);
+      setUser(user);
+    } catch (err) {
+      console.error('AuthContext: Google login error:', err);
+      if (
+        err.message.includes('AbortError') ||
+        err.message.includes('NetworkError')
+      ) {
+        setError(
+          'Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies.'
+        );
+      } else {
+        setError(err.message || 'Google login failed. Please try again.');
+      }
+    }
+  };
+
   const logout = async () => {
     try {
       const { logout } = await import('../api/auth');
@@ -79,9 +96,12 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         login,
+        loginWithGoogle,
         logout,
         isAuthenticated,
         initializing,
+        error,
+        setError,
       }}
     >
       {children}
