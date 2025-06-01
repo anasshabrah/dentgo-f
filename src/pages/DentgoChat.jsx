@@ -1,4 +1,3 @@
-// src/pages/DentgoChat.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -9,6 +8,7 @@ import { fetchChatSession, endChatSession } from '../api/chats';
 import buttonBack from '../assets/images/Button-Back.png';
 import chatMenuImg from '../assets/images/chat-menu-img.png';
 import Loader from '../components/Loader';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle'; // import Bootstrap JS
 
 // Detect Arabic characters for RTL support
 function isRTL(text) {
@@ -122,7 +122,6 @@ export default function DentgoChat() {
     <div className="site_content">
       <div className="verification-main">
         <div className="container verify-screen-main p-0">
-
           {/* Header */}
           <div className="Dentgo-chat-menu-main d-flex align-items-center px-3 py-2">
             <button onClick={() => navigate(-1)} className="btn btn-link p-0 me-2">
@@ -133,7 +132,7 @@ export default function DentgoChat() {
             </div>
             <div className="d-flex align-items-center">
               <Link to="/Notification" className="me-3 position-relative">
-                {/* notification icon */}
+                {/* Notification icon */}
               </Link>
               <button className="btn btn-link p-0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight">
                 <img src={chatMenuImg} alt="Menu" className="chat-menu-img chat-menu-svg" />
@@ -213,7 +212,12 @@ export default function DentgoChat() {
                 onClick={async () => {
                   if (sessionId) {
                     await endChatSession(sessionId);
-                    localStorage.removeItem("currentSession");
+                  }
+                  // Properly dismiss the modal before navigating
+                  const modalEl = document.getElementById('finger-print-modal');
+                  if (modalEl) {
+                    const bsModal = bootstrap.Modal.getInstance(modalEl);
+                    if (bsModal) bsModal.hide();
                   }
                   navigate("/DentgoGptHome");
                 }}

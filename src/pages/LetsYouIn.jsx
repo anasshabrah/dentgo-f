@@ -13,7 +13,6 @@ import { loadGoogle } from '../lib/google';
 import { useAuth } from '../context/AuthContext';
 import { loginWithGoogle, loginWithApple } from '../api/auth';
 
-const API_BASE = process.env.REACT_APP_SERVER_URL;
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function LetsYouIn() {
@@ -34,15 +33,16 @@ export default function LetsYouIn() {
       try {
         const user = await loginWithGoogle(credential);
         login(user);
+        // Navigate immediately after successful login to reduce perceived delay
+        navigate('/DentgoGptHome', { replace: true });
       } catch (err) {
         console.error('Google login error:', err);
-        // Additional fallback in case AuthContext does not catch
         setError(
           'Authentication failed. Please try again or use a different browser mode.'
         );
       }
     },
-    [login, setError]
+    [login, navigate, setError]
   );
 
   // Initialize Google Identity
