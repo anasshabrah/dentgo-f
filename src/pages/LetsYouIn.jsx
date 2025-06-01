@@ -78,62 +78,70 @@ export default function LetsYouIn() {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center py-16 px-4">
-        {/* Back Button */}
-        <header className="absolute top-4 left-4">
-          <Link onClick={() => navigate(-1)} className="flex items-center">
-            <img className="w-8 h-8" src={buttonBack} alt="Go Back" />
-          </Link>
-        </header>
-
-        {/* Logo and Title */}
-        <div className="text-center">
-          <img className="mx-auto w-40 h-40" src={logo} alt="Dentgo logo" />
-          <h1 className="text-3xl font-bold text-gray-800 mt-4">DentGo AI</h1>
+    <div className="site_content">
+      <div className="let-you-page-main">
+        <div className="let-you-screen-main">
+          <header className="back-btn back-btn2 top-navbar">
+            <Link onClick={() => navigate(-1)}>
+              <img className="profile-pic" src={buttonBack} alt="Go Back" />
+            </Link>
+          </header>
+          <div className="Dentgo_img_main">
+            <img className="Dentgo_img" src={logo} alt="Dentgo logo" />
+            <h1 className="Dentgo_title">DentGo AI</h1>
+          </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div
-            className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-md my-4 cursor-pointer"
-            onClick={() => setError(null)}
-          >
-            {error}
+        <div className="footer_box">
+          <div className="lets_you_in_box lets_you_in_box2">
+            <h2 className="lets_you_in_text">Welcome</h2>
+
+            {/* Show error message if present */}
+            {error && (
+              <div
+                className="alert alert-warning"
+                style={{
+                  backgroundColor: '#fff3cd',
+                  color: '#856404',
+                  padding: '10px 15px',
+                  borderRadius: '5px',
+                  marginBottom: '15px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => setError(null)}
+              >
+                {error}
+              </div>
+            )}
+
+            <div className="icons_main icons_main2">
+              {/* Google */}
+              <button
+                type="button"
+                className="oauth-btn"
+                onClick={() => {
+                  if (window.google?.accounts?.id) {
+                    window.google.accounts.id.prompt();
+                  } else {
+                    alert('Google login is not ready yet.');
+                  }
+                }}
+              >
+                <img src={GoogleIcon} alt="Google logo" />
+                <span>Continue with Google</span>
+              </button>
+
+              {/* Apple */}
+              <button
+                type="button"
+                className="oauth-btn"
+                onClick={() => loginWithApple()}
+              >
+                <img src={AppleIcon} alt="Apple logo" />
+                <span>Continue with Apple</span>
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Welcome Text */}
-        <h2 className="text-2xl font-semibold text-gray-800 mt-8">Welcome</h2>
-
-        {/* OAuth Buttons */}
-        <div className="mt-8 space-y-4">
-          {/* Google Login Button */}
-          <button
-            type="button"
-            className="flex items-center justify-center bg-white border border-gray-300 rounded-md py-3 w-64 hover:bg-gray-50"
-            onClick={() => {
-              if (window.google?.accounts?.id) {
-                window.google.accounts.id.prompt();
-              } else {
-                alert('Google login is not ready yet.');
-              }
-            }}
-          >
-            <img className="w-6 h-6 mr-3" src={GoogleIcon} alt="Google logo" />
-            <span className="text-lg text-gray-800">Continue with Google</span>
-          </button>
-
-          {/* Apple Login Button */}
-          <button
-            type="button"
-            className="flex items-center justify-center bg-white border border-gray-300 rounded-md py-3 w-64 hover:bg-gray-50"
-            onClick={() => loginWithApple()}
-          >
-            <img className="w-6 h-6 mr-3" src={AppleIcon} alt="Apple logo" />
-            <span className="text-lg text-gray-800">Continue with Apple</span>
-          </button>
         </div>
       </div>
     </div>
