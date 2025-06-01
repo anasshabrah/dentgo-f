@@ -4,7 +4,8 @@ import { createCard } from "../api/cards";
 import buttonBack from "../assets/images/Button-Back.png";
 import visaIcon from "../assets/images/visa-icon.png";
 import Loader from "../components/Loader";
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { CardElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
+import { stripePromise } from "../lib/stripeClient";
 
 const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 
@@ -106,7 +107,6 @@ const AddNewCard = () => {
                 <p className="card-name-jessica">
                   {cardName || "Jessica Smith"}
                 </p>
-                {/* No CVV & expiry date since Stripe Elements handles those */}
               </div>
             </div>
 
@@ -160,4 +160,13 @@ const AddNewCard = () => {
   );
 };
 
-export default AddNewCard;
+// Wrapper with Stripe Elements
+const AddNewCardPage = () => {
+  return (
+    <Elements stripe={stripePromise}>
+      <AddNewCard />
+    </Elements>
+  );
+};
+
+export default AddNewCardPage;
