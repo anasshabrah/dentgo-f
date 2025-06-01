@@ -1150,11 +1150,11 @@ label.custom-radio-sel-lang {
 }
 
 .onboarding-next-btn-new-payment {
-  background-color: #0078D7;
+  background-color: #0078D7 !important;
   color: #ffffff !important;
   font-family: Poppins, sans-serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
   border-radius: 12px;
   margin: 16px 0;
@@ -1164,8 +1164,10 @@ label.custom-radio-sel-lang {
   opacity: 1;
   transition: background 0.2s ease;
 }
+
 .onboarding-next-btn-new-payment:hover {
-  background-color: #0064ba;
+  background-color: #0064ba !important;
+  color: #ffffff !important;
 }
 
 /************************ 19.Subscription Screen Css ***************************/
