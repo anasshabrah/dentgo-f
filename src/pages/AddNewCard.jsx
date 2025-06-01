@@ -90,7 +90,6 @@ const AddNewCardForm = () => {
       }
 
       await createCard({ paymentMethodId: token.id, nickName: cardName || null });
-
       navigate("/PaymentMethod");
     } catch (err) {
       console.error("AddNewCard error:", err);
@@ -116,11 +115,16 @@ const AddNewCardForm = () => {
             className="verify-section-main align-items-stretch"
             onSubmit={handleSubmit}
           >
+            {/* ====== Card Preview (clearly labeled as Static) ====== */}
             <div className="position-relative demo-visa mb-4">
-              <img className="hello-visa" src={visaIcon} alt="visa" />
+              <span className="card-preview-label">Sample Card Preview</span>
+              <img className="hello-visa" src={visaIcon} alt="Visa logo" />
               <p className="card-hidden-number">{maskedCardNumber}</p>
               <div className="card-name-jessica-main">
-                <p className="card-name-jessica">{cardName || "Jessica Smith"}</p>
+                <p className="card-name-jessica">
+                  {/* Use generic placeholder when empty */}
+                  {cardName || "Cardholder Name"}
+                </p>
                 <div className="card-name-jessica-main-sub">
                   <p className="card-date-cvv">{formatDate(expiryDate)}</p>
                   <p className="card-date-cvv">{cvv || "***"}</p>
@@ -147,6 +151,9 @@ const AddNewCardForm = () => {
                 <div className="stripe-card-input">
                   <CardElement
                     id="card-element"
+                    onChange={() => {
+                      /* No interactive masked number—preview is labeled static */
+                    }}
                     options={{
                       style: {
                         base: {
@@ -169,7 +176,7 @@ const AddNewCardForm = () => {
                     onChange={handleDateChange}
                     dateFormat="MM/yy"
                     className="no-spinners"
-                    placeholderText="Expiry Date"
+                    placeholderText="MM/YY"
                     required
                     showMonthYearPicker
                     id="expiryDate"
@@ -177,10 +184,10 @@ const AddNewCardForm = () => {
                 </div>
                 <div className="form-item flex-fill">
                   <input
-                    type="text"
-                    className="no-spinners"
+                    type="number"
                     id="cvv"
-                    maxLength={3}
+                    className="no-spinners"
+                    max="999"
                     value={cvv}
                     onChange={handleCvvChange}
                     required
@@ -192,7 +199,15 @@ const AddNewCardForm = () => {
               </div>
             </div>
 
-            {error && <div className="error-message text-danger mb-3">{error}</div>}
+            {error && (
+              <div
+                className="error-message text-danger mb-3"
+                role="alert"
+                aria-live="assertive"
+              >
+                {error}
+              </div>
+            )}
 
             <div className="print-continue-btn-head">
               <button
@@ -200,7 +215,13 @@ const AddNewCardForm = () => {
                 className="bottom-fix-btn onboarding-next-btn-plus"
                 disabled={submitting}
               >
-                {submitting ? "Adding…" : "Add My Card"}
+                {submitting ? (
+                  <>
+                    <span className="btn-spinner" aria-hidden="true" /> Adding…
+                  </>
+                ) : (
+                  "Add My Card"
+                )}
               </button>
             </div>
           </form>
@@ -210,12 +231,10 @@ const AddNewCardForm = () => {
   );
 };
 
-const AddNewCard = () => {
-  return (
-    <Elements stripe={stripePromise}>
-      <AddNewCardForm />
-    </Elements>
-  );
-};
+const AddNewCard = () => (
+  <Elements stripe={stripePromise}>
+    <AddNewCardForm />
+  </Elements>
+);
 
 export default AddNewCard;
