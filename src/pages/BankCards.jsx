@@ -86,9 +86,7 @@ const BankCards = () => {
                   </Link>
                 ))
               ) : (
-                !fetchError && (
-                  <p className="sub-text my-3">No saved cards found.</p>
-                )
+                <p className="sub-text my-3">No saved cards found.</p>
               )}
             </form>
 
