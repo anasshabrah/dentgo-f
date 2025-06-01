@@ -20,11 +20,13 @@ const PaymentMethodForm = () => {
   const [paymentRequest, setPaymentRequest] = useState(null);
   const [canMakePayment, setCanMakePayment] = useState(false);
 
+  // Simulate page loader
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  // Once loader is done, fetch saved cards
   useEffect(() => {
     if (loading) return;
     async function loadCards() {
@@ -39,6 +41,7 @@ const PaymentMethodForm = () => {
     loadCards();
   }, [loading]);
 
+  // Initialize Apple/Google Pay PaymentRequest if possible
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -51,6 +54,7 @@ const PaymentMethodForm = () => {
           requestPayerName: true,
         });
         pr.on("paymentmethod", async (event) => {
+          // TODO: send event.paymentMethod.id to your backend to attach & save
           event.complete("success");
         });
         if (await pr.canMakePayment()) {
@@ -72,6 +76,7 @@ const PaymentMethodForm = () => {
     <div className="site_content">
       <div className="verification-main">
         <div className="container verify-screen-main p-0">
+          {/* ====== Header / Back (Unified: do not modify) ====== */}
           <header className="back-btn back-btn2 top-navbar d-flex align-items-center px-3 py-2">
             <Link onClick={handleBack} className="btn-link me-3" aria-label="Go back">
               <img className="profile-pic" src={buttonBack} alt="Go Back" />
@@ -80,6 +85,7 @@ const PaymentMethodForm = () => {
           </header>
 
           <div className="verify-section-main align-items-stretch">
+            {/* ====== Apple/Google Pay button (if available) ====== */}
             {canMakePayment && paymentRequest ? (
               <div className="form-check border-bottom px-0 custom-radio">
                 <PaymentRequestButtonElement options={{ paymentRequest }} />
@@ -95,10 +101,12 @@ const PaymentMethodForm = () => {
               </div>
             )}
 
+            {/* ====== Display any fetch error ====== */}
             {fetchError && (
               <div className="error-message text-danger mb-3">{fetchError}</div>
             )}
 
+            {/* ====== Render each saved card from Prisma ====== */}
             {cards.length > 0 ? (
               cards.map((card) => (
                 <div
@@ -106,6 +114,7 @@ const PaymentMethodForm = () => {
                   className="form-check border-bottom px-0 custom-radio"
                 >
                   <div className="form-check-label checkout-modal-lbl-payment d-flex align-items-center gap-2">
+                    {/* Minimal placeholder icon showing the network */}
                     <span className="payment-type">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -148,9 +157,10 @@ const PaymentMethodForm = () => {
               <p className="sub-text">No saved cards found.</p>
             )}
 
+            {/* ====== “Add New Payment” button ====== */}
             <div className="print-continue-btn-head">
               <div
-                className="onboarding-next-btn-new-payment"
+                className="onboarding-next-btn-new-payment bottom-fix-btn"
                 onClick={handleAddNew}
               >
                 Add New Payment
