@@ -4,24 +4,20 @@ import { createCard } from "../api/cards";
 import buttonBack from "../assets/images/Button-Back.png";
 import visaIcon from "../assets/images/visa-icon.png";
 import Loader from "../components/Loader";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { stripePromise } from "../lib/stripeClient";
+import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 
 const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 
 const AddNewCard = () => {
   const navigate = useNavigate();
+  const stripe = useStripe();
+  const elements = useElements();
+
   const [loading, setLoading] = useState(true);
   const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [maskedCardNumber, setMaskedCardNumber] = useState("*** **** **** 0000");
-  const [expiryDate, setExpiryDate] = useState(null);
-  const [cvv, setCvv] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Simulate brief loader on mount
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -29,31 +25,6 @@ const AddNewCard = () => {
 
   const handleBack = () => navigate(-1);
   const handleCardNameChange = (e) => setCardName(e.target.value);
-
-  const handleCardNumberChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
-    setCardNumber(raw);
-    const masked = raw
-      .split("")
-      .map((ch, i) => (i < 12 ? "*" : ch))
-      .join("")
-      .replace(/(.{4})/g, "$1 ")
-      .trim();
-    setMaskedCardNumber(masked || "*** **** **** 0000");
-  };
-
-  const handleDateChange = (date) => setExpiryDate(date);
-  const handleCvvChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, "").slice(0, 3);
-    setCvv(raw);
-  };
-
-  const formatDate = (date) => {
-    if (!date) return "**/**";
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const y = String(date.getFullYear()).slice(-2);
-    return `${m}/${y}`;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,37 +38,40 @@ const AddNewCard = () => {
         credentials: "include",
       });
 
-      // 2) Create a Stripe token from raw card fields
-      const stripe = await stripePromise;
-      const month = expiryDate ? expiryDate.getMonth() + 1 : null;
-      const year = expiryDate ? expiryDate.getFullYear() : null;
+      if (!stripe || !elements) {
+        setError("Stripe.js has not yet loaded.");
+        setSubmitting(false);
+        return;
+      }
 
-      const { token: stripeToken, error: stripeError } = await stripe.createToken({
-        type: "card",
-        card: {
-          number: cardNumber,
-          exp_month: month,
-          exp_year: year,
-          cvc: cvv,
-          name: cardName,
-        },
-      });
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        setError("Card element not found.");
+        setSubmitting(false);
+        return;
+      }
+
+      // 2) Create token from CardElement
+      const { token, error: stripeError } = await stripe.createToken(
+        cardElement,
+        { name: cardName }
+      );
 
       if (stripeError) {
         setError(stripeError.message);
         setSubmitting(false);
         return;
       }
-      if (!stripeToken?.id) {
-        setError("Failed to generate card token");
+
+      if (!token?.id) {
+        setError("Failed to generate card token.");
         setSubmitting(false);
         return;
       }
 
       // 3) Send stripeToken.id + optional nickName to our backend to save in Prisma
-      await createCard({ paymentMethodId: stripeToken.id, nickName: cardName || null });
+      await createCard({ paymentMethodId: token.id, nickName: cardName || null });
 
-      // 4) On success, navigate back to PaymentMethod
       navigate("/PaymentMethod");
     } catch (err) {
       console.error("AddNewCard error:", err);
@@ -125,13 +99,11 @@ const AddNewCard = () => {
           >
             <div className="position-relative demo-visa mb-4">
               <img className="hello-visa" src={visaIcon} alt="visa" />
-              <p className="card-hidden-number">{maskedCardNumber}</p>
+              <p className="card-hidden-number">**** **** **** ****</p>
               <div className="card-name-jessica-main">
-                <p className="card-name-jessica">{cardName || "Jessica Smith"}</p>
-                <div className="card-name-jessica-main-sub">
-                  <p className="card-date-cvv">{formatDate(expiryDate)}</p>
-                  <p className="card-date-cvv">{cvv || "***"}</p>
-                </div>
+                <p className="card-name-jessica">
+                  {cardName || "Jessica Smith"}
+                </p>
               </div>
             </div>
 
@@ -151,48 +123,19 @@ const AddNewCard = () => {
               </div>
 
               <div className="form-item mb-3">
-                <input
-                  type="text"
-                  pattern="\d*"
-                  className="no-spinners"
-                  id="cardNumber"
-                  maxLength={16}
-                  value={cardNumber}
-                  onChange={handleCardNumberChange}
-                  required
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "16px",
+                        color: "#333",
+                        "::placeholder": {
+                          color: "#aaa",
+                        },
+                      },
+                    },
+                  }}
                 />
-                <label className="info-person" htmlFor="cardNumber">
-                  Card Number
-                </label>
-              </div>
-
-              <div className="date-number-cvv d-flex gap-3">
-                <div className="form-item flex-fill">
-                  <DatePicker
-                    selected={expiryDate}
-                    onChange={handleDateChange}
-                    dateFormat="MM/yy"
-                    className="no-spinners"
-                    placeholderText="Expiry Date"
-                    required
-                    showMonthYearPicker
-                    id="expiryDate"
-                  />
-                </div>
-                <div className="form-item flex-fill">
-                  <input
-                    type="text"
-                    className="no-spinners"
-                    id="cvv"
-                    maxLength={3}
-                    value={cvv}
-                    onChange={handleCvvChange}
-                    required
-                  />
-                  <label className="info-person" htmlFor="cvv">
-                    CVV
-                  </label>
-                </div>
               </div>
             </div>
 
