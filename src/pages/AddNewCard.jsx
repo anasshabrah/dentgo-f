@@ -4,18 +4,28 @@ import { createCard } from "../api/cards";
 import buttonBack from "../assets/images/Button-Back.png";
 import visaIcon from "../assets/images/visa-icon.png";
 import Loader from "../components/Loader";
-import { CardElement, useStripe, useElements, Elements } from "@stripe/react-stripe-js";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements
+} from "@stripe/react-stripe-js";
 import { stripePromise } from "../lib/stripeClient";
 
 const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 
-const AddNewCard = () => {
+const AddNewCardForm = () => {
   const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
 
   const [loading, setLoading] = useState(true);
   const [cardName, setCardName] = useState("");
+  const [maskedCardNumber, setMaskedCardNumber] = useState("*** **** **** 0000");
+  const [expiryDate, setExpiryDate] = useState(null);
+  const [cvv, setCvv] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,6 +37,18 @@ const AddNewCard = () => {
 
   const handleBack = () => navigate(-1);
   const handleCardNameChange = (e) => setCardName(e.target.value);
+  const handleDateChange = (date) => setExpiryDate(date);
+  const handleCvvChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 3);
+    setCvv(raw);
+  };
+
+  const formatDate = (date) => {
+    if (!date) return "**/**";
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = String(date.getFullYear()).slice(-2);
+    return `${m}/${y}`;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +63,7 @@ const AddNewCard = () => {
       });
 
       if (!stripe || !elements) {
-        setError("Stripe.js has not yet loaded.");
+        setError("Stripe has not fully loaded. Please try again.");
         setSubmitting(false);
         return;
       }
@@ -53,7 +75,6 @@ const AddNewCard = () => {
         return;
       }
 
-      // 2) Create token from CardElement
       const { token, error: stripeError } = await stripe.createToken(
         cardElement,
         { name: cardName }
@@ -71,10 +92,8 @@ const AddNewCard = () => {
         return;
       }
 
-      // 3) Send stripeToken.id + optional nickName to our backend to save in Prisma
       await createCard({ paymentMethodId: token.id, nickName: cardName || null });
 
-      // 4) On success, navigate back to PaymentMethod
       navigate("/PaymentMethod");
     } catch (err) {
       console.error("AddNewCard error:", err);
@@ -102,11 +121,13 @@ const AddNewCard = () => {
           >
             <div className="position-relative demo-visa mb-4">
               <img className="hello-visa" src={visaIcon} alt="visa" />
-              <p className="card-hidden-number">**** **** **** ****</p>
+              <p className="card-hidden-number">{maskedCardNumber}</p>
               <div className="card-name-jessica-main">
-                <p className="card-name-jessica">
-                  {cardName || "Jessica Smith"}
-                </p>
+                <p className="card-name-jessica">{cardName || "Jessica Smith"}</p>
+                <div className="card-name-jessica-main-sub">
+                  <p className="card-date-cvv">{formatDate(expiryDate)}</p>
+                  <p className="card-date-cvv">{cvv || "***"}</p>
+                </div>
               </div>
             </div>
 
@@ -125,6 +146,7 @@ const AddNewCard = () => {
                 </label>
               </div>
 
+              {/* Stripe CardElement styled to match your UI */}
               <div className="form-item mb-3">
                 <CardElement
                   options={{
@@ -136,9 +158,41 @@ const AddNewCard = () => {
                           color: "#aaa",
                         },
                       },
+                      invalid: {
+                        color: "#FF484D",
+                      },
                     },
                   }}
                 />
+              </div>
+
+              <div className="date-number-cvv d-flex gap-3">
+                <div className="form-item flex-fill">
+                  <DatePicker
+                    selected={expiryDate}
+                    onChange={handleDateChange}
+                    dateFormat="MM/yy"
+                    className="no-spinners"
+                    placeholderText="Expiry Date"
+                    required
+                    showMonthYearPicker
+                    id="expiryDate"
+                  />
+                </div>
+                <div className="form-item flex-fill">
+                  <input
+                    type="text"
+                    className="no-spinners"
+                    id="cvv"
+                    maxLength={3}
+                    value={cvv}
+                    onChange={handleCvvChange}
+                    required
+                  />
+                  <label className="info-person" htmlFor="cvv">
+                    CVV
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -160,13 +214,13 @@ const AddNewCard = () => {
   );
 };
 
-// Wrapper with Stripe Elements
-const AddNewCardPage = () => {
+// Wrap with Stripe Elements provider
+const AddNewCard = () => {
   return (
     <Elements stripe={stripePromise}>
-      <AddNewCard />
+      <AddNewCardForm />
     </Elements>
   );
 };
 
-export default AddNewCardPage;
+export default AddNewCard;
