@@ -3,39 +3,33 @@ import axios from 'axios';
 
 const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
-export async function createStripeCustomer(token) {
+export async function createStripeCustomer() {
   const resp = await axios.post(
     `${API_BASE}/api/payments/create-customer`,
     {},
     {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' }
     }
   );
   return resp.data; // { customerId: 'cus_...' }
 }
 
-export async function createSubscription(token, priceId, paymentMethodId) {
+export async function createSubscription(priceId, paymentMethodId) {
   const resp = await axios.post(
     `${API_BASE}/api/payments/create-subscription`,
     { priceId, paymentMethodId },
     {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' }
     }
   );
   return resp.data;
 }
 
-export async function fetchActiveSubscription(token) {
+export async function fetchActiveSubscription() {
   const resp = await axios.get(`${API_BASE}/api/subscriptions`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    withCredentials: true
   });
-  return resp.data; // your existing /api/subscriptions logic returns all subscriptions
+  return resp.data; // returns active subscriptions
 }
