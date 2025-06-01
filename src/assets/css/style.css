@@ -1150,9 +1150,8 @@ label.custom-radio-sel-lang {
 }
 
 .onboarding-next-btn-new-payment {
-  position: static;
   background-color: #0078D7;
-  color: #ffffff;
+  color: #ffffff !important;
   font-family: Poppins, sans-serif;
   font-size: 18px;
   font-weight: 500;
