@@ -1,4 +1,4 @@
-// src/api/auth.js
+// frontend/src/api/auth.js
 const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
 /* Google login */
@@ -6,7 +6,7 @@ export async function loginWithGoogle(credential) {
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', // Always include credentials
+    credentials: 'include',
     body: JSON.stringify({ credential }),
   });
   if (!res.ok) {

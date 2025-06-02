@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx
+// frontend/src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { loginWithGoogle as loginWithGoogleAPI } from '../api/auth';
 
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (response.status === 401) {
+        // accessToken expired or missing → try refresh
         const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
@@ -65,10 +66,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
     } catch (err) {
       console.error('AuthContext: Google login error:', err);
-      if (
-        err.message.includes('AbortError') ||
-        err.message.includes('NetworkError')
-      ) {
+      if (err.message.includes('AbortError') || err.message.includes('NetworkError')) {
         setError(
           'Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies.'
         );
