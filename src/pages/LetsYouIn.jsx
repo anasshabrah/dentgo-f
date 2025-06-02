@@ -18,6 +18,7 @@ export default function LetsYouIn() {
   const navigate = useNavigate();
   const { login, isAuthenticated, error, setError } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -73,6 +74,7 @@ export default function LetsYouIn() {
         callback: handleCredential,
         ux_mode: "popup",
       });
+      setGoogleReady(true);
       setLoading(false);
     });
   }, [handleCredential, setError]);
@@ -130,10 +132,19 @@ export default function LetsYouIn() {
           <div className="flex flex-col gap-4 w-full">
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              disabled={!googleReady}
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
+                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={() => {
-                if (window.google?.accounts?.id) {
-                  window.google.accounts.id.prompt();
+                if (window.google?.accounts?.id && googleReady) {
+                  try {
+                    window.google.accounts.id.prompt();
+                  } catch (err) {
+                    if (err.name !== "AbortError") {
+                      console.error("Google prompt error:", err);
+                    }
+                  }
                 } else {
                   alert("Google login is not ready yet.");
                 }
@@ -155,7 +166,7 @@ export default function LetsYouIn() {
         </div>
       </div>
 
-      {/* Display only the dotsPatternBottom image in the lower third */}
+      {/* Display only the dentaiBottom image in the lower third */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
         <img
           src={dentaiBottom}
