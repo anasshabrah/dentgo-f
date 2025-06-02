@@ -68,8 +68,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (response.ok) {
-        const data = (await response.json()) as { user: User };
-        setUser(data.user || null);
+        // — Instead of calling response.json() directly, first read response as text
+        const text = await response.text();
+        try {
+          const parsed = JSON.parse(text) as { user: User };
+          setUser(parsed.user || null);
+        } catch {
+          // If parsing fails, assume no valid JSON user object → not authenticated
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
