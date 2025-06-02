@@ -8,7 +8,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <ModalProvider>
-        <Suspense fallback={<Loader />}>                  
+        <Suspense fallback={<Loader />}>                 
           <RoutesConfig />
         </Suspense>
       </ModalProvider>
