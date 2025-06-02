@@ -1,4 +1,5 @@
 // src/pages/LetsYouIn.jsx
+
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
@@ -16,33 +17,33 @@ const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function LetsYouIn() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, error, setError, loginWithGoogle } = useAuth();
+  const { login, isAuthenticated, error, setError } = useAuth();
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Load Google's Identity Services script
+  // Insert Google Identity script once
   useGoogleIdentity();
 
-  // If already authenticated, redirect immediately
+  // If already authenticated, redirect to home
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/DentgoGptHome", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // Callback to handle credential response from Google
+  // Handle the credential returned by Google One-Tap / Popup
   const handleCredentialResponse = useCallback(
     async (response) => {
       const { credential } = response;
       if (!credential) {
-        setError("No credentials returned. Please try again.");
+        setError("No Google credential returned. Please try again.");
         return;
       }
 
       try {
-        // Send credential to backend, get user object
+        // Send the credential to our backend API (/api/auth/google)
         const user = await loginWithGoogleAPI(credential);
-        login(user); // store in context
+        login(user); // store user in context
         navigate("/DentgoGptHome", { replace: true });
       } catch (err) {
         console.error("Google login error:", err);
@@ -54,10 +55,10 @@ export default function LetsYouIn() {
     [login, navigate, setError]
   );
 
-  // Initialize Google Identity Services client once script has loaded
+  // Initialize Google Identity Services client once the script is loaded
   useEffect(() => {
-    // Wait until the window.google.accounts.id object is available
-    const tryInitialize = () => {
+    const attemptInit = () => {
+      // Wait until `window.google.accounts.id` is defined
       if (window.google?.accounts?.id) {
         if (!CLIENT_ID) {
           console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
@@ -69,25 +70,25 @@ export default function LetsYouIn() {
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
-          ux_mode: "popup",
+          ux_mode: "popup", // force a popup chooser
         });
 
         setGoogleReady(true);
         setLoading(false);
       } else {
-        // If still not loaded, retry after a short delay
-        setTimeout(tryInitialize, 100);
+        // Retry in 100ms if not yet loaded
+        setTimeout(attemptInit, 100);
       }
     };
 
-    tryInitialize();
+    attemptInit();
   }, [handleCredentialResponse]);
 
   if (loading) return <Loader />;
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
-      {/* Blue Header */}
+      {/* ========== BLUE HEADER ========== */}
       <div className="flex-none bg-primary relative">
         <header className="pt-6 px-4 flex items-center">
           <button
@@ -110,7 +111,7 @@ export default function LetsYouIn() {
         </div>
       </div>
 
-      {/* Welcome + Buttons */}
+      {/* ========== WELCOME & BUTTONS ========== */}
       <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
@@ -120,20 +121,21 @@ export default function LetsYouIn() {
           {error && (
             <div
               role="alert"
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded"
+              tabIndex={0}
               onClick={() => setError(null)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   setError(null);
                 }
               }}
-              tabIndex={0}
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
             >
               {error}
             </div>
           )}
 
           <div className="flex flex-col gap-4 w-full">
+            {/* ===== GOOGLE BUTTON ===== */}
             <button
               type="button"
               disabled={!googleReady}
@@ -145,13 +147,25 @@ export default function LetsYouIn() {
               onClick={() => {
                 if (window.google?.accounts?.id && googleReady) {
                   try {
-                    window.google.accounts.id.prompt();
+                    window.google.accounts.id.prompt((notification) => {
+                      // If FedCM aborts, fallback to redirect
+                      if (notification.isNotDisplayed()) {
+                        const reason = notification.getNotDisplayedReason();
+                        console.warn("Google prompt not displayed:", reason);
+                        if (reason === "browser_not_supported" || reason === "abort") {
+                          // AbortError fallback: redirect to traditional OAuth
+                          window.location.href = "/api/auth/google";
+                        }
+                      }
+                    });
                   } catch (err) {
-                    if (err.name !== "AbortError") {
-                      console.error("Google prompt error:", err);
-                      setError(
-                        "Unexpected error when opening Google login. Please try again."
-                      );
+                    if (err.name === "AbortError") {
+                      // Fallback to server‐side redirect if the popup is aborted
+                      console.warn("Google prompt aborted. Falling back to redirect.");
+                      window.location.href = "/api/auth/google";
+                    } else {
+                      console.error("Unexpected error in google.accounts.id.prompt():", err);
+                      setError("Unexpected error opening Google login. Please try again.");
                     }
                   }
                 } else {
@@ -163,14 +177,14 @@ export default function LetsYouIn() {
               <span>Continue with Google</span>
             </button>
 
+            {/* ===== APPLE BUTTON ===== */}
             <button
               type="button"
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
               onClick={async () => {
                 try {
-                  const user = await loginWithApple();
-                  login(user);
-                  navigate("/DentgoGptHome", { replace: true });
+                  // Redirect to Apple OAuth endpoint
+                  window.location.href = "/api/auth/apple";
                 } catch (err) {
                   console.error("Apple login error:", err);
                   setError("Apple authentication failed. Please try again.");
@@ -184,7 +198,7 @@ export default function LetsYouIn() {
         </div>
       </div>
 
-      {/* Display only the dentaiBottom image in the lower third */}
+      {/* ========== BOTTOM IMAGE (lower third) ========== */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
         <img
           src={dentaiBottom}
