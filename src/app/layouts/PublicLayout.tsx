@@ -1,5 +1,11 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
+import React from 'react';
 
-const PublicLayout: React.FC = () => <Outlet />;
+const PublicLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <main>
+      {children}
+    </main>
+  );
+};
+
 export default PublicLayout;
