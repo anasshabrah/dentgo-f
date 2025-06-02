@@ -5,7 +5,7 @@ import buttonBack from "../assets/images/Button-Back.png";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
-import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
+import dentaiBottom from "../assets/images/dentaiBottom.png";
 
 import { loadGoogle } from "../lib/google";
 
@@ -158,7 +158,7 @@ export default function LetsYouIn() {
       {/* Display only the dotsPatternBottom image in the lower third */}
       <div className="absolute bottom-0 left-0 w-full h-40">
         <img
-          src={dotsPatternBottom}
+          src={dentaiBottom}
           alt="Dental AI graphic"
           className="w-full h-full object-contain"
         />
