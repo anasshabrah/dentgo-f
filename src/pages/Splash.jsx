@@ -49,9 +49,9 @@ const Splash = () => {
   }, []);
 
   return (
-    <div className="bg-blue-800 min-h-screen">
+    <div className="bg-white min-h-screen">
       {showSplash && (
-        <div className="fixed inset-0 bg-blue-800 z-50 flex flex-col items-center justify-center">
+        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
           <div className="relative h-screen w-full flex flex-col items-center justify-center">
             <div className="absolute top-0 left-0">
               <img
@@ -104,13 +104,13 @@ const Splash = () => {
                 <div className="flex items-center justify-center mb-8">
                   {index < slides.length - 1 ? (
                     <div
-                      className="bg-blue-800 text-white text-base font-medium py-3 px-6 rounded transition hover:bg-blue-700 cursor-pointer"
+                      className="bg-primary text-white text-base font-medium py-3 px-6 rounded transition hover:opacity-90 cursor-pointer"
                       onClick={handleNext}
                     >
                       <Link to="#">Next</Link>
                     </div>
                   ) : (
-                    <div className="bg-blue-800 text-white text-base font-medium py-3 px-6 rounded transition hover:bg-blue-700 cursor-pointer">
+                    <div className="bg-primary text-white text-base font-medium py-3 px-6 rounded transition hover:opacity-90 cursor-pointer">
                       <Link to="/LetsYouIn">Get Started</Link>
                     </div>
                   )}
