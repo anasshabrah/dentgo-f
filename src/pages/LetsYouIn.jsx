@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import buttonBack from "../assets/images/Button-Back.png";
@@ -8,20 +8,17 @@ import GoogleIcon from "../assets/images/Icon-google.png";
 import dentaiBottom from "../assets/images/dentaiBottom.png";
 
 import { useAuth } from "../context/AuthContext";
-import { loginWithApple } from "../api/auth";
 
 export default function LetsYouIn() {
   const navigate = useNavigate();
   const { isAuthenticated, error, setError } = useAuth();
-  const [loading, setLoading] = useState(false);
 
+  // If already authenticated, redirect to home
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/DentgoGptHome", { replace: true });
     }
   }, [isAuthenticated, navigate]);
-
-  if (loading) return <Loader />;
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
@@ -77,7 +74,6 @@ export default function LetsYouIn() {
               type="button"
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
               onClick={() => {
-                // Always fallback to server-side OAuth for consistency
                 window.location.href = "/api/auth/google";
               }}
             >
