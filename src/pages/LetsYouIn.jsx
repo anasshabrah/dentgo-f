@@ -97,8 +97,8 @@ export default function LetsYouIn() {
       </div>
 
       {/* Welcome + Buttons */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 mt-[-2rem]">
-        {/* Pull up with negative margin-top */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4">
+        {/* Increased pt-4 to naturally pull up Welcome without overlap */}
         <div className="w-full">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
             Welcome
