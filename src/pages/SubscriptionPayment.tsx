@@ -18,7 +18,9 @@ import { API_BASE } from "../config";
 const PaymentRequestSection = () => {
   const stripe = useStripe();
   const navigate = useNavigate();
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
+    null
+  );
 
   // 1) build PaymentRequest
   useEffect(() => {
@@ -40,7 +42,7 @@ const PaymentRequestSection = () => {
           // 2) when user taps Apple/Google Pay, attach that paymentMethod to a Subscription
           try {
             // create a new Subscription on the backend
-            const priceId = process.env.REACT_APP_STRIPE_PRICE_ID || ""; // might pass from config or hardcode
+            const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || "";
             const paymentMethodId = event.paymentMethod.id as string;
 
             // ask backend to create subscription Intent
@@ -107,7 +109,7 @@ const SubscriptionPayment = () => {
   };
 
   const handleProceedToCheckout = () => {
-    // as a fallback, navigate to confirm‐pin (in case user wants to pick a saved card)
+    // as a fallback, navigate to confirm-pin (in case user wants to pick a saved card)
     navigate("/confirm-payment-pin");
   };
 
@@ -173,7 +175,7 @@ const SubscriptionPayment = () => {
                       <path
                         fillRule="evenodd"
                         clipRule="evenodd"
-                        d="M15.0974 16.4389C13.5053 17.7698 11.4401 18.5733 9.1833 18.5733C4.14818 18.5733 0.0664062 14.5737 0.0664062 9.63996C0.0664062 4.70622 4.14818 0.706627 9.1833 0.706627C11.4401 0.706627 13.5053 1.51009 15.0974 2.84102C16.6894 1.51009 18.7547 0.706627 21.0114 0.706627C26.0465 0.706627 30.1283 4.70622 30.1283 9.63996C30.1283 14.5737 26.0465 18.5733 21.0114 18.5733C18.7547 18.5733 16.6894 17.7698 15.0974 16.4389Z"
+                        d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
                         fill="#ED0006"
                       />
                       <path

@@ -80,9 +80,9 @@ const PaymentMethodForm: React.FC = () => {
               return;
             }
 
-            // 3) Persist the new card on our server:
+            // 3) Persist the new card on our server (FIXED URL)
             const pmId = setupIntent.payment_method as string;
-            await fetch(`${API_BASE}/api/cards`, {
+            await fetch(`${API_BASE}/api/payments/cards`, {
               method: "POST",
               credentials: "include",
               headers: { "Content-Type": "application/json" },
