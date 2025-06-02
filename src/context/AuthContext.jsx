@@ -14,6 +14,13 @@ export const AuthProvider = ({ children }) => {
   // 1) Try to fetch the current user; if 401, attempt refresh
   const fetchUser = async () => {
     try {
+      // SHORT‐CIRCUIT if no refreshToken cookie – no need to hit backend at all
+      if (!document.cookie.includes("refreshToken=")) {
+        setUser(null);
+        setInitializing(false);
+        return;
+      }
+
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: "include",
         mode: "cors",
