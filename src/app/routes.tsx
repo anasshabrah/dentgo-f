@@ -1,30 +1,30 @@
 import React, { lazy } from "react";
-import RootLayout from "../layouts/RootLayout";
-import PublicLayout from "../layouts/PublicLayout";
-import DashboardLayout from "../layouts/DashboardLayout";
+import RootLayout from "./layouts/RootLayout";
+import PublicLayout from "./layouts/PublicLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "../components/RequireAuth";
 import paymentRoutes from "../modules/payments/routes";
 
 // —— Public pages (lazy‑loaded) ——
 const Splash              = lazy(() => import("../pages/Splash"));
-const LetsYouIn           = lazy(() => import("../pages/lets-you-in"));
-const NotificationAllow   = lazy(() => import("../pages/notificationAllow"));
+const Login           = lazy(() => import("../pages/Login"));
+const NotificationAllow   = lazy(() => import("../pages/NotificationAllow"));
 
 // —— Authenticated pages ——
-const DentgoHome          = lazy(() => import("../pages/dentgo-gpt-home"));
-const DentgoChat          = lazy(() => import("../pages/dentgo-chat"));
-const History             = lazy(() => import("../pages/history"));
-const Notification        = lazy(() => import("../pages/notification"));
-const NotificationSetting = lazy(() => import("../pages/notification-setting"));
-const Currency            = lazy(() => import("../pages/currency"));
-const TermsAndPrivacy     = lazy(() => import("../pages/terms-and-privacy"));
-const ContactUs           = lazy(() => import("../pages/contact-us"));
+const DentgoHome          = lazy(() => import("../pages/DentgoGptHome"));
+const DentgoChat          = lazy(() => import("../pages/DentgoChat"));
+const History             = lazy(() => import("../pages/History"));
+const Notification        = lazy(() => import("../pages/Notification"));
+const NotificationSetting = lazy(() => import("../pages/NotificationSetting"));
+const Currency            = lazy(() => import("../pages/Currency"));
+const TermsAndPrivacy     = lazy(() => import("../pages/TermsAndPrivacy"));
+const ContactUs           = lazy(() => import("../pages/ContactUs"));
 const DeleteAccount       = lazy(() => import("../pages/Delete"));
 
 // —— Misc standalone pages (simple modals / alerts) ——
-const Alert               = lazy(() => import("../pages/alert"));
+const Alert               = lazy(() => import("../pages/Alert"));
 const Confirmation        = lazy(() => import("../pages/Confirmation"));
-const ConfirmPaymentPin   = lazy(() => import("../pages/confirm-payment-pin"));
+const ConfirmPaymentPin   = lazy(() => import("../pages/ConfirmPaymentPin"));
 
 const routes = [
   // PUBLIC
@@ -32,7 +32,7 @@ const routes = [
     element: <PublicLayout />,
     children: [
       { index: true, element: <Splash /> },
-      { path: "login",      element: <LetsYouIn /> },
+      { path: "login",      element: <Login /> },
       { path: "allow-push", element: <NotificationAllow /> },
     ],
   },

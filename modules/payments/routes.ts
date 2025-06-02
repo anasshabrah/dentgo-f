@@ -1,11 +1,11 @@
 import React, { lazy } from "react";
 
-const PaymentMethod     = lazy(() => import("../../pages/payment-method"));
-const AddNewCard        = lazy(() => import("../../pages/add-new-card"));
+const PaymentMethod     = lazy(() => import("../../pages/PaymentMethod"));
+const AddNewCard        = lazy(() => import("../../pages/AddNewCard"));
 const SelectPayment     = lazy(() => import("../../pages/SelectPaymentMethod"));
-const SubscriptionPay   = lazy(() => import("../../pages/subscription-payment"));
-const PlusSubscription  = lazy(() => import("../../pages/plus-subscription"));
-const CancelSubscription= lazy(() => import("../../pages/cancel-subscription"));
+const SubscriptionPay   = lazy(() => import("../../pages/SubscriptionPayment"));
+const PlusSubscription  = lazy(() => import("../../pages/PlusSubscription"));
+const CancelSubscription= lazy(() => import("../../pages/CancelSubscription"));
 
 const paymentRoutes = [
   { path: "PaymentMethod",       element: <PaymentMethod /> },
