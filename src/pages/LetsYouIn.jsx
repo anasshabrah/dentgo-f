@@ -156,11 +156,11 @@ export default function LetsYouIn() {
       </div>
 
       {/* Display only the dotsPatternBottom image in the lower third */}
-      <div className="absolute bottom-0 left-0 w-full h-40">
+      <div className="absolute bottom-0 left-0 w-full h-40 overflow-hidden">
         <img
           src={dentaiBottom}
           alt="Dental AI graphic"
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       </div>
     </div>
