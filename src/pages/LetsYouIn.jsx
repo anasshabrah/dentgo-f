@@ -5,7 +5,7 @@ import buttonBack from "../assets/images/Button-Back.png";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
-import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png"; // Decorative dental-themed pattern
+import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
 
 import useGoogleIdentity from "../hooks/useGoogleIdentity";
 import { loadGoogle } from "../lib/google";
@@ -141,12 +141,12 @@ export default function LetsYouIn() {
         </div>
       </div>
 
-      {/* Decorative Pattern at the Bottom */}
-      <div className="absolute bottom-0 left-0 w-full h-32">
+      {/* Display only the dotsPatternBottom image in the lower third */}
+      <div className="absolute bottom-0 left-0 w-full h-40">
         <img
           src={dotsPatternBottom}
-          alt="Decorative dental AI pattern"
-          className="w-full h-full object-cover"
+          alt="Dental AI graphic"
+          className="w-full h-full object-contain"
         />
       </div>
     </div>
