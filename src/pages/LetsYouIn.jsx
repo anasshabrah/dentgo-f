@@ -145,8 +145,8 @@ export default function LetsYouIn() {
       <div className="absolute bottom-0 left-0 w-full h-40">
         <img
           src={dotsPatternBottom}
-          alt="Dental AI graphic"
-          className="w-full h-full object-contain"
+          alt="Decorative Dental AI Graphic"
+          className="w-full h-full object-cover"
         />
       </div>
     </div>
