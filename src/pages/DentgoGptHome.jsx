@@ -7,11 +7,10 @@ import { useAuth } from "../context/AuthContext";
 
 const DentgoGptHome = () => {
   const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { logout } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
 
-  // Clean up any lingering bootstrap backdrop if re-navigating
+  // Clean up any lingering Bootstrap backdrop if re-navigating
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -35,115 +34,113 @@ const DentgoGptHome = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
-      {/* === HEADER === */}
-      <header className="relative bg-primary pt-6 pb-10">
+      {/* ===== HEADER ===== */}
+      <header className="relative bg-primary py-4">
         {/* Subtle bottom accent gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0"></div>
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0" />
 
-        <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center justify-between">
-            {/* Logo + Title */}
+        <div className="mx-auto max-w-lg px-4 flex items-center justify-between">
+          {/* Logo + Title */}
+          <Link
+            to="/DentgoGptHome"
+            className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white"
+            aria-label="Dentgo Home"
+          >
+            <img src={logo} alt="Dentgo Logo" className="h-8 w-auto" />
+            <span className="text-white text-lg font-medium">Dentgo</span>
+          </Link>
+
+          <div className="flex items-center gap-4">
+            {/* Notification Icon */}
             <Link
-              to="/DentgoGptHome"
-              className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label="Dentgo Home"
+              to="/Notification"
+              className="relative p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label="View notifications"
             >
-              <img src={logo} alt="Dentgo Logo" className="h-8 w-auto" />
-              <span className="text-white text-lg font-medium leading-6">Dentgo</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current text-white"
+              >
+                <mask
+                  id="notif-mask"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
+                  width="24"
+                  height="24"
+                >
+                  <rect width="24" height="24" fill="white" />
+                </mask>
+                <g mask="url(#notif-mask)">
+                  <path
+                    d="M10 5C10 4.46957 10.2107 3.96086 10.5858 3.58579C10.9609 3.21071 11.4696 3 12 3C12.5304 3 13.0391 3.21071 13.4142 3.58579C13.7893 3.96086 14 4.46957 14 5C15.1484 5.54303 16.1274 6.38833 16.8321 7.4453C17.5367 8.50227 17.9404 9.73107 18 11V14C18.0753 14.6217 18.2954 15.2171 18.6428 15.7381C18.9902 16.2592 19.4551 16.6914 20 17H4C4.54494 16.6914 5.00981 16.2592 5.35719 15.7381C5.70457 15.2171 5.92474 14.6217 6 14V11C6.05956 9.73107 6.4633 8.50227 7.16795 7.4453C7.8726 6.38833 8.85159 5.54303 10 5Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </svg>
+              <span className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full bg-red-600 text-white text-xs">
+                5
+              </span>
             </Link>
 
-            <div className="flex items-center gap-4">
-              {/* Notification Icon */}
-              <Link
-                to="/Notification"
-                className="relative p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-                aria-label="View notifications"
+            {/* Menu Button (Offcanvas toggle) */}
+            <button
+              className="p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasMenu"
+              aria-label="Open menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current text-white"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                <mask
+                  id="menu-mask"
+                  maskUnits="userSpaceOnUse"
+                  x="0"
+                  y="0"
                   width="24"
                   height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current text-white"
                 >
-                  <mask
-                    id="notif-mask"
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="24"
-                    height="24"
-                  >
-                    <rect width="24" height="24" fill="white" />
-                  </mask>
-                  <g mask="url(#notif-mask)">
-                    <path
-                      d="M10 5C10 4.46957 10.2107 3.96086 10.5858 3.58579C10.9609 3.21071 11.4696 3 12 3C12.5304 3 13.0391 3.21071 13.4142 3.58579C13.7893 3.96086 14 4.46957 14 5C15.1484 5.54303 16.1274 6.38833 16.8321 7.4453C17.5367 8.50227 17.9404 9.73107 18 11V14C18.0753 14.6217 18.2954 15.2171 18.6428 15.7381C18.9902 16.2592 19.4551 16.6914 20 17H4C4.54494 16.6914 5.00981 16.2592 5.35719 15.7381C5.70457 15.2171 5.92474 14.6217 6 14V11C6.05956 9.73107 6.4633 8.50227 7.16795 7.4453C7.8726 6.38833 8.85159 5.54303 10 5Z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </svg>
-                <span className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full bg-red-600 text-white text-xs">
-                  5
-                </span>
-              </Link>
-
-              {/* Menu Button (Offcanvas toggle) */}
-              <button
-                className="p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasMenu"
-                aria-label="Open menu"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current text-white"
-                >
-                  <mask
-                    id="menu-mask"
-                    maskUnits="userSpaceOnUse"
-                    x="0"
-                    y="0"
-                    width="24"
-                    height="24"
-                  >
-                    <rect width="24" height="24" fill="white" />
-                  </mask>
-                  <g mask="url(#menu-mask)">
-                    <path
-                      d="M19 6.87298C19.3062 7.04978 19.5601 7.30461 19.7358 7.6115C19.9115 7.9184 20.0026 8.26638 20 8.61998V15.156C19.9999 15.5126 19.9045 15.8628 19.7235 16.1701C19.5426 16.4775 19.2828 16.7308 18.971 16.904L12.971 20.737C12.674 20.9019 12.3398 20.9885 12 20.9885C11.6602 20.9885 11.326 20.9019 11.029 20.737L5.029 16.904C4.71736 16.7309 4.45763 16.4777 4.27671 16.1705C4.0958 15.8634 4.00026 15.5135 4 15.157V8.61998C4.00008 8.26334 4.09553 7.9132 4.27646 7.60585C4.45739 7.29851 4.71721 7.04513 5.029 6.87198L11.029 3.29998C11.3348 3.12975 11.679 3.04041 12.029 3.04041C12.379 3.04041 12.7232 3.12975 13.029 3.29998L19.029 6.87298H19V6.87298Z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </svg>
-              </button>
-            </div>
+                  <rect width="24" height="24" fill="white" />
+                </mask>
+                <g mask="url(#menu-mask)">
+                  <path
+                    d="M19 6.87298C19.3062 7.04978 19.5601 7.30461 19.7358 7.6115C19.9115 7.9184 20.0026 8.26638 20 8.61998V15.156C19.9999 15.5126 19.9045 15.8628 19.7235 16.1701C19.5426 16.4775 19.2828 16.7308 18.971 16.904L12.971 20.737C12.674 20.9019 12.3398 20.9885 12 20.9885C11.6602 20.9885 11.326 20.9019 11.029 20.737L5.029 16.904C4.71736 16.7309 4.45763 16.4777 4.27671 16.1705C4.0958 15.8634 4.00026 15.5135 4 15.157V8.61998C4.00008 8.26334 4.09553 7.9132 4.27646 7.60585C4.45739 7.29851 4.71721 7.04513 5.029 6.87198L11.029 3.29998C11.3348 3.12975 11.679 3.04041 12.029 3.04041C12.379 3.04041 12.7232 3.12975 13.029 3.29998L19.029 6.87298H19V6.87298Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </svg>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* === MAIN CONTENT === */}
+      {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 bg-gray-100">
         <div className="mx-auto max-w-lg px-4">
           {/* Dentgo Plus Card */}
@@ -196,7 +193,7 @@ const DentgoGptHome = () => {
         </div>
       </main>
 
-      {/* === OFFCANVAS MENU (Bootstrap structure, styled with Tailwind inside) === */}
+      {/* ===== OFFCANVAS MENU (moved out of header/main) ===== */}
       <div
         className="offcanvas offcanvas-start bg-gray-100"
         tabIndex="-1"
@@ -231,13 +228,6 @@ const DentgoGptHome = () => {
         </div>
 
         <nav className="p-4 space-y-4">
-          {/*
-            Each menu item is a flex container with:
-            - SVG icon (stroke-current & text-primary)
-            - Title text
-            - Chevron icon on the right
-            - Entire row has hover/focus background and padding
-          */}
           <Link
             to="/DentgoChat"
             className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
@@ -919,7 +909,7 @@ const DentgoGptHome = () => {
         </nav>
       </div>
 
-      {/* === LOGOUT CONFIRMATION BOTTOM OFFCANVAS === */}
+      {/* ===== LOGOUT CONFIRMATION BOTTOM OFFCANVAS ===== */}
       <div
         className="offcanvas offcanvas-bottom bg-gray-100"
         tabIndex="-1"
@@ -982,7 +972,7 @@ const DentgoGptHome = () => {
         </div>
       </div>
 
-      {/* === HOME SCREEN PROMO POPUP === */}
+      {/* ===== HOME SCREEN PROMO POPUP ===== */}
       {isVisible && (
         <>
           {/* Dimmed backdrop */}
@@ -1034,7 +1024,6 @@ const DentgoGptHome = () => {
                   aria-label="Add Home Screen"
                 >
                   Add Home Screen
-                  {/* Decorative ring effect can be added via CSS if desired */}
                   <span className="ml-2">➔</span>
                 </button>
               </div>
