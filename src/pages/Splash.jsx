@@ -49,10 +49,10 @@ const Splash = () => {
   }, []);
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white h-screen w-full overflow-hidden">
       {showSplash && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-          <div className="relative h-screen w-full flex flex-col items-center justify-center">
+          <div className="relative h-full w-full flex flex-col items-center justify-center">
             <div className="absolute top-0 left-0">
               <img
                 className="w-48 object-contain"
@@ -78,60 +78,61 @@ const Splash = () => {
         </div>
       )}
 
-      <div className="mx-auto max-w-xl px-4 py-8">
-        <div className="relative">
+      <div className="w-full h-full flex flex-col">
+        <div className="flex-1 w-full flex flex-col">
           {slides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`${activeSlide === index ? "block" : "hidden"} w-full`}
+              className={`${activeSlide === index ? "flex" : "hidden"} flex-1 flex-col items-center justify-between w-full h-full`}
             >
-              <div className="h-screen flex flex-col">
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <div className="flex flex-col items-center">
-                    <img
-                      className="pt-16 pb-16 w-full"
-                      src={slide.imgSrc}
-                      alt={`Slide illustration for: ${slide.title}`}
-                    />
-                    <h2 className="text-center text-2xl font-bold text-gray-800 px-4 mb-4">
-                      {slide.title}
-                    </h2>
-                    <p className="text-center text-base text-gray-500 px-4">
-                      {slide.content}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-center mb-8">
-                  {index < slides.length - 1 ? (
-                    <div
-                      className="bg-primary text-white text-base font-medium py-3 px-6 rounded transition hover:opacity-90 cursor-pointer"
-                      onClick={handleNext}
+              <div className="flex flex-col items-center px-4 pt-8">
+                <img
+                  className="w-full max-w-xs mb-4"
+                  src={slide.imgSrc}
+                  alt={`Slide illustration for: ${slide.title}`}
+                />
+                <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
+                  {slide.title}
+                </h2>
+                <p className="text-center text-base text-gray-500">
+                  {slide.content}
+                </p>
+              </div>
+
+              <div className="w-full px-4 pb-8">
+                {index < slides.length - 1 ? (
+                  <button
+                    className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
+                    onClick={handleNext}
+                  >
+                    Next
+                  </button>
+                ) : (
+                  <Link to="/LetsYouIn">
+                    <button
+                      className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
                     >
-                      <Link to="#">Next</Link>
-                    </div>
-                  ) : (
-                    <div className="bg-primary text-white text-base font-medium py-3 px-6 rounded transition hover:opacity-90 cursor-pointer">
-                      <Link to="/LetsYouIn">Get Started</Link>
-                    </div>
-                  )}
-                </div>
+                      Get Started
+                    </button>
+                  </Link>
+                )}
               </div>
             </div>
           ))}
+        </div>
 
-          <div className="flex justify-center gap-2 mt-4">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`rounded-full transition-all ${
-                  activeSlide === index
-                    ? "bg-gray-800 w-8 h-2"
-                    : "bg-gray-200 w-2 h-2"
-                }`}
-                onClick={() => setActiveSlide(index)}
-              ></button>
-            ))}
-          </div>
+        <div className="flex justify-center gap-2 mb-4">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              className={`rounded-full transition-all ${
+                activeSlide === index
+                  ? "bg-gray-800 w-8 h-2"
+                  : "bg-gray-200 w-2 h-2"
+              }`}
+              onClick={() => setActiveSlide(index)}
+            ></button>
+          ))}
         </div>
       </div>
     </div>
