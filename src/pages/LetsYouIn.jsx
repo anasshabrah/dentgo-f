@@ -7,7 +7,6 @@ import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
 import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
 
-import useGoogleIdentity from "../hooks/useGoogleIdentity";
 import { loadGoogle } from "../lib/google";
 
 import { useAuth } from "../context/AuthContext";
@@ -42,7 +41,17 @@ export default function LetsYouIn() {
     [login, navigate, setError]
   );
 
-  useGoogleIdentity();
+  const handleApple = useCallback(async () => {
+    try {
+      const user = await loginWithApple();
+      login(user);
+      navigate("/DentgoGptHome", { replace: true });
+    } catch (err) {
+      console.error("Apple login error:", err);
+      setError("Apple authentication failed. Please try again.");
+    }
+  }, [login, navigate, setError]);
+
   useEffect(() => {
     loadGoogle(() => {
       if (!window.google?.accounts?.id) {
@@ -50,11 +59,13 @@ export default function LetsYouIn() {
         setError(
           "Google login is not available at the moment. Please try again later."
         );
+        setLoading(false);
         return;
       }
       if (!CLIENT_ID) {
         console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
         alert("Google Login misconfigured: missing client ID.");
+        setLoading(false);
         return;
       }
       window.google.accounts.id.initialize({
@@ -62,13 +73,9 @@ export default function LetsYouIn() {
         callback: handleCredential,
         ux_mode: "popup",
       });
+      setLoading(false);
     });
   }, [handleCredential, setError]);
-
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(t);
-  }, []);
 
   if (loading) return <Loader />;
 
@@ -106,8 +113,15 @@ export default function LetsYouIn() {
 
           {error && (
             <div
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
+              role="button"
+              tabIndex={0}
               onClick={() => setError(null)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setError(null);
+                }
+              }}
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
             >
               {error}
             </div>
@@ -132,7 +146,7 @@ export default function LetsYouIn() {
             <button
               type="button"
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
-              onClick={() => loginWithApple()}
+              onClick={handleApple}
             >
               <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
               <span>Continue with Apple</span>
@@ -145,8 +159,8 @@ export default function LetsYouIn() {
       <div className="absolute bottom-0 left-0 w-full h-40">
         <img
           src={dotsPatternBottom}
-          alt="Decorative Dental AI Graphic"
-          className="w-full h-full object-cover"
+          alt="Dental AI graphic"
+          className="w-full h-full object-contain"
         />
       </div>
     </div>
