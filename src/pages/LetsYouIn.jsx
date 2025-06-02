@@ -142,11 +142,11 @@ export default function LetsYouIn() {
       </div>
 
       {/* Decorative Pattern at the Bottom */}
-      <div className="absolute bottom-0 left-0 w-full">
+      <div className="absolute bottom-0 left-0 w-full h-32">
         <img
           src={dotsPatternBottom}
           alt="Decorative dental AI pattern"
-          className="w-full object-cover"
+          className="w-full h-full object-cover"
         />
       </div>
     </div>
