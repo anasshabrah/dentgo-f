@@ -73,6 +73,7 @@ export default function LetsYouIn() {
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col">
+      {/* Blue Header */}
       <div className="flex-none bg-primary relative">
         <header className="pt-6 px-4 flex items-center">
           <button
@@ -95,9 +96,11 @@ export default function LetsYouIn() {
         </div>
       </div>
 
-      <div className="flex-1 w-full flex flex-col items-center justify-center px-4">
+      {/* Welcome + Buttons */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 mt-[-2rem]">
+        {/* Pull up with negative margin-top */}
         <div className="w-full">
-          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-6">
+          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
             Welcome
           </h2>
 
