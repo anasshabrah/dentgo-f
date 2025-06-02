@@ -72,66 +72,68 @@ export default function LetsYouIn() {
   if (loading) return <Loader />;
 
   return (
-    <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="relative bg-white h-screen">
-        <div className="bg-blue bg-no-repeat bg-top h-96 relative">
-          <header className="pt-8 flex items-center px-3">
-            <button onClick={() => navigate(-1)} className="p-0" aria-label="Go Back">
-              <img src={buttonBack} alt="Go Back" className="w-6 h-auto" />
-            </button>
-          </header>
-          <div className="flex flex-col items-center justify-center pt-5">
-            <img
-              src={logo}
-              alt="Dentgo logo"
-              className="max-w-full max-h-full object-contain"
-            />
-            <h1 className="text-white text-2xl font-semibold mt-3 text-center">
-              DentGo AI
-            </h1>
-          </div>
+    <div className="bg-white h-screen w-full overflow-hidden flex flex-col">
+      <div className="flex-none bg-primary relative">
+        <header className="pt-6 px-4 flex items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-0"
+            aria-label="Go Back"
+          >
+            <img src={buttonBack} alt="Go Back" className="w-6 h-auto" />
+          </button>
+        </header>
+        <div className="flex flex-col items-center justify-center py-4">
+          <img
+            src={logo}
+            alt="Dentgo logo"
+            className="w-24 h-auto object-contain"
+          />
+          <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+            DentGo AI
+          </h1>
         </div>
+      </div>
 
-        <div className="flex items-center justify-center bg-white">
-          <div className="-mt-10 p-8 px-4 bg-white rounded-3xl w-full max-w-lg mx-auto shadow-lg relative z-20">
-            <h2 className="text-center text-gray-800 text-2xl font-semibold leading-9">
-              Welcome
-            </h2>
+      <div className="flex-1 w-full flex flex-col items-center justify-center px-4">
+        <div className="w-full">
+          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-6">
+            Welcome
+          </h2>
 
-            {error && (
-              <div
-                className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
-                onClick={() => setError(null)}
-              >
-                {error}
-              </div>
-            )}
-
-            <div className="flex justify-center items-center gap-4 mt-4 mb-10">
-              <button
-                type="button"
-                className="flex items-center justify-center gap-3 w-full p-4 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
-                onClick={() => {
-                  if (window.google?.accounts?.id) {
-                    window.google.accounts.id.prompt();
-                  } else {
-                    alert("Google login is not ready yet.");
-                  }
-                }}
-              >
-                <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
-                <span>Continue with Google</span>
-              </button>
-
-              <button
-                type="button"
-                className="flex items-center justify-center gap-3 w-full p-4 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
-                onClick={() => loginWithApple()}
-              >
-                <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
-                <span>Continue with Apple</span>
-              </button>
+          {error && (
+            <div
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
+              onClick={() => setError(null)}
+            >
+              {error}
             </div>
+          )}
+
+          <div className="flex flex-col gap-4 w-full">
+            <button
+              type="button"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              onClick={() => {
+                if (window.google?.accounts?.id) {
+                  window.google.accounts.id.prompt();
+                } else {
+                  alert("Google login is not ready yet.");
+                }
+              }}
+            >
+              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
+              <span>Continue with Google</span>
+            </button>
+
+            <button
+              type="button"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              onClick={() => loginWithApple()}
+            >
+              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
+              <span>Continue with Apple</span>
+            </button>
           </div>
         </div>
       </div>
