@@ -1,6 +1,4 @@
-// src/pages/LetsYouIn.jsx
-
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import buttonBack from "../assets/images/Button-Back.png";
@@ -9,80 +7,19 @@ import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
 import dentaiBottom from "../assets/images/dentaiBottom.png";
 
-import useGoogleIdentity from "../hooks/useGoogleIdentity";
 import { useAuth } from "../context/AuthContext";
-import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
-
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+import { loginWithApple } from "../api/auth";
 
 export default function LetsYouIn() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, error, setError } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [googleReady, setGoogleReady] = useState(false);
+  const { isAuthenticated, error, setError } = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  // Insert Google Identity script once
-  useGoogleIdentity();
-
-  // If already authenticated, redirect to home
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/DentgoGptHome", { replace: true });
     }
   }, [isAuthenticated, navigate]);
-
-  // Handle the credential returned by Google One-Tap / Popup
-  const handleCredentialResponse = useCallback(
-    async (response) => {
-      const { credential } = response;
-      if (!credential) {
-        setError("No Google credential returned. Please try again.");
-        return;
-      }
-
-      try {
-        // Send the credential to our backend API (/api/auth/google)
-        const user = await loginWithGoogleAPI(credential);
-        login(user); // store user in context
-        navigate("/DentgoGptHome", { replace: true });
-      } catch (err) {
-        console.error("Google login error:", err);
-        setError(
-          "Authentication failed. Please try again or use a different browser mode."
-        );
-      }
-    },
-    [login, navigate, setError]
-  );
-
-  // Initialize Google Identity Services client once the script is loaded
-  useEffect(() => {
-    const attemptInit = () => {
-      // Wait until `window.google.accounts.id` is defined
-      if (window.google?.accounts?.id) {
-        if (!CLIENT_ID) {
-          console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
-          alert("Google Login misconfigured: missing client ID.");
-          setLoading(false);
-          return;
-        }
-
-        window.google.accounts.id.initialize({
-          client_id: CLIENT_ID,
-          callback: handleCredentialResponse,
-          ux_mode: "popup", // force a popup chooser
-        });
-
-        setGoogleReady(true);
-        setLoading(false);
-      } else {
-        // Retry in 100ms if not yet loaded
-        setTimeout(attemptInit, 100);
-      }
-    };
-
-    attemptInit();
-  }, [handleCredentialResponse]);
 
   if (loading) return <Loader />;
 
@@ -138,39 +75,10 @@ export default function LetsYouIn() {
             {/* ===== GOOGLE BUTTON ===== */}
             <button
               type="button"
-              disabled={!googleReady}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
-                googleReady
-                  ? "hover:bg-gray-100"
-                  : "opacity-50 cursor-not-allowed"
-              }`}
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
               onClick={() => {
-                if (window.google?.accounts?.id && googleReady) {
-                  try {
-                    window.google.accounts.id.prompt((notification) => {
-                      // If FedCM aborts, fallback to redirect
-                      if (notification.isNotDisplayed()) {
-                        const reason = notification.getNotDisplayedReason();
-                        console.warn("Google prompt not displayed:", reason);
-                        if (reason === "browser_not_supported" || reason === "abort") {
-                          // AbortError fallback: redirect to traditional OAuth
-                          window.location.href = "/api/auth/google";
-                        }
-                      }
-                    });
-                  } catch (err) {
-                    if (err.name === "AbortError") {
-                      // Fallback to server‐side redirect if the popup is aborted
-                      console.warn("Google prompt aborted. Falling back to redirect.");
-                      window.location.href = "/api/auth/google";
-                    } else {
-                      console.error("Unexpected error in google.accounts.id.prompt():", err);
-                      setError("Unexpected error opening Google login. Please try again.");
-                    }
-                  }
-                } else {
-                  alert("Google login is not ready yet.");
-                }
+                // Always fallback to server-side OAuth for consistency
+                window.location.href = "/api/auth/google";
               }}
             >
               <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
@@ -181,14 +89,8 @@ export default function LetsYouIn() {
             <button
               type="button"
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
-              onClick={async () => {
-                try {
-                  // Redirect to Apple OAuth endpoint
-                  window.location.href = "/api/auth/apple";
-                } catch (err) {
-                  console.error("Apple login error:", err);
-                  setError("Apple authentication failed. Please try again.");
-                }
+              onClick={() => {
+                window.location.href = "/api/auth/apple";
               }}
             >
               <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
