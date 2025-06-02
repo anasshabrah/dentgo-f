@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { ModalProvider } from "../context/ModalContext";
-import RoutesConfig from "./RoutesConfig";
+import RoutesConfig from "./app/routes";
 import Loader from "../components/ui/Loader";
 
 export default function App() {
