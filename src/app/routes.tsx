@@ -6,10 +6,12 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "../components/RequireAuth";
 import paymentRoutes from "../../modules/payments/routes";
 
+// —— Public pages (lazy-loaded) ——
 const Splash             = lazy(() => import("../pages/Splash"));
 const Login              = lazy(() => import("../pages/Login"));
 const NotificationAllow  = lazy(() => import("../pages/NotificationAllow"));
 
+// —— Authenticated pages ——
 const DentgoGptHome      = lazy(() => import("../pages/DentgoGptHome"));
 const DentgoChat         = lazy(() => import("../pages/DentgoChat"));
 const History            = lazy(() => import("../pages/History"));
@@ -20,6 +22,7 @@ const TermsAndPrivacy    = lazy(() => import("../pages/TermsAndPrivacy"));
 const ContactUs          = lazy(() => import("../pages/ContactUs"));
 const DeleteAccount      = lazy(() => import("../pages/Delete"));
 
+// —— Misc standalone pages (simple modals / alerts) ——
 const Alert             = lazy(() => import("../pages/Alert"));
 const Confirmation      = lazy(() => import("../pages/Confirmation"));
 const ConfirmPaymentPin = lazy(() => import("../pages/ConfirmPaymentPin"));
@@ -52,7 +55,7 @@ export default function RoutesConfig() {
       ),
       children: [
         {
-          element: <DashboardLayout />,
+          element: <DashboardLayout />, // adds SideMenu + padding
           children: [
             // core app
             { path: "dentgo-gpt-home",    element: <DentgoGptHome /> },
@@ -64,12 +67,14 @@ export default function RoutesConfig() {
             { path: "terms-and-privacy",  element: <TermsAndPrivacy /> },
             { path: "contact-us",         element: <ContactUs /> },
             { path: "delete",             element: <DeleteAccount /> },
+            // feature modules (payment routes are defined with their own kebab-case paths)
             ...paymentRoutes,
           ],
         },
       ],
     },
 
+    // STANDALONE (accessible without menu)
     { path: "alert",               element: <Alert /> },
     { path: "confirmation",        element: <Confirmation /> },
     { path: "confirm-payment-pin", element: <ConfirmPaymentPin /> },
