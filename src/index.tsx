@@ -12,6 +12,8 @@ declare global {
   }
 }
 
+console.log("[Startup] index.tsx → about to create root and render <App />");
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -25,5 +27,7 @@ root.render(
     </DarkModeProvider>
   </React.StrictMode>
 );
+
+console.log("[Startup] index.tsx → <App /> render call done");
 
 reportWebVitals();

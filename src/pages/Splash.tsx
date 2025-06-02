@@ -1,4 +1,3 @@
-// src/pages/Splash.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
@@ -12,6 +11,7 @@ const Splash = () => {
   const [activeSlide, setActiveSlide] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
 
+  // Define the slides array
   const slides = [
     {
       id: 0,
@@ -37,16 +37,23 @@ const Splash = () => {
   ];
 
   useEffect(() => {
+    console.log("[Lifecycle] Splash.tsx → Splash mounted, starting 1.5s timer");
     const splashTimer = setTimeout(() => {
+      console.log("[Splash] 1.5s passed → hiding splash screen");
       setShowSplash(false);
     }, 1500);
 
-    return () => clearTimeout(splashTimer);
+    return () => {
+      clearTimeout(splashTimer);
+    };
   }, []);
 
   const handleNext = () => {
+    console.log(`[Splash] Next button clicked (going from slide ${activeSlide} to ${activeSlide + 1})`);
     setActiveSlide((prev) => Math.min(prev + 1, slides.length - 1));
   };
+
+  console.log(`[Splash] rendering slide #${activeSlide}`);
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden">
@@ -126,12 +133,13 @@ const Splash = () => {
             <button
               key={index}
               className={`rounded-full transition-all ${
-                activeSlide === index
-                  ? "bg-gray-800 w-8 h-2"
-                  : "bg-gray-200 w-2 h-2"
+                activeSlide === index ? "bg-gray-800 w-8 h-2" : "bg-gray-200 w-2 h-2"
               }`}
-              onClick={() => setActiveSlide(index)}
-            ></button>
+              onClick={() => {
+                console.log(`[Splash] Dot clicked → setting activeSlide to ${index}`);
+                setActiveSlide(index);
+              }}
+            />
           ))}
         </div>
       </div>

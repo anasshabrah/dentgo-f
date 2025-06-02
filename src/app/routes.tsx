@@ -1,4 +1,4 @@
-import React, { lazy } from "react";
+import React, { lazy, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import PublicLayout from "./layouts/PublicLayout";
@@ -6,34 +6,37 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "../components/RequireAuth";
 import paymentRoutes from "../modules/payments/routes";
 
-// —— Public pages (lazy-loaded) ——
-const Splash              = lazy(() => import("../pages/Splash"));
-const Login               = lazy(() => import("../pages/Login"));
-const NotificationAllow   = lazy(() => import("../pages/NotificationAllow"));
+const Splash = lazy(() => import("../pages/Splash"));
+const Login = lazy(() => import("../pages/Login"));
+const NotificationAllow = lazy(() => import("../pages/NotificationAllow"));
 
-// —— Authenticated pages ——
-const DentgoGptHome       = lazy(() => import("../pages/DentgoGptHome"));
-const DentgoChat          = lazy(() => import("../pages/DentgoChat"));
-const History             = lazy(() => import("../pages/History"));
-const Notification        = lazy(() => import("../pages/Notification"));
+const DentgoGptHome = lazy(() => import("../pages/DentgoGptHome"));
+const DentgoChat = lazy(() => import("../pages/DentgoChat"));
+const History = lazy(() => import("../pages/History"));
+const Notification = lazy(() => import("../pages/Notification"));
 const NotificationSetting = lazy(() => import("../pages/NotificationSetting"));
-const Currency            = lazy(() => import("../pages/Currency"));
-const TermsAndPrivacy     = lazy(() => import("../pages/TermsAndPrivacy"));
-const ContactUs           = lazy(() => import("../pages/ContactUs"));
-const DeleteAccount       = lazy(() => import("../pages/Delete"));
+const Currency = lazy(() => import("../pages/Currency"));
+const TermsAndPrivacy = lazy(() => import("../pages/TermsAndPrivacy"));
+const ContactUs = lazy(() => import("../pages/ContactUs"));
+const DeleteAccount = lazy(() => import("../pages/Delete"));
 
-// —— Misc standalone pages (simple modals / alerts) ——
-const Alert               = lazy(() => import("../pages/Alert"));
-const Confirmation        = lazy(() => import("../pages/Confirmation"));
-const ConfirmPaymentPin   = lazy(() => import("../pages/ConfirmPaymentPin"));
+const Alert = lazy(() => import("../pages/Alert"));
+const Confirmation = lazy(() => import("../pages/Confirmation"));
+const ConfirmPaymentPin = lazy(() => import("../pages/ConfirmPaymentPin"));
 
 export default function RoutesConfig() {
+  useEffect(() => {
+    console.log("[Lifecycle] routes.tsx → RoutesConfig rendered");
+  }, []);
+
   const renderRoutes = (list: any[]) =>
-    list.map(({ path, element, children, index }, i) => (
+    list.map(({ path, element, children, index }, i) =>
+      // The comma operator here logs first, then returns the <Route> element:
+      (console.log(`[Routing] Adding route #${i}: path="${path ?? "(index)"}"`),
       <Route key={i} path={path} element={element} index={index}>
         {children ? renderRoutes(children) : null}
-      </Route>
-    ));
+      </Route>)
+    );
 
   const routes = [
     // PUBLIC
@@ -41,7 +44,7 @@ export default function RoutesConfig() {
       element: <PublicLayout />,
       children: [
         { index: true, element: <Splash /> },
-        { path: "login",      element: <Login /> },
+        { path: "login", element: <Login /> },
         { path: "allow-push", element: <NotificationAllow /> },
       ],
     },
@@ -58,15 +61,15 @@ export default function RoutesConfig() {
           element: <DashboardLayout />, // adds SideMenu + padding
           children: [
             // core app
-            { path: "dentgo-gpt-home",      element: <DentgoGptHome /> },
-            { path: "dentgo-chat",          element: <DentgoChat /> },
-            { path: "history",              element: <History /> },
-            { path: "notification",         element: <Notification /> },
+            { path: "dentgo-gpt-home", element: <DentgoGptHome /> },
+            { path: "dentgo-chat", element: <DentgoChat /> },
+            { path: "history", element: <History /> },
+            { path: "notification", element: <Notification /> },
             { path: "notification-setting", element: <NotificationSetting /> },
-            { path: "currency",             element: <Currency /> },
-            { path: "terms-and-privacy",    element: <TermsAndPrivacy /> },
-            { path: "contact-us",           element: <ContactUs /> },
-            { path: "delete",               element: <DeleteAccount /> },
+            { path: "currency", element: <Currency /> },
+            { path: "terms-and-privacy", element: <TermsAndPrivacy /> },
+            { path: "contact-us", element: <ContactUs /> },
+            { path: "delete", element: <DeleteAccount /> },
             // feature modules (payment routes live under src/modules/payments)
             ...paymentRoutes,
           ],
@@ -75,8 +78,8 @@ export default function RoutesConfig() {
     },
 
     // STANDALONE (accessible without menu)
-    { path: "alert",               element: <Alert /> },
-    { path: "confirmation",        element: <Confirmation /> },
+    { path: "alert", element: <Alert /> },
+    { path: "confirmation", element: <Confirmation /> },
     { path: "confirm-payment-pin", element: <ConfirmPaymentPin /> },
   ];
 
