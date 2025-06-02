@@ -1,16 +1,16 @@
-// frontend/src/pages/LetsYouIn.jsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Loader from '../components/Loader';
-import buttonBack from '../assets/images/Button-Back.png';
-import logo from '../assets/images/logo-w.png';
-import AppleIcon from '../assets/images/Icon-apple.png';
-import GoogleIcon from '../assets/images/Icon-google.png';
-import dentaiBottom from '../assets/images/dentaiBottom.png';
+// src/pages/LetsYouIn.jsx
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import Loader from "../components/Loader";
+import buttonBack from "../assets/images/Button-Back.png";
+import logo from "../assets/images/logo-w.png";
+import AppleIcon from "../assets/images/Icon-apple.png";
+import GoogleIcon from "../assets/images/Icon-google.png";
+import dentaiBottom from "../assets/images/dentaiBottom.png";
 
-import useGoogleIdentity from '../hooks/useGoogleIdentity';
-import { useAuth } from '../context/AuthContext';
-import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from '../api/auth';
+import useGoogleIdentity from "../hooks/useGoogleIdentity";
+import { useAuth } from "../context/AuthContext";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -26,7 +26,7 @@ export default function LetsYouIn() {
   // 2) If already logged in, redirect immediately
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/DentgoGptHome', { replace: true });
+      navigate("/DentgoGptHome", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -35,16 +35,17 @@ export default function LetsYouIn() {
     async (response) => {
       const { credential } = response;
       if (!credential) {
-        setError('No credentials returned. Please try again.');
+        setError("No credentials returned. Please try again.");
         return;
       }
       try {
+        // Send credential to backend, get user & cookies set there
         const user = await loginWithGoogleAPI(credential);
         login(user);
-        navigate('/DentgoGptHome', { replace: true });
+        navigate("/DentgoGptHome", { replace: true });
       } catch (err) {
-        console.error('Google login error:', err);
-        setError('Authentication failed. Please try again or use a different browser mode.');
+        console.error("Google login error:", err);
+        setError("Authentication failed. Please try again or use a different browser mode.");
       }
     },
     [login, navigate, setError]
@@ -52,11 +53,12 @@ export default function LetsYouIn() {
 
   // 4) Initialize Google One-Tap once the script is loaded
   useEffect(() => {
+    let retryTimeout = null;
     const tryInitialize = () => {
       if (window.google?.accounts?.id) {
         if (!CLIENT_ID) {
-          console.error('Missing REACT_APP_GOOGLE_CLIENT_ID!');
-          alert('Google Login misconfigured: missing client ID.');
+          console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
+          alert("Google Login misconfigured: missing client ID.");
           setLoading(false);
           return;
         }
@@ -64,17 +66,18 @@ export default function LetsYouIn() {
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
-          ux_mode: 'popup',
+          ux_mode: "popup",
         });
         setGoogleReady(true);
         setLoading(false);
       } else {
-        // Retry a bit later if the script hasn't loaded yet
-        setTimeout(tryInitialize, 100);
+        // If still not loaded, retry after a short delay
+        retryTimeout = setTimeout(tryInitialize, 100);
       }
     };
 
     tryInitialize();
+    return () => clearTimeout(retryTimeout);
   }, [handleCredentialResponse]);
 
   if (loading) return <Loader />;
@@ -96,7 +99,7 @@ export default function LetsYouIn() {
 
       {/* Welcome + Buttons */}
       <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
-        <div className="w-full">
+        <div className="w-full max-w-md">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">Welcome</h2>
 
           {error && (
@@ -105,7 +108,7 @@ export default function LetsYouIn() {
               className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded"
               onClick={() => setError(null)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === "Enter" || e.key === " ") {
                   setError(null);
                 }
               }}
@@ -121,20 +124,20 @@ export default function LetsYouIn() {
               type="button"
               disabled={!googleReady}
               className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
-                googleReady ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
+                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={() => {
                 if (window.google?.accounts?.id && googleReady) {
                   try {
                     window.google.accounts.id.prompt();
                   } catch (err) {
-                    if (err.name !== 'AbortError') {
-                      console.error('Google prompt error:', err);
-                      setError('Unexpected error when opening Google login. Please try again.');
+                    if (err.name !== "AbortError") {
+                      console.error("Google prompt error:", err);
+                      setError("Unexpected error when opening Google login. Please try again.");
                     }
                   }
                 } else {
-                  alert('Google login is not ready yet.');
+                  alert("Google login is not ready yet.");
                 }
               }}
             >
@@ -148,12 +151,11 @@ export default function LetsYouIn() {
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
               onClick={async () => {
                 try {
-                  await loginWithApple();
-                  // loginWithApple will eventually redirect you back here with cookies set
-                  // so we don’t need to do login(...) manually
+                  // Apple login will redirect the user to Apple, then back with cookies set
+                  loginWithApple();
                 } catch (err) {
-                  console.error('Apple login error:', err);
-                  setError('Apple authentication failed. Please try again.');
+                  console.error("Apple login error:", err);
+                  setError("Apple authentication failed. Please try again.");
                 }
               }}
             >

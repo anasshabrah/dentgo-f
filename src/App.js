@@ -1,3 +1,4 @@
+// src/App.js
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -26,7 +27,7 @@ import SelectPaymentMethod from "./pages/SelectPaymentMethod.jsx";
 import Notification from "./pages/Notification.jsx";
 import Delete from "./pages/Delete.jsx";
 
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute.jsx";
 
 function App() {
   return (

@@ -1,6 +1,6 @@
-// frontend/src/context/AuthContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { loginWithGoogle as loginWithGoogleAPI } from '../api/auth';
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { loginWithGoogle as loginWithGoogleAPI } from "../api/auth";
 
 const AuthContext = createContext();
 
@@ -9,30 +9,31 @@ export const AuthProvider = ({ children }) => {
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE = process.env.REACT_APP_SERVER_URL || '';
+  const API_BASE = process.env.REACT_APP_SERVER_URL || "";
 
+  // 1) Try to fetch the current user; if 401, attempt refresh
   const fetchUser = async () => {
     try {
       let response = await fetch(`${API_BASE}/api/users/me`, {
-        credentials: 'include',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: "include",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.status === 401) {
-        // accessToken expired or missing → try refresh
+        // accessToken missing/expired → try refresh
         const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          mode: 'cors',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          credentials: "include",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
         });
 
         if (refreshResp.ok) {
           response = await fetch(`${API_BASE}/api/users/me`, {
-            credentials: 'include',
-            mode: 'cors',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: "include",
+            mode: "cors",
+            headers: { "Content-Type": "application/json" },
           });
         }
       }
@@ -43,8 +44,8 @@ export const AuthProvider = ({ children }) => {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error('AuthContext: Error fetching user:', error);
+    } catch (err) {
+      console.error("AuthContext: Error fetching user:", err);
       setUser(null);
     } finally {
       setInitializing(false);
@@ -53,6 +54,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const login = (userData) => {
@@ -65,24 +67,27 @@ export const AuthProvider = ({ children }) => {
       const user = await loginWithGoogleAPI(credential);
       setUser(user);
     } catch (err) {
-      console.error('AuthContext: Google login error:', err);
-      if (err.message.includes('AbortError') || err.message.includes('NetworkError')) {
+      console.error("AuthContext: Google login error:", err);
+      if (
+        err.message.includes("AbortError") ||
+        err.message.includes("NetworkError")
+      ) {
         setError(
-          'Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies.'
+          "Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies."
         );
       } else {
-        setError(err.message || 'Google login failed. Please try again.');
+        setError(err.message || "Google login failed. Please try again.");
       }
     }
   };
 
   const logout = async () => {
     try {
-      const { logout } = await import('../api/auth');
+      const { logout } = await import("../api/auth");
       await logout();
       setUser(null);
-    } catch (error) {
-      console.error('AuthContext: Error logging out:', error);
+    } catch (err) {
+      console.error("AuthContext: Error logging out:", err);
       setUser(null);
     }
   };

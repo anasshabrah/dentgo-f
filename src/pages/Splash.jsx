@@ -1,3 +1,4 @@
+// src/pages/Splash.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
@@ -9,6 +10,7 @@ import robotSlider3 from "../assets/images/robot-slider-img3.png";
 
 const Splash = () => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [showSplash, setShowSplash] = useState(true);
 
   const slides = [
     {
@@ -34,19 +36,17 @@ const Splash = () => {
     },
   ];
 
-  const handleNext = () => {
-    if (activeSlide < slides.length - 1) {
-      setActiveSlide(activeSlide + 1);
-    }
-  };
-
-  const [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
     const splashTimer = setTimeout(() => {
       setShowSplash(false);
     }, 1500);
+
     return () => clearTimeout(splashTimer);
   }, []);
+
+  const handleNext = () => {
+    setActiveSlide((prev) => Math.min(prev + 1, slides.length - 1));
+  };
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden">
@@ -83,7 +83,9 @@ const Splash = () => {
           {slides.map((slide, index) => (
             <div
               key={slide.id}
-              className={`${activeSlide === index ? "flex" : "hidden"} flex-1 flex-col items-center justify-between w-full h-full`}
+              className={`${
+                activeSlide === index ? "flex" : "hidden"
+              } flex-1 flex-col items-center justify-between w-full h-full`}
             >
               <div className="flex flex-col items-center px-4 pt-8">
                 <img
@@ -109,9 +111,7 @@ const Splash = () => {
                   </button>
                 ) : (
                   <Link to="/LetsYouIn">
-                    <button
-                      className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
-                    >
+                    <button className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90">
                       Get Started
                     </button>
                   </Link>
