@@ -1,3 +1,4 @@
+// src/lib/google.js
 let loading = false;
 export const loadGoogle = (cb) => {
   if (window.google?.accounts?.id) {

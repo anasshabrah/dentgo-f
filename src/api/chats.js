@@ -2,19 +2,27 @@ const API_BASE = process.env.REACT_APP_SERVER_URL || '';
 
 export async function fetchChatSessions() {
   const res = await fetch(`${API_BASE}/api/chats`, {
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to fetch chat sessions');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Failed to fetch chat sessions');
+  }
   return res.json();
 }
 
 export async function fetchChatSession(id) {
   const res = await fetch(`${API_BASE}/api/chats/${id}`, {
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to fetch chat session');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Failed to fetch chat session');
+  }
   return res.json();
 }
 
@@ -24,5 +32,8 @@ export async function endChatSession(sessionId) {
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
   });
-  if (!res.ok) throw new Error('Failed to end chat session');
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || 'Failed to end chat session');
+  }
 }

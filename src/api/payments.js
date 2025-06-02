@@ -9,7 +9,7 @@ export async function createStripeCustomer() {
     {},
     {
       withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     }
   );
   return resp.data; // { customerId: 'cus_...' }
@@ -21,7 +21,7 @@ export async function createSubscription(priceId, paymentMethodId) {
     { priceId, paymentMethodId },
     {
       withCredentials: true,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     }
   );
   return resp.data;
@@ -29,7 +29,7 @@ export async function createSubscription(priceId, paymentMethodId) {
 
 export async function fetchActiveSubscription() {
   const resp = await axios.get(`${API_BASE}/api/subscriptions`, {
-    withCredentials: true
+    withCredentials: true,
   });
-  return resp.data; // returns active subscriptions
+  return resp.data;
 }
