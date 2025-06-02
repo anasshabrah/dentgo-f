@@ -1,3 +1,4 @@
+// src/pages/LetsYouIn.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
@@ -7,30 +8,41 @@ import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
 import dentaiBottom from "../assets/images/dentaiBottom.png";
 
-import { loadGoogle } from "../lib/google";
-
+import useGoogleIdentity from "../hooks/useGoogleIdentity";
 import { useAuth } from "../context/AuthContext";
-import { loginWithGoogle, loginWithApple } from "../api/auth";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 export default function LetsYouIn() {
   const navigate = useNavigate();
-  const { login, isAuthenticated, error, setError } = useAuth();
+  const { login, isAuthenticated, error, setError, loginWithGoogle } = useAuth();
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
+  // Load Google's Identity Services script
+  useGoogleIdentity();
+
+  // If already authenticated, redirect immediately
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/DentgoGptHome", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  const handleCredential = useCallback(
-    async ({ credential }) => {
+  // Callback to handle credential response from Google
+  const handleCredentialResponse = useCallback(
+    async (response) => {
+      const { credential } = response;
+      if (!credential) {
+        setError("No credentials returned. Please try again.");
+        return;
+      }
+
       try {
-        const user = await loginWithGoogle(credential);
-        login(user);
+        // Send credential to backend, get user object
+        const user = await loginWithGoogleAPI(credential);
+        login(user); // store in context
         navigate("/DentgoGptHome", { replace: true });
       } catch (err) {
         console.error("Google login error:", err);
@@ -42,42 +54,34 @@ export default function LetsYouIn() {
     [login, navigate, setError]
   );
 
-  const handleApple = useCallback(async () => {
-    try {
-      const user = await loginWithApple();
-      login(user);
-      navigate("/DentgoGptHome", { replace: true });
-    } catch (err) {
-      console.error("Apple login error:", err);
-      setError("Apple authentication failed. Please try again.");
-    }
-  }, [login, navigate, setError]);
-
+  // Initialize Google Identity Services client once script has loaded
   useEffect(() => {
-    loadGoogle(() => {
-      if (!window.google?.accounts?.id) {
-        console.error("Google Identity not loaded.");
-        setError(
-          "Google login is not available at the moment. Please try again later."
-        );
+    // Wait until the window.google.accounts.id object is available
+    const tryInitialize = () => {
+      if (window.google?.accounts?.id) {
+        if (!CLIENT_ID) {
+          console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
+          alert("Google Login misconfigured: missing client ID.");
+          setLoading(false);
+          return;
+        }
+
+        window.google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: handleCredentialResponse,
+          ux_mode: "popup",
+        });
+
+        setGoogleReady(true);
         setLoading(false);
-        return;
+      } else {
+        // If still not loaded, retry after a short delay
+        setTimeout(tryInitialize, 100);
       }
-      if (!CLIENT_ID) {
-        console.error("Missing REACT_APP_GOOGLE_CLIENT_ID!");
-        alert("Google Login misconfigured: missing client ID.");
-        setLoading(false);
-        return;
-      }
-      window.google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredential,
-        ux_mode: "popup",
-      });
-      setGoogleReady(true);
-      setLoading(false);
-    });
-  }, [handleCredential, setError]);
+    };
+
+    tryInitialize();
+  }, [handleCredentialResponse]);
 
   if (loading) return <Loader />;
 
@@ -115,15 +119,15 @@ export default function LetsYouIn() {
 
           {error && (
             <div
-              role="button"
-              tabIndex={0}
+              role="alert"
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded"
               onClick={() => setError(null)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   setError(null);
                 }
               }}
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
+              tabIndex={0}
             >
               {error}
             </div>
@@ -134,7 +138,9 @@ export default function LetsYouIn() {
               type="button"
               disabled={!googleReady}
               className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
-                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+                googleReady
+                  ? "hover:bg-gray-100"
+                  : "opacity-50 cursor-not-allowed"
               }`}
               onClick={() => {
                 if (window.google?.accounts?.id && googleReady) {
@@ -143,6 +149,9 @@ export default function LetsYouIn() {
                   } catch (err) {
                     if (err.name !== "AbortError") {
                       console.error("Google prompt error:", err);
+                      setError(
+                        "Unexpected error when opening Google login. Please try again."
+                      );
                     }
                   }
                 } else {
@@ -157,7 +166,16 @@ export default function LetsYouIn() {
             <button
               type="button"
               className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
-              onClick={handleApple}
+              onClick={async () => {
+                try {
+                  const user = await loginWithApple();
+                  login(user);
+                  navigate("/DentgoGptHome", { replace: true });
+                } catch (err) {
+                  console.error("Apple login error:", err);
+                  setError("Apple authentication failed. Please try again.");
+                }
+              }}
             >
               <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
               <span>Continue with Apple</span>
