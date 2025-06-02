@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import buttonBack from "../assets/images/Button-Back.png";
-import logo from "../assets/images/logo.png";
+import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
 
