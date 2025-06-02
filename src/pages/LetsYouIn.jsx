@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader";
 import buttonBack from "../assets/images/Button-Back.png";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
+import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png"; // Decorative dental-themed pattern
 
 import useGoogleIdentity from "../hooks/useGoogleIdentity";
 import { loadGoogle } from "../lib/google";
@@ -72,7 +73,7 @@ export default function LetsYouIn() {
   if (loading) return <Loader />;
 
   return (
-    <div className="bg-white h-screen w-full overflow-hidden flex flex-col">
+    <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
       {/* Blue Header */}
       <div className="flex-none bg-primary relative">
         <header className="pt-6 px-4 flex items-center">
@@ -97,8 +98,7 @@ export default function LetsYouIn() {
       </div>
 
       {/* Welcome + Buttons */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4">
-        {/* Increased pt-4 to naturally pull up Welcome without overlap */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
             Welcome
@@ -139,6 +139,15 @@ export default function LetsYouIn() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Decorative Pattern at the Bottom */}
+      <div className="absolute bottom-0 left-0 w-full">
+        <img
+          src={dotsPatternBottom}
+          alt="Decorative dental AI pattern"
+          className="w-full object-cover"
+        />
       </div>
     </div>
   );
