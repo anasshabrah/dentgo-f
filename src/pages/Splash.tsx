@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import dotsPattern from "../assets/images/dots_pattern.png";
 import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
@@ -7,11 +6,14 @@ import imageUnscreen from "../assets/images/Image.png";
 import robotSlider from "../assets/images/robot-slider-img2.png";
 import robotSlider3 from "../assets/images/robot-slider-img3.png";
 
-const Splash = () => {
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [showSplash, setShowSplash] = useState(true);
+interface SplashProps {
+  onComplete: () => void;
+}
 
-  // Define the slides array
+const Splash: React.FC<SplashProps> = ({ onComplete }) => {
+  const [showInitialSplash, setShowInitialSplash] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
+
   const slides = [
     {
       id: 0,
@@ -37,27 +39,29 @@ const Splash = () => {
   ];
 
   useEffect(() => {
-    console.log("[Lifecycle] Splash.tsx → Splash mounted, starting 1.5s timer");
-    const splashTimer = setTimeout(() => {
-      console.log("[Splash] 1.5s passed → hiding splash screen");
-      setShowSplash(false);
+    console.log("[Lifecycle] Splash.tsx → Splash mounted");
+    const timer = setTimeout(() => {
+      console.log("[Splash] Showing initial splash for 1.5s, then starting slides");
+      setShowInitialSplash(false);
     }, 1500);
 
-    return () => {
-      clearTimeout(splashTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
   const handleNext = () => {
-    console.log(`[Splash] Next button clicked (going from slide ${activeSlide} to ${activeSlide + 1})`);
-    setActiveSlide((prev) => Math.min(prev + 1, slides.length - 1));
+    if (activeSlide < slides.length - 1) {
+      setActiveSlide((prev) => prev + 1);
+    } else {
+      console.log("[Splash] Last slide completed → calling onComplete()");
+      onComplete();
+    }
   };
 
-  console.log(`[Splash] rendering slide #${activeSlide}`);
+  console.log(`[Splash] Rendering ${showInitialSplash ? "initial splash" : `slide #${activeSlide}`}`);
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden">
-      {showSplash && (
+      {showInitialSplash ? (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
           <div className="relative h-full w-full flex flex-col items-center justify-center">
             <div className="absolute top-0 left-0">
@@ -83,66 +87,59 @@ const Splash = () => {
             </div>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          <div className="w-full h-full flex flex-col">
+            <div className="flex-1 w-full flex flex-col">
+              {slides.map((slide, index) => (
+                <div
+                  key={slide.id}
+                  className={`${
+                    activeSlide === index ? "flex" : "hidden"
+                  } flex-1 flex-col items-center justify-between w-full h-full`}
+                >
+                  <div className="flex flex-col items-center px-4 pt-8">
+                    <img
+                      className="w-full max-w-xs mb-4"
+                      src={slide.imgSrc}
+                      alt={`Slide illustration for: ${slide.title}`}
+                    />
+                    <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
+                      {slide.title}
+                    </h2>
+                    <p className="text-center text-base text-gray-500">
+                      {slide.content}
+                    </p>
+                  </div>
 
-      <div className="w-full h-full flex flex-col">
-        <div className="flex-1 w-full flex flex-col">
-          {slides.map((slide, index) => (
-            <div
-              key={slide.id}
-              className={`${
-                activeSlide === index ? "flex" : "hidden"
-              } flex-1 flex-col items-center justify-between w-full h-full`}
-            >
-              <div className="flex flex-col items-center px-4 pt-8">
-                <img
-                  className="w-full max-w-xs mb-4"
-                  src={slide.imgSrc}
-                  alt={`Slide illustration for: ${slide.title}`}
-                />
-                <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
-                  {slide.title}
-                </h2>
-                <p className="text-center text-base text-gray-500">
-                  {slide.content}
-                </p>
-              </div>
-
-              <div className="w-full px-4 pb-8">
-                {index < slides.length - 1 ? (
-                  <button
-                    className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
-                    onClick={handleNext}
-                  >
-                    Next
-                  </button>
-                ) : (
-                  <Link to="/lets-you-in">
-                    <button className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90">
-                      Get Started
+                  <div className="w-full px-4 pb-8">
+                    <button
+                      className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
+                      onClick={handleNext}
+                    >
+                      {index < slides.length - 1 ? "Next" : "Get Started"}
                     </button>
-                  </Link>
-                )}
-              </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="flex justify-center gap-2 mb-4">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              className={`rounded-full transition-all ${
-                activeSlide === index ? "bg-gray-800 w-8 h-2" : "bg-gray-200 w-2 h-2"
-              }`}
-              onClick={() => {
-                console.log(`[Splash] Dot clicked → setting activeSlide to ${index}`);
-                setActiveSlide(index);
-              }}
-            />
-          ))}
-        </div>
-      </div>
+            <div className="flex justify-center gap-2 mb-4">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  className={`rounded-full transition-all ${
+                    activeSlide === index
+                      ? "bg-gray-800 w-8 h-2"
+                      : "bg-gray-200 w-2 h-2"
+                  }`}
+                  onClick={() => setActiveSlide(index)}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -1,0 +1,2 @@
+import{A as r}from"./index-AnWCcf8t.js";async function n(){const a=await fetch(`${r}/api/payments/cards`,{credentials:"include"});if(!a.ok)throw new Error("Failed to fetch cards");return(await a.json()).cards}async function o(a){const t=await fetch(`${r}/api/payments/cards`,{method:"POST",credentials:"include",headers:{"Content-Type":"application/json"},body:JSON.stringify(a)});if(!t.ok){const e=await t.json().catch(()=>({}));throw new Error(e.error||"Failed to create card")}}export{o as c,n as f};
+//# sourceMappingURL=cards-Cy3an-VF.js.map
