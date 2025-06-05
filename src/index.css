@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-primary     : #375066;
+  --color-white       : #ffffff;
+
+  --background-color  : var(--color-white);
+  --text-color        : #333333;
+}
+
+.dark {
+  --background-color  : #121212;
+  --text-color        : #e0e0e0;
+}
+
+body {
+  @apply bg-[var(--background-color)] text-[var(--text-color)] font-sans;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
