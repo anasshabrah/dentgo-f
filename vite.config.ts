@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  base: "/",
   plugins: [react()],
   build: { sourcemap: true },
   server: {
@@ -11,7 +12,6 @@ export default defineConfig({
         target: process.env.VITE_SERVER_URL,
         changeOrigin: true,
         secure: false,
-        // Strip the leading `/api` before forwarding to the backend URL:
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
