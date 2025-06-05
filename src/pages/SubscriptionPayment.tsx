@@ -1,217 +1,214 @@
+// src/pages/SelectPaymentMethod.tsx
+
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Loader from "../components/ui/Loader";
-import logo from "../assets/images/logo.png";
+import { StripeElements } from "../lib/stripeClient";
 import {
-  Elements as ElementsWrapper,
-  useStripe,
-  PaymentRequestButtonElement,
-} from "@stripe/react-stripe-js";
-import {
-  stripePromise,
   createPaymentRequest,
-  createSubscriptionIntent,
+  createPaymentIntent,
+  PaymentRequestButtonElement,
+  useStripe,
 } from "../lib/stripeClient";
+import { fetchCards } from "../api/cards";
 
-const PaymentRequestSection = () => {
+interface Card {
+  id: number;
+  network: string | null;
+  last4: string;
+  isActive: boolean;
+}
+
+const InnerSelectPaymentMethod: React.FC = () => {
+  const navigate = useNavigate();
   const stripe = useStripe();
-  const navigate = useNavigate();
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
-
-  useEffect(() => {
-    if (!stripe) return;
-    (async () => {
-      try {
-        const pr = await createPaymentRequest({
-          country: "US",
-          currency: "usd",
-          total: {
-            label: "DentGo Plus Subscription",
-            amount: 2500, // $25.00 in cents
-          },
-          requestPayerName: true,
-          requestPayerEmail: true,
-        });
-
-        pr.on("paymentmethod", async (event: any) => {
-          try {
-            const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || "";
-            const paymentMethodId = event.paymentMethod.id as string;
-
-            const { clientSecret } = await createSubscriptionIntent(
-              priceId,
-              paymentMethodId
-            );
-
-            const { error, paymentIntent } = await stripe.confirmCardPayment(
-              clientSecret,
-              { payment_method: paymentMethodId }
-            );
-            if (error || !paymentIntent) {
-              event.complete("fail");
-              console.error("Subscription payment error:", error);
-              return;
-            }
-
-            event.complete("success");
-            navigate("/confirm-payment-pin");
-          } catch (err) {
-            console.error("Error creating subscription:", err);
-            event.complete("fail");
-          }
-        });
-
-        pr.canMakePayment().then((result: any) => {
-          if (result) setPaymentRequest(pr);
-        });
-      } catch (err) {
-        console.error("PaymentRequest init error:", err);
-      }
-    })();
-  }, [stripe, navigate]);
-
-  if (!paymentRequest) return null;
-
-  return (
-    <div className="w-full mb-4">
-      <PaymentRequestButtonElement
-        options={{
-          paymentRequest,
-          style: {
-            paymentRequestButton: {
-              type: "buy",
-              theme: "dark",
-              height: "48px",
-            },
-          },
-        }}
-      />
-    </div>
+  const [loading, setLoading] = useState<boolean>(true);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [fetchError, setFetchError] = useState<string>("");
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
+    null
   );
-};
 
-const SubscriptionPayment = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  const handleProceedToCheckout = () => {
-    navigate("/confirm-payment-pin");
-  };
-
+  // Simulate initial loading state
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  // Initialize Apple/Google Pay
+  useEffect(() => {
+    if (loading || !stripe) return;
+
+    (async () => {
+      try {
+        const pr = await createPaymentRequest({
+          country: "US",
+          currency: "usd",
+          total: { label: "Your Order", amount: 5000 },
+          requestPayerName: true,
+          requestPayerEmail: true,
+        });
+
+        if (await pr.canMakePayment()) {
+          setPaymentRequest(pr);
+        }
+
+        pr.on("paymentmethod", async (event: any) => {
+          try {
+            const clientSecret = await createPaymentIntent(5000);
+            const { error, paymentIntent } = await stripe.confirmCardPayment(
+              clientSecret,
+              { payment_method: event.paymentMethod.id }
+            );
+            if (error || !paymentIntent) {
+              event.complete("fail");
+              console.error("PaymentIntent confirmation error:", error);
+              return;
+            }
+            event.complete("success");
+            navigate("/confirm-payment-pin");
+          } catch (err) {
+            console.error("Error during PaymentRequest flow:", err);
+            event.complete("fail");
+          }
+        });
+      } catch (err) {
+        console.error("PaymentRequest init error:", err);
+      }
+    })();
+  }, [loading, stripe, navigate]);
+
+  // Fetch saved cards after loading completes
+  useEffect(() => {
+    if (loading) return;
+    (async () => {
+      try {
+        const data = await fetchCards();
+        setCards(data);
+      } catch (err) {
+        console.error("Failed to fetch saved cards:", err);
+        setFetchError("Unable to load saved cards.");
+      }
+    })();
+  }, [loading]);
+
+  const handleContinue = () => {
+    navigate("/confirm-payment-pin");
+  };
+
   if (loading) {
-    return <Loader />;
+    return <Loader fullscreen />;
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-      <ElementsWrapper stripe={stripePromise}>
-        <div className="mx-auto max-w-lg px-4">
-          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl flex-1 overflow-y-auto">
-            <div className="flex justify-center mb-4">
-              <img className="w-24 h-auto" src={logo} alt="DentGo logo" />
-            </div>
-            <h2 className="text-center text-xl font-semibold text-gray-800 leading-7 mb-2">
-              DentGo Plus Subscription
-            </h2>
-            <p className="text-center text-sm text-gray-500 mb-4">
-              Subscription Due at 15 Dec 2024
-            </p>
-            <h2 className="text-center text-5xl font-medium text-gray-800 leading-none mb-4">
-              $25.00
-            </h2>
-            <p className="text-center text-sm text-gray-500 mb-4">
-              Choose a card or bank for payout
-            </p>
-
-            <PaymentRequestSection />
-
-            <p className="text-center text-sm text-gray-500 mb-4">
-              Or select a saved payment method
-            </p>
-            <div className="flex items-center justify-between w-full mb-4">
-              <div className="flex w-full items-center gap-2">
-                <span className="border border-gray-200 p-2 rounded w-12 h-8 flex items-center justify-center">
-                  <svg
-                    width="31"
-                    height="19"
-                    viewBox="0 0 31 19"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
-                      fill="#ED0006"
-                    />
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M15.0957 16.4389C17.0557 14.8004 18.2985 12.3624 18.2985 9.63996C18.2985 6.91754 17.0557 4.47955 15.0957 2.84102C16.6878 1.51009 18.753 0.706627 21.0098 0.706627C26.0449 0.706627 30.1267 4.70622 30.1267 9.63996C30.1267 14.5737 26.0449 18.5733 21.0098 18.5733C18.753 18.5733 16.6878 17.7698 15.0957 16.4389Z"
-                      fill="#F9A000"
-                    />
-                  </svg>
-                </span>
-                <div className="pl-4">
-                  <div className="text-gray-800 text-base font-semibold leading-6">
-                    Master Card
-                  </div>
-                  <div className="text-gray-500 text-sm font-medium leading-5">
-                    Card Number **** 7887
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate("/select-payment-method")}
-                className="text-gray-800 text-2xl"
-                aria-label="Choose saved payment method"
-              >
-                <i className="ri-arrow-down-s-line"></i>
-              </button>
-            </div>
-
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-[480px] px-4">
+        <div className="bg-white dark:bg-gray-800 pt-4 px-4 mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto flex flex-col">
+          {/* Apple/Google Pay Button */}
+          {paymentRequest ? (
             <div className="mb-4">
-              <p className="text-sm text-gray-500 mb-2">Promo Code</p>
-              <div>
-                <div className="relative mb-4">
-                  <input
-                    type="number"
-                    id="promo_code"
-                    className="w-full h-16 bg-gray-200 border-2 border-gray-200 rounded-xl px-4 pt-4 text-lg text-gray-800 focus:border-blue outline-none"
-                    autoComplete="off"
-                    required
-                  />
-                  <label
-                    htmlFor="promo_code"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-500 transition-all"
-                  >
-                    Enter Code Here
-                  </label>
-                </div>
-              </div>
+              <PaymentRequestButtonElement options={{ paymentRequest }} />
             </div>
+          ) : (
+            <div className="border-b-2 border-gray-200 dark:border-gray-700 mb-4 px-2 py-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Apple Pay / Google Pay not available. Use HTTPS or localhost and supported browser.
+              </p>
+            </div>
+          )}
 
-            <div className="mt-auto"></div>
+          {/* Error Banner */}
+          {fetchError && (
+            <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
+              {fetchError}
+            </div>
+          )}
+
+          {/* Saved Cards List */}
+          {cards.length > 0 ? (
+            <div className="flex-1 overflow-y-auto">
+              {cards.map((card) => (
+                <div
+                  key={card.id}
+                  className="border-b-2 border-gray-200 dark:border-gray-700 px-0"
+                >
+                  <div className="flex items-center gap-2 py-4 pr-8 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <span className="flex items-center justify-center w-12 h-8 border border-gray-200 dark:border-gray-700 rounded">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="20"
+                        viewBox="0 0 32 20"
+                        fill="none"
+                      >
+                        <rect width="32" height="20" rx="3" fill="#E0E0E0" />
+                        <text
+                          x="16"
+                          y="13"
+                          textAnchor="middle"
+                          fontSize="10"
+                          fill="#333"
+                        >
+                          {card.network}
+                        </text>
+                      </svg>
+                    </span>
+                    <div className="pl-4">
+                      <div className="text-gray-800 dark:text-gray-200 text-base font-bold leading-6">
+                        {card.network}
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
+                        <span
+                          className={
+                            card.isActive
+                              ? "text-blue-800 dark:text-primary"
+                              : "text-red-600"
+                          }
+                        >
+                          {card.isActive ? "Active" : "Inactive"}
+                        </span>{" "}
+                        | Card Number **** {card.last4}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 my-3 text-sm">
+              No saved cards found.
+            </p>
+          )}
+
+          {/* Link a New Card */}
+          <div className="mb-4">
+            <Link
+              to="/add-new-card"
+              className="text-blue-600 dark:text-primary text-base font-medium"
+            >
+              + Link a New Card
+            </Link>
+          </div>
+
+          {/* Continue Button */}
+          <div className="flex items-center justify-center flex-col mt-auto mb-4">
+            <div
+              className="w-full py-4 bg-white dark:bg-gray-700 text-blue-600 dark:text-primary text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600 transition"
+              onClick={handleContinue}
+            >
+              Continue
+            </div>
           </div>
         </div>
-
-        <div className="px-4 fixed bottom-4 inset-x-0">
-          <button
-            type="button"
-            className="w-full bg-blue-800 text-white text-lg font-medium py-4 rounded"
-            onClick={handleProceedToCheckout}
-          >
-            Proceed to Checkout
-          </button>
-        </div>
-      </ElementsWrapper>
+      </div>
     </div>
   );
 };
 
-export default SubscriptionPayment;
+const SelectPaymentMethod: React.FC = () => (
+  <StripeElements>
+    <InnerSelectPaymentMethod />
+  </StripeElements>
+);
+
+export default SelectPaymentMethod;
