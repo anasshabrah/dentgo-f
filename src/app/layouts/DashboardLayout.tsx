@@ -1,4 +1,3 @@
-// src/app/layouts/DashboardLayout.tsx
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { useModal } from "../../context/ModalContext";
@@ -16,21 +15,9 @@ const DashboardLayout: React.FC = () => {
           onClick={() => open(<SideMenu />)}
           className="p-1 rounded hover:bg-primary/80"
         >
-          <svg
-            className="w-6 h-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-        {/* <-- No title here; RootLayout already renders "Dentgo" via <Header /> --> */}
+        <h1 className="text-lg font-medium">Dentgo</h1>
       </div>
 
       {/* Page content */}
@@ -40,5 +27,4 @@ const DashboardLayout: React.FC = () => {
     </>
   );
 };
-
 export default DashboardLayout;
