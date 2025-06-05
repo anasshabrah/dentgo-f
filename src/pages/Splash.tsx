@@ -39,12 +39,9 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
   ];
 
   useEffect(() => {
-    console.log("[Lifecycle] Splash.tsx → Splash mounted");
     const timer = setTimeout(() => {
-      console.log("[Splash] Showing initial splash for 1.5s, then starting slides");
       setShowInitialSplash(false);
     }, 1500);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -52,12 +49,9 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
     if (activeSlide < slides.length - 1) {
       setActiveSlide((prev) => prev + 1);
     } else {
-      console.log("[Splash] Last slide completed → calling onComplete()");
       onComplete();
     }
   };
-
-  console.log(`[Splash] Rendering ${showInitialSplash ? "initial splash" : `slide #${activeSlide}`}`);
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden">
@@ -68,7 +62,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
               <img
                 className="w-48 object-contain"
                 src={dotsPattern}
-                alt="Decorative pattern top"
+                alt=""
+                aria-hidden="true"
               />
             </div>
             <div className="flex flex-col items-center">
@@ -82,7 +77,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
               <img
                 className="w-48 object-contain"
                 src={dotsPatternBottom}
-                alt="Decorative pattern bottom"
+                alt=""
+                aria-hidden="true"
               />
             </div>
           </div>
@@ -102,7 +98,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
                     <img
                       className="w-full max-w-xs mb-4"
                       src={slide.imgSrc}
-                      alt={`Slide illustration for: ${slide.title}`}
+                      alt=""
+                      aria-hidden="true"
                     />
                     <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
                       {slide.title}
@@ -134,6 +131,7 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
                       : "bg-gray-200 w-2 h-2"
                   }`}
                   onClick={() => setActiveSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>

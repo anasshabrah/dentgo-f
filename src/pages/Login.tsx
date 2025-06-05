@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
-import buttonBack from "../assets/images/Button-Back.png";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
@@ -19,17 +18,14 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // 1) Load Google Identity script
   useGoogleIdentity();
 
-  // 2) If already logged in (once initializing ends), redirect immediately
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // 3) Handle credential response from Google One-Tap
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -38,7 +34,6 @@ const Login: React.FC = () => {
         return;
       }
       try {
-        // Send credential to backend, get user & cookies set there
         const user = await loginWithGoogleAPI(credential);
         login(user);
         navigate("/dentgo-gpt-home", { replace: true });
@@ -53,7 +48,6 @@ const Login: React.FC = () => {
     [login, navigate, setError]
   );
 
-  // 4) Initialize Google One-Tap once the script is loaded
   useEffect(() => {
     let retryTimeout: number | null = null;
 
@@ -75,7 +69,6 @@ const Login: React.FC = () => {
         setGoogleReady(true);
         setLoading(false);
       } else {
-        // If still not loaded, retry after a short delay
         retryTimeout = window.setTimeout(tryInitialize, 100);
       }
     };
@@ -86,31 +79,22 @@ const Login: React.FC = () => {
     };
   }, [handleCredentialResponse]);
 
-  // 1a) If we’re waiting for auth to finish, show loader
   if (initializing || loading) {
     return <Loader />;
   }
 
-  // 2a) If already authenticated, redirect
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
-      {/* ===== HEADER ===== */}
-      <div className="flex-none bg-primary relative">
-        <header className="pt-6 px-4 flex items-center">
-          <button onClick={() => navigate(-1)} className="p-0" aria-label="Go Back">
-            <img src={buttonBack} alt="Go Back" className="w-6 h-auto" />
-          </button>
-        </header>
-        <div className="flex flex-col items-center justify-center py-4">
-          <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
-          <h1 className="text-white text-2xl font-semibold mt-3 text-center">
-            DentGo AI
-          </h1>
-        </div>
+      {/* ===== LOGO AND TITLE ===== */}
+      <div className="flex flex-col items-center justify-center bg-primary py-6">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+          DentGo AI
+        </h1>
       </div>
 
       {/* ===== MAIN LOGIN SECTION ===== */}
@@ -174,7 +158,6 @@ const Login: React.FC = () => {
               "
               onClick={async () => {
                 try {
-                  // Apple login will redirect the user to Apple, then back with cookies set
                   loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);

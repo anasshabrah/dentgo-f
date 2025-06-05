@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import buttonBack from "../assets/images/Button-Back.png";
-import logo from "../assets/images/logo.png";
 import Loader from "../components/ui/Loader";
+import logo from "../assets/images/logo.png";
 import {
   Elements as ElementsWrapper,
   useStripe,
@@ -13,16 +12,12 @@ import {
   createPaymentRequest,
   createSubscriptionIntent,
 } from "../lib/stripeClient";
-import { API_BASE } from "../config";
 
 const PaymentRequestSection = () => {
   const stripe = useStripe();
   const navigate = useNavigate();
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
-    null
-  );
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
 
-  // 1) build PaymentRequest
   useEffect(() => {
     if (!stripe) return;
     (async () => {
@@ -39,19 +34,15 @@ const PaymentRequestSection = () => {
         });
 
         pr.on("paymentmethod", async (event: any) => {
-          // 2) when user taps Apple/Google Pay, attach that paymentMethod to a Subscription
           try {
-            // create a new Subscription on the backend
             const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || "";
             const paymentMethodId = event.paymentMethod.id as string;
 
-            // ask backend to create subscription Intent
             const { clientSecret } = await createSubscriptionIntent(
               priceId,
               paymentMethodId
             );
 
-            // confirm via Stripe
             const { error, paymentIntent } = await stripe.confirmCardPayment(
               clientSecret,
               { payment_method: paymentMethodId }
@@ -63,7 +54,6 @@ const PaymentRequestSection = () => {
             }
 
             event.complete("success");
-            // redirect to PIN / confirmation flow
             navigate("/confirm-payment-pin");
           } catch (err) {
             console.error("Error creating subscription:", err);
@@ -104,12 +94,7 @@ const SubscriptionPayment = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
-
   const handleProceedToCheckout = () => {
-    // as a fallback, navigate to confirm-pin (in case user wants to pick a saved card)
     navigate("/confirm-payment-pin");
   };
 
@@ -125,108 +110,93 @@ const SubscriptionPayment = () => {
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
       <ElementsWrapper stripe={stripePromise}>
-        <div className="bg-blue-800 pt-4 pb-8">
-          <div className="mx-auto max-w-lg px-4">
-            <div className="flex items-center space-x-3 px-3 py-2">
-              <button
-                type="button"
-                onClick={handleBackClick}
-                className="p-0"
-                aria-label="Go Back"
-              >
-                <img className="w-6 h-6" src={buttonBack} alt="Go Back" />
-              </button>
-              <h1 className="text-white text-lg font-medium">
-                DentGo Plus Subscription
-              </h1>
+        <div className="mx-auto max-w-lg px-4">
+          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl flex-1 overflow-y-auto">
+            <div className="flex justify-center mb-4">
+              <img className="w-24 h-auto" src={logo} alt="DentGo logo" />
             </div>
-            <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl flex-1 overflow-y-auto">
-              <div className="flex justify-center mb-4">
-                <img className="w-24 h-auto" src={logo} alt="logo" />
-              </div>
-              <h2 className="text-center text-xl font-semibold text-gray-800 leading-7 mb-2">
-                DentGo Plus Subscription
-              </h2>
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Subscription Due at 15 Dec 2024
-              </p>
-              <h2 className="text-center text-5xl font-medium text-gray-800 leading-none mb-4">
-                $25.00
-              </h2>
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Choose a card or bank for payout
-              </p>
+            <h2 className="text-center text-xl font-semibold text-gray-800 leading-7 mb-2">
+              DentGo Plus Subscription
+            </h2>
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Subscription Due at 15 Dec 2024
+            </p>
+            <h2 className="text-center text-5xl font-medium text-gray-800 leading-none mb-4">
+              $25.00
+            </h2>
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Choose a card or bank for payout
+            </p>
 
-              <PaymentRequestSection />
+            <PaymentRequestSection />
 
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Or select a saved payment method
-              </p>
-              <div className="flex items-center justify-between w-full mb-4">
-                <div className="flex w-full items-center gap-2">
-                  <span className="border border-gray-200 p-2 rounded w-12 h-8 flex items-center justify-center">
-                    <svg
-                      width="31"
-                      height="19"
-                      viewBox="0 0 31 19"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
-                        fill="#ED0006"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M15.0957 16.4389C17.0557 14.8004 18.2985 12.3624 18.2985 9.63996C18.2985 6.91754 17.0557 4.47955 15.0957 2.84102C16.6878 1.51009 18.753 0.706627 21.0098 0.706627C26.0449 0.706627 30.1267 4.70622 30.1267 9.63996C30.1267 14.5737 26.0449 18.5733 21.0098 18.5733C18.753 18.5733 16.6878 17.7698 15.0957 16.4389Z"
-                        fill="#F9A000"
-                      />
-                    </svg>
-                  </span>
-                  <div className="pl-4">
-                    <div className="text-gray-800 text-base font-semibold leading-6">
-                      Master Card
-                    </div>
-                    <div className="text-gray-500 text-sm font-medium leading-5">
-                      Card Number **** 7887
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate("/select-payment-method")}
-                  className="text-gray-800 text-2xl"
-                  aria-label="Choose saved payment method"
-                >
-                  <i className="ri-arrow-down-s-line"></i>
-                </button>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Promo Code</p>
-                <div>
-                  <div className="relative mb-4">
-                    <input
-                      type="number"
-                      id="promo_code"
-                      className="w-full h-16 bg-gray-200 border-2 border-gray-200 rounded-xl px-4 pt-4 text-lg text-gray-800 focus:border-blue outline-none"
-                      autoComplete="off"
-                      required
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Or select a saved payment method
+            </p>
+            <div className="flex items-center justify-between w-full mb-4">
+              <div className="flex w-full items-center gap-2">
+                <span className="border border-gray-200 p-2 rounded w-12 h-8 flex items-center justify-center">
+                  <svg
+                    width="31"
+                    height="19"
+                    viewBox="0 0 31 19"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
+                      fill="#ED0006"
                     />
-                    <label
-                      htmlFor="promo_code"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-500 transition-all"
-                    >
-                      Enter Code Here
-                    </label>
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M15.0957 16.4389C17.0557 14.8004 18.2985 12.3624 18.2985 9.63996C18.2985 6.91754 17.0557 4.47955 15.0957 2.84102C16.6878 1.51009 18.753 0.706627 21.0098 0.706627C26.0449 0.706627 30.1267 4.70622 30.1267 9.63996C30.1267 14.5737 26.0449 18.5733 21.0098 18.5733C18.753 18.5733 16.6878 17.7698 15.0957 16.4389Z"
+                      fill="#F9A000"
+                    />
+                  </svg>
+                </span>
+                <div className="pl-4">
+                  <div className="text-gray-800 text-base font-semibold leading-6">
+                    Master Card
+                  </div>
+                  <div className="text-gray-500 text-sm font-medium leading-5">
+                    Card Number **** 7887
                   </div>
                 </div>
               </div>
-
-              <div className="mt-auto"></div>
+              <button
+                onClick={() => navigate("/select-payment-method")}
+                className="text-gray-800 text-2xl"
+                aria-label="Choose saved payment method"
+              >
+                <i className="ri-arrow-down-s-line"></i>
+              </button>
             </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-2">Promo Code</p>
+              <div>
+                <div className="relative mb-4">
+                  <input
+                    type="number"
+                    id="promo_code"
+                    className="w-full h-16 bg-gray-200 border-2 border-gray-200 rounded-xl px-4 pt-4 text-lg text-gray-800 focus:border-blue outline-none"
+                    autoComplete="off"
+                    required
+                  />
+                  <label
+                    htmlFor="promo_code"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-500 transition-all"
+                  >
+                    Enter Code Here
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto"></div>
           </div>
         </div>
 

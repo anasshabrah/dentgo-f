@@ -16,26 +16,28 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-blue-800 p-4 flex justify-between">
-        <div className="text-white font-bold">Dashboard</div>
-        <div className="flex items-center">
-          {user && (
-            <>
-              <span className="text-white mr-4">Hello, {user.name}</span>
-              <button
-                onClick={() => logout()}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
-      <main className="p-4">
-        <h1 className="text-2xl font-semibold mb-4">Welcome to Your Dashboard</h1>
-        {/* Link to PaymentMethod removed to prevent blank screen issue */}
-      </main>
+      <div className="mx-auto max-w-lg px-4">
+        <main className="p-4">
+          <h1 className="text-2xl font-semibold mb-4">
+            Welcome to Your Dashboard
+          </h1>
+          <div className="flex items-center justify-between">
+            {user && (
+              <>
+                <span className="text-gray-800 dark:text-gray-200">
+                  Hello, {user.name}
+                </span>
+                <button
+                  onClick={() => logout()}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

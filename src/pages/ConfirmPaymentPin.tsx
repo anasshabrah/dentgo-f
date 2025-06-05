@@ -26,20 +26,26 @@ const ConfirmPaymentPin: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+        className="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm"
       >
-        <h2 className="text-xl font-semibold mb-4">Enter Payment PIN</h2>
-        {error && <div className="text-red-600 mb-2">{error}</div>}
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          Enter Payment PIN
+        </h2>
+        {error && (
+          <div className="text-red-600 bg-red-100 border border-red-300 p-2 rounded mb-4">
+            {error}
+          </div>
+        )}
         <input
           type="password"
           placeholder="PIN"
           value={pin}
           onChange={handleChange}
           maxLength={4}
-          className="w-full border border-gray-300 p-2 rounded mb-4"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 rounded mb-4 text-gray-800 dark:text-gray-200"
           required
         />
         <button

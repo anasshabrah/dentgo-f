@@ -557,23 +557,20 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { useModal } from "../../context/ModalContext";
 import SideMenu from "../../components/layout/SideMenu";
+import AppHeader from "../../components/layout/AppHeader";
 
 const DashboardLayout: React.FC = () => {
   const { open } = useModal();
 
   return (
     <>
-      {/* Top bar with hamburger */}
-      <div className="bg-primary text-white p-4 flex items-center gap-3">
-        <button
-          aria-label="Open menu"
-          onClick={() => open(<SideMenu />)}
-          className="p-1 rounded hover:bg-primary/80"
-        >
-          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-        </button>
-        <h1 className="text-lg font-medium">Dentgo</h1>
-      </div>
+      {/* Shared header with burger and notifications */}
+      <AppHeader
+        title="Dentgo"
+        showMenu
+        showNotifications
+        onMenuClick={() => open(<SideMenu />)}
+      />
 
       {/* Page content */}
       <div className="mx-auto max-w-lg px-4 pb-8">
@@ -582,18 +579,34 @@ const DashboardLayout: React.FC = () => {
     </>
   );
 };
+
 export default DashboardLayout;
 
 
 --- C:\Users\hanos\cb\frontend\src\app\layouts\PublicLayout.tsx ---
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import AppHeader from "../../components/layout/AppHeader";
 
 const PublicLayout: React.FC = () => {
+  // Crude path-to-title map – expand as needed
+  const { pathname } = useLocation();
+  const title = ({
+    "/login": "Login",
+    "/": "Dentgo",
+  } as Record<string, string>)[pathname] ?? "Dentgo";
+
   return (
-    <main>
-      <Outlet />
-    </main>
+    <>
+      {/* Shared header with back button */}
+      <AppHeader
+        title={title}
+        showBack={pathname !== "/"}
+      />
+      <main>
+        <Outlet />
+      </main>
+    </>
   );
 };
 
@@ -603,12 +616,10 @@ export default PublicLayout;
 --- C:\Users\hanos\cb\frontend\src\app\layouts\RootLayout.tsx ---
 import React from "react";
 import { Outlet } from "react-router-dom";
-import Header from "../../components/layout/Header";
 import GlobalModals from "../../components/modal/GlobalModals";
 
 const RootLayout: React.FC = () => (
   <div className="flex flex-col min-h-screen bg-gray-100 font-sans">
-    <Header />
     <main className="flex-1">
       <Outlet />
     </main>
@@ -752,43 +763,83 @@ const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) =
 export default RequireAuth;
 
 
---- C:\Users\hanos\cb\frontend\src\components\layout\Header.tsx ---
+--- C:\Users\hanos\cb\frontend\src\components\layout\AppHeader.tsx ---
+// src/components/layout/AppHeader.tsx
 import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import buttonBack from "../../assets/images/Button-Back.png";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../../context/ModalContext";
+import SideMenu from "./SideMenu";
 
-interface HeaderProps {
-  title?: string;
+interface Props {
+  title: string;
+  /** Hide burger on public pages that don’t have a menu */
+  showMenu?: boolean;
+  /** Show back button when the router can go back */
   showBack?: boolean;
+  /** Show bell icon when user is authenticated */
+  showNotifications?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, showBack = true }) => {
+const AppHeader: React.FC<Props> = ({
+  title,
+  showMenu = false,
+  showBack = false,
+  showNotifications = false,
+}) => {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-
-  const defaultTitle = pathname.replace("/", "") || "Dentgo";
+  const { open } = useModal();
 
   return (
-    <header className="bg-primary pt-4 pb-4 shadow">
-      <div className="mx-auto max-w-lg px-4 flex items-center gap-3">
-        {showBack && (
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Go back"
-            className="p-0"
-          >
-            <img src={buttonBack} alt="Back" className="h-6 w-auto" />
-          </button>
-        )}
-        <h1 className="text-white text-lg font-medium flex-1 truncate">
-          {title ?? defaultTitle}
-        </h1>
-      </div>
+    <header className="bg-primary text-white p-4 flex items-center gap-3">
+      {showBack && (
+        <button
+          aria-label="Go back"
+          onClick={() => navigate(-1)}
+          className="p-1 rounded hover:bg-primary/80"
+        >
+          {/* ← icon */}
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
+
+      {showMenu && (
+        <button
+          aria-label="Open menu"
+          onClick={() => open(<SideMenu />)}
+          className="p-1 rounded hover:bg-primary/80"
+        >
+          {/* ☰ icon */}
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      )}
+
+      <h1 className="text-lg font-medium flex-1">{title}</h1>
+
+      {showNotifications && (
+        <button
+          aria-label="Notifications"
+          onClick={() => navigate("/notification")}
+          className="p-1 rounded hover:bg-primary/80 relative"
+        >
+          {/* 🛎 icon */}
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+              d="M10 5a2 2 0 014 0c4 1 6 4 6 8v3l2 2H4l2-2v-3c0-4 2-7 6-8zm1 13h2a2 2 0 11-4 0" />
+          </svg>
+          {/* red dot – wire up later */}
+          {/* <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-red-600" /> */}
+        </button>
+      )}
     </header>
   );
 };
 
-export default Header;
+export default AppHeader;
+
 
 --- C:\Users\hanos\cb\frontend\src\components\layout\SideMenu.tsx ---
 import React, { Fragment } from "react";
@@ -1280,8 +1331,7 @@ export default paymentRoutes;
 --- C:\Users\hanos\cb\frontend\src\pages\AddNewCard.tsx ---
 import React, { useState, useEffect, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { createCard } from "../api/cards"; // existing helper that POSTs to /api/cards
-import buttonBack from "../assets/images/Button-Back.png";
+import { createCard } from "../api/cards";
 import Loader from "../components/ui/Loader";
 import {
   Elements,
@@ -1308,7 +1358,6 @@ const AddNewCardForm: React.FC = () => {
     return () => clearTimeout(t);
   }, []);
 
-  const handleBack = () => navigate(-1);
   const handleCardNameChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setCardName(e.target.value);
 
@@ -1385,7 +1434,7 @@ const AddNewCardForm: React.FC = () => {
         nickName: cardName || null,
       });
 
-      // 5) Redirect to payment‐methods list
+      // 5) Redirect to payment-methods list
       navigate("/payment-method");
     } catch (err: any) {
       console.error("AddNewCard error:", err);
@@ -1398,93 +1447,80 @@ const AddNewCardForm: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button onClick={handleBack} className="mr-3 p-0" aria-label="Go back">
-              <img
-                className="inline-block w-6 h-auto"
-                src={buttonBack}
-                alt="Go back"
-              />
-            </button>
-            <h1 className="text-white text-lg font-medium">Add New Card</h1>
+      <div className="mx-auto max-w-lg px-4">
+        <form
+          className="bg-blue-800 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto"
+          onSubmit={handleSubmit}
+        >
+          <div className="relative mb-3">
+            <input
+              type="text"
+              id="cardName"
+              autoComplete="off"
+              required
+              value={cardName}
+              onChange={handleCardNameChange}
+              placeholder=" "
+              className="peer w-full border border-gray-200 dark:border-gray-700 rounded px-2 py-3 text-base font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800"
+            />
+            <label
+              htmlFor="cardName"
+              className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-xs peer-focus:text-gray-800 dark:peer-focus:text-gray-200 peer-valid:-top-2 peer-valid:left-2 peer-valid:text-xs peer-valid:text-gray-800 dark:peer-valid:text-gray-200 bg-white dark:bg-gray-800 px-1"
+            >
+              Card Name
+            </label>
           </div>
 
-          <form
-            className="bg-blue-800 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto"
-            onSubmit={handleSubmit}
-          >
-            <div className="relative mb-3">
-              <input
-                type="text"
-                id="cardName"
-                autoComplete="off"
-                required
-                value={cardName}
-                onChange={handleCardNameChange}
-                placeholder=" "
-                className="peer w-full border border-gray-200 dark:border-gray-700 rounded px-2 py-3 text-base font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800"
-              />
-              <label
-                htmlFor="cardName"
-                className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-xs peer-focus:text-gray-800 dark:peer-focus:text-gray-200 peer-valid:-top-2 peer-valid:left-2 peer-valid:text-xs peer-valid:text-gray-800 dark:peer-valid:text-gray-200 bg-white dark:bg-gray-800 px-1"
-              >
-                Card Name
-              </label>
-            </div>
-
-            <div className="mb-3">
-              <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 pt-5 text-lg text-gray-800 dark:text-gray-200">
-                <CardElement
-                  id="card-element"
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: "18px",
-                        color: "#374151",
-                        fontFamily: "'Satoshi', sans-serif",
-                        "::placeholder": { color: "#6B7280" },
-                      },
-                      invalid: { color: "#FF484D" },
+          <div className="mb-3">
+            <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 pt-5 text-lg text-gray-800 dark:text-gray-200">
+              <CardElement
+                id="card-element"
+                options={{
+                  style: {
+                    base: {
+                      fontSize: "18px",
+                      color: "#374151",
+                      fontFamily: "'Satoshi', sans-serif",
+                      "::placeholder": { color: "#6B7280" },
                     },
-                    hidePostalCode: true,
-                  }}
-                />
-              </div>
+                    invalid: { color: "#FF484D" },
+                  },
+                  hidePostalCode: true,
+                }}
+              />
             </div>
+          </div>
 
-            {error && (
-              <div
-                className="text-sm p-2 border border-red-600 rounded bg-red-100 mb-3 text-red-600"
-                role="alert"
-                aria-live="assertive"
-              >
-                {error}
-              </div>
-            )}
-
-            <div className="flex flex-col items-center justify-center">
-              <button
-                type="submit"
-                className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue text-lg font-medium rounded-xl py-4 text-center disabled:opacity-50"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <span
-                      className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
-                      aria-hidden="true"
-                    />
-                    Adding…
-                  </>
-                ) : (
-                  "Add My Card"
-                )}
-              </button>
+          {error && (
+            <div
+              className="text-sm p-2 border border-red-600 rounded bg-red-100 mb-3 text-red-600"
+              role="alert"
+              aria-live="assertive"
+            >
+              {error}
             </div>
-          </form>
-        </div>
+          )}
+
+          <div className="flex flex-col items-center justify-center">
+            <button
+              type="submit"
+              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue text-lg font-medium rounded-xl py-4 text-center disabled:opacity-50"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span
+                    className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
+                    aria-hidden="true"
+                  />
+                  Adding…
+                </>
+              ) : (
+                "Add My Card"
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -1501,17 +1537,15 @@ export default AddNewCard;
 
 --- C:\Users\hanos\cb\frontend\src\pages\Alert.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
 import alertImg from "../assets/images/alert-img.png";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Alert = () => {
+const Alert: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  const handleBackClick = () => navigate(-1);
-  const goToLetYouIn = () => navigate("/lets-you-in");
+  const goToLogin = () => navigate("/login");
   const goToHome = () => navigate("/dentgo-gpt-home");
 
   useEffect(() => {
@@ -1523,45 +1557,33 @@ const Alert = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
-      <div className="bg-blue-700 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button onClick={handleBackClick} className="mr-3">
-              <img
-                className="inline-block w-6 h-auto"
-                src={buttonBack}
-                alt="Go back"
-              />
-            </button>
-            <h1 className="text-white text-lg font-medium">Alert</h1>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto">
+          <div className="flex items-center justify-center">
+            <img className="max-w-full pb-4" src={alertImg} alt="Alert" />
           </div>
-          <div className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto">
-            <div className="flex items-center justify-center">
-              <img className="max-w-full pb-4" src={alertImg} alt="Alert" />
-            </div>
-            <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
-              Sorry! Your Order Has Failed!
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-center text-lg leading-6 pb-5 my-4">
-              Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
-            </p>
+          <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
+            Sorry! Your Order Has Failed!
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center text-lg leading-6 pb-5 my-4">
+            Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
+          </p>
 
-            <button
-              onClick={goToLetYouIn}
-              className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10"
-            >
-              <Link to="/lets-you-in" className="text-blue-700 dark:text-primary">
-                Try Again
-              </Link>
-            </button>
+          <button
+            onClick={goToLogin}
+            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10"
+          >
+            <Link to="/login" className="text-blue-700 dark:text-primary">
+              Try Again
+            </Link>
+          </button>
 
-            <button
-              onClick={goToHome}
-              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10"
-            >
-              <Link to="/dentgo-gpt-home">Go to Home</Link>
-            </button>
-          </div>
+          <button
+            onClick={goToHome}
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10"
+          >
+            <Link to="/dentgo-gpt-home">Go to Home</Link>
+          </button>
         </div>
       </div>
     </div>
@@ -1574,7 +1596,6 @@ export default Alert;
 --- C:\Users\hanos\cb\frontend\src\pages\BankCards.tsx ---
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import buttonBack from "../assets/images/Button-Back.png";
 import Loader from "../components/ui/Loader";
 import { fetchCards } from "../api/cards";
 
@@ -1590,8 +1611,6 @@ const BankCards: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [cards, setCards] = useState<Card[]>([]);
   const [fetchError, setFetchError] = useState<string>("");
-
-  const handleBackClick = () => navigate(-1);
 
   useEffect(() => {
     async function loadCards() {
@@ -1612,60 +1631,52 @@ const BankCards: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-700 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
-              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="text-white text-lg font-medium">Banks &amp; Cards</h1>
-          </div>
-          <div className="bg-primary pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            {fetchError && (
-              <div className="text-sm p-2 border border-red-400 rounded bg-red-100 mb-3 text-red-600">
-                {fetchError}
-              </div>
-            )}
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-primary pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          {fetchError && (
+            <div className="text-sm p-2 border border-red-400 rounded bg-red-100 mb-3 text-red-600">
+              {fetchError}
+            </div>
+          )}
 
-            {cards.length > 0 ? (
-              cards.map((card) => (
-                <Link to="/add-new-card" key={card.id}>
-                  <div className="border-b-2 border-gray-200 dark:border-gray-700 px-0">
-                    <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
-                      <span className="w-8 h-8 flex items-center justify-center">
-                        <svg width="32" height="32" className="text-blue">
-                          <circle cx="16" cy="16" r="16" fill="currentColor" />
-                        </svg>
-                      </span>
-                      <div className="pl-4">
-                        <div className="text-gray-800 dark:text-gray-200 text-base font-semibold leading-6">
-                          {card.network || "Unknown Network"}
-                        </div>
-                        <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
-                          <span className={card.isActive ? "text-blue-700" : "text-red-600"}>
-                            {card.isActive ? "Active" : "Inactive"}
-                          </span>{" "}
-                          | Card Number **** {card.last4}
-                        </div>
+          {cards.length > 0 ? (
+            cards.map((card) => (
+              <Link to="/add-new-card" key={card.id}>
+                <div className="border-b-2 border-gray-200 dark:border-gray-700 px-0">
+                  <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
+                    <span className="w-8 h-8 flex items-center justify-center">
+                      <svg width="32" height="32" className="text-blue">
+                        <circle cx="16" cy="16" r="16" fill="currentColor" />
+                      </svg>
+                    </span>
+                    <div className="pl-4">
+                      <div className="text-gray-800 dark:text-gray-200 text-base font-semibold leading-6">
+                        {card.network || "Unknown Network"}
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
+                        <span className={card.isActive ? "text-blue-700" : "text-red-600"}>
+                          {card.isActive ? "Active" : "Inactive"}
+                        </span>{" "}
+                        | Card Number **** {card.last4}
                       </div>
                     </div>
                   </div>
-                </Link>
-              ))
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 my-3 text-sm">
-                No saved cards found.
-              </p>
-            )}
-
-            <div className="flex flex-col items-center justify-center mt-auto">
-              <Link
-                to="/add-new-card"
-                className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-primary text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-200 dark:hover:bg-gray-600"
-              >
-                + Link a New Card
+                </div>
               </Link>
-            </div>
+            ))
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 my-3 text-sm">
+              No saved cards found.
+            </p>
+          )}
+
+          <div className="flex flex-col items-center justify-center mt-auto">
+            <Link
+              to="/add-new-card"
+              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue-700 dark:text-primary text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-200 dark:hover:bg-gray-600"
+            >
+              + Link a New Card
+            </Link>
           </div>
         </div>
       </div>
@@ -1678,17 +1689,12 @@ export default BankCards;
 
 --- C:\Users\hanos\cb\frontend\src\pages\CancelSubscription.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const CancelSubscription = () => {
+const CancelSubscription: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -1699,116 +1705,106 @@ const CancelSubscription = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
-              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="text-white text-lg font-medium">
-              Dentgo GPT Plus Subscription
-            </h1>
-          </div>
-          <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            <h2 className="text-white text-2xl font-semibold mb-6">
-              Dentgo GPT Plus
-            </h2>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          <h2 className="text-white text-2xl font-semibold mb-6">
+            Dentgo GPT Plus
+          </h2>
 
-            <div className="flex items-start gap-3 mb-6">
-              <svg
-                className="w-6 h-6 text-red"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 30 30"
-                fill="none"
-              >
-                <path
-                  d="M16.25 3.75V12.5H23.75L13.75 26.25V17.5H6.25L16.25 3.75Z"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div>
-                <h3 className="text-white text-base font-semibold">
-                  Premium Features
-                </h3>
-                <p className="text-gray-300 text-sm">
-                  Plus subscribers have access to Dentgo GPT Pro and our latest
-                  beta features.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 mb-6">
-              <svg
-                className="w-6 h-6 text-red"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 30 30"
-                fill="none"
-              >
-                <path
-                  d="M15 15C17.5 11.3 15 6.25 13.75 5C13.75 8.7975 11.5337 10.9263 10 12.5C8.4675 14.075 7.5 16.55 7.5 18.75C7.5 20.7391 8.29018 22.6468 9.6967 24.0533C11.1032 25.4598 13.0109 26.25 15 26.25C16.9891 26.25 18.8968 25.4598 20.3033 24.0533C21.7098 22.6468 22.5 20.7391 22.5 18.75C22.5 16.835 21.18 13.825 20 12.5C17.7675 16.25 16.5112 16.25 15 15Z"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div>
-                <h3 className="text-white text-base font-semibold">
-                  Priority Access
-                </h3>
-                <p className="text-gray-300 text-sm">
-                  You’ll be able to use Dentgo GPT even when demand is high.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 mb-6">
-              <svg
-                className="w-6 h-6 text-red"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 30 30"
-                fill="none"
-              >
-                <path
-                  d="M7.04501 24.205C5.47168 22.6317 4.40023 20.6271 3.96616 18.4448C3.53209 16.2626 3.75488 14.0006 4.60637 11.9449C5.45786 9.88924 6.8998 8.13224 8.74985 6.89608C10.5999 5.65992 12.775 5.00012 15 5.00012C17.225 5.00012 19.4001 5.65992 21.2502 6.89608C23.1002 8.13224 24.5421 9.88924 25.3936 11.9449C26.2451 14.0006 26.4679 16.2626 26.0338 18.4448C25.5998 20.6271 24.5283 22.6317 22.955 24.205"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M20 11.25L15 16.25"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div>
-                <h3 className="text-white text-base font-semibold">
-                  Ultra Fast
-                </h3>
-                <p className="text-gray-300 text-sm">
-                  Enjoy even faster response speeds when using Dentgo GPT Pro.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-auto flex flex-col items-center">
-              <p className="text-gray-300 text-sm mb-4 text-center">
-                Auto-renews for $25/month until canceled. Due date is 15 Dec
-                2024
+          <div className="flex items-start gap-3 mb-6">
+            <svg
+              className="w-6 h-6 text-red"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              fill="none"
+            >
+              <path
+                d="M16.25 3.75V12.5H23.75L13.75 26.25V17.5H6.25L16.25 3.75Z"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div>
+              <h3 className="text-white text-base font-semibold">
+                Premium Features
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Plus subscribers have access to Dentgo GPT Pro and our latest
+                beta features.
               </p>
-              <Link
-                to="/lets-you-in"
-                className="w-full max-w-sm bg-white text-blue text-lg font-medium rounded-xl py-4 text-center hover:bg-gray-100"
-              >
-                Cancel My Subscription
-              </Link>
             </div>
+          </div>
+
+          <div className="flex items-start gap-3 mb-6">
+            <svg
+              className="w-6 h-6 text-red"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              fill="none"
+            >
+              <path
+                d="M15 15C17.5 11.3 15 6.25 13.75 5C13.75 8.7975 11.5337 10.9263 10 12.5C8.4675 14.075 7.5 16.55 7.5 18.75C7.5 20.7391 8.29018 22.6468 9.6967 24.0533C11.1032 25.4598 13.0109 26.25 15 26.25C16.9891 26.25 18.8968 25.4598 20.3033 24.0533C21.7098 22.6468 22.5 20.7391 22.5 18.75C22.5 16.835 21.18 13.825 20 12.5C17.7675 16.25 16.5112 16.25 15 15Z"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div>
+              <h3 className="text-white text-base font-semibold">
+                Priority Access
+              </h3>
+              <p className="text-gray-300 text-sm">
+                You’ll be able to use Dentgo GPT even when demand is high.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 mb-6">
+            <svg
+              className="w-6 h-6 text-red"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              fill="none"
+            >
+              <path
+                d="M7.04501 24.205C5.47168 22.6317 4.40023 20.6271 3.96616 18.4448C3.53209 16.2626 3.75488 14.0006 4.60637 11.9449C5.45786 9.88924 6.8998 8.13224 8.74985 6.89608C10.5999 5.65992 12.775 5.00012 15 5.00012C17.225 5.00012 19.4001 5.65992 21.2502 6.89608C23.1002 8.13224 24.5421 9.88924 25.3936 11.9449C26.2451 14.0006 26.4679 16.2626 26.0338 18.4448C25.5998 20.6271 24.5283 22.6317 22.955 24.205"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M20 11.25L15 16.25"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div>
+              <h3 className="text-white text-base font-semibold">
+                Ultra Fast
+              </h3>
+              <p className="text-gray-300 text-sm">
+                Enjoy even faster response speeds when using Dentgo GPT Pro.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-auto flex flex-col items-center">
+            <p className="text-gray-300 text-sm mb-4 text-center">
+              Auto-renews for $25/month until canceled. Due date is 15 Dec
+              2024
+            </p>
+            <Link
+              to="/login"
+              className="w-full max-w-sm bg-white text-blue text-lg font-medium rounded-xl py-4 text-center hover:bg-gray-100"
+            >
+              Cancel My Subscription
+            </Link>
           </div>
         </div>
       </div>
@@ -1821,18 +1817,12 @@ export default CancelSubscription;
 
 --- C:\Users\hanos\cb\frontend\src\pages\Confirmation.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
 import confirmationImg from "../assets/images/confirmation-img.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Confirmation = () => {
-  const navigate = useNavigate();
+const Confirmation: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -1843,27 +1833,19 @@ const Confirmation = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-600 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
-              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="text-white text-lg font-medium">Confirmation</h1>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          <div className="flex items-center justify-center">
+            <img className="max-w-full pb-4" src={confirmationImg} alt="Confirmation" />
           </div>
-          <div className="bg-blue-700 pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            <div className="flex items-center justify-center">
-              <img className="max-w-full pb-4" src={confirmationImg} alt="Confirmation" />
-            </div>
-            <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
-              Thank You For Your Subscriptions!
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 my-4">
-              Sagittis sit ipsum tellus vitae dui sed. Elementum auctor magna et a montes.
-            </p>
-            <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 text-blue-600 text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-700 cursor-pointer">
-              <Link to="/alert">Go To Home</Link>
-            </div>
+          <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
+            Thank You For Your Subscriptions!
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 my-4">
+            Sagittis sit ipsum tellus vitae dui sed. Elementum auctor magna et a montes.
+          </p>
+          <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 text-blue-600 text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-700 cursor-pointer">
+            <Link to="/alert">Go To Home</Link>
           </div>
         </div>
       </div>
@@ -1903,20 +1885,26 @@ const ConfirmPaymentPin: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+        className="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm"
       >
-        <h2 className="text-xl font-semibold mb-4">Enter Payment PIN</h2>
-        {error && <div className="text-red-600 mb-2">{error}</div>}
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          Enter Payment PIN
+        </h2>
+        {error && (
+          <div className="text-red-600 bg-red-100 border border-red-300 p-2 rounded mb-4">
+            {error}
+          </div>
+        )}
         <input
           type="password"
           placeholder="PIN"
           value={pin}
           onChange={handleChange}
           maxLength={4}
-          className="w-full border border-gray-300 p-2 rounded mb-4"
+          className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-2 rounded mb-4 text-gray-800 dark:text-gray-200"
           required
         />
         <button
@@ -1936,18 +1924,11 @@ export default ConfirmPaymentPin;
 
 --- C:\Users\hanos\cb\frontend\src\pages\ContactUs.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
 import contactUsImg from "../assets/images/contact-us-img.png";
-import { Link, useNavigate } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import { Loader } from "../components/ui/Loader";
 
-const ContactUs = () => {
-  const navigate = useNavigate();
+const ContactUs: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -1960,134 +1941,122 @@ const ContactUs = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-600 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="pt-2 flex items-center px-3">
-            <button
-              onClick={handleBackClick}
-              className="mr-3 p-0"
-              aria-label="Go back"
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          <h2 className="text-gray-900 dark:text-gray-100 text-center text-2xl font-semibold leading-9 mb-2">
+            Contact Us
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 mb-6">
+            If you face any trouble for item ordering feel free to contact us.
+          </p>
+
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <g>
+                  <path
+                    d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M17 9L13.87 11.5C12.84 12.32 11.15 12.32 10.12 11.5L7 9"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </svg>
+            </div>
+            <a
+              href="mailto:cs@dentgo.ai"
+              className="text-gray-900 dark:text-gray-100 text-lg underline"
             >
-              <img className="w-6 h-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="text-white text-lg font-medium">Contact Us</h1>
+              cs@dentgo.ai
+            </a>
           </div>
-          <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            <h2 className="text-gray-900 dark:text-gray-100 text-center text-2xl font-semibold leading-9 mb-2">
-              Contact Us
+
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <g>
+                  <path
+                    d="M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 9.61305 20.0518 7.32387 18.364 5.63604C16.6761 3.94821 14.3869 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12Z"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.60156 9H20.4016"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M3.60156 15H20.4016"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M11.4997 3C9.81501 5.69961 8.92188 8.81787 8.92188 12C8.92188 15.1821 9.81501 18.3004 11.4997 21"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12.5 3C14.1847 5.69961 15.0778 8.81787 15.0778 12C15.0778 15.1821 14.1847 18.3004 12.5 21"
+                    stroke="#0078D7"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </g>
+              </svg>
+            </div>
+            <a
+              href="https://dentgo.ai"
+              className="text-gray-900 dark:text-gray-100 text-lg underline"
+            >
+              dentgo.ai
+            </a>
+          </div>
+
+          <div className="mt-6 w-full">
+            <h2 className="text-gray-900 dark:text-gray-100 text-xl font-semibold mb-2">
+              About Us
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 mb-6">
-              If you face any trouble for item ordering feel free to contact us.
+            <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
+              DentGo is your intelligent dental assistant — designed to save you time and enhance patient care. It
+              helps you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
             </p>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-shrink-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <g>
-                    <path
-                      d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M17 9L13.87 11.5C12.84 12.32 11.15 12.32 10.12 11.5L7 9"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </svg>
-              </div>
-              <a
-                href="mailto:cs@dentgo.ai"
-                className="text-gray-900 dark:text-gray-100 text-lg underline"
-              >
-                cs@dentgo.ai
-              </a>
-            </div>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-shrink-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                >
-                  <g>
-                    <path
-                      d="M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 9.61305 20.0518 7.32387 18.364 5.63604C16.6761 3.94821 14.3869 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12Z"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M3.60156 9H20.4016"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M3.60156 15H20.4016"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M11.4997 3C9.81501 5.69961 8.92188 8.81787 8.92188 12C8.92188 15.1821 9.81501 18.3004 11.4997 21"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12.5 3C14.1847 5.69961 15.0778 8.81787 15.0778 12C15.0778 15.1821 14.1847 18.3004 12.5 21"
-                      stroke="#0078D7"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                </svg>
-              </div>
-              <a
-                href="https://dentgo.ai"
-                className="text-gray-900 dark:text-gray-100 text-lg underline"
-              >
-                dentgo.ai
-              </a>
-            </div>
-
-            <div className="mt-6 w-full">
-              <h2 className="text-gray-900 dark:text-gray-100 text-xl font-semibold mb-2">
-                About Us
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
-                DentGo is your intelligent dental assistant — designed to save you time and enhance patient care.
-                It helps you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
-              </p>
-              <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
-                Whether you're managing a busy clinic or just starting out, DentGo streamlines your workflow and
-                connects you with trusted suppliers that deliver right to your clinic's door.
-              </p>
-              <p className="text-gray-600 dark:text-gray-400 text-base leading-6">
-                Powered by AI, DentGo turns complex decisions into clear, actionable steps — allowing you to focus more
-                on your patients and less on logistics.
-              </p>
-            </div>
+            <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
+              Whether you're managing a busy clinic or just starting out, DentGo streamlines your workflow and connects
+              you with trusted suppliers that deliver right to your clinic's door.
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 text-base leading-6">
+              Powered by AI, DentGo turns complex decisions into clear, actionable steps — allowing you to focus more on
+              your patients and less on logistics.
+            </p>
           </div>
         </div>
       </div>
@@ -2100,17 +2069,10 @@ export default ContactUs;
 
 --- C:\Users\hanos\cb\frontend\src\pages\Currency.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Currency = () => {
-  const navigate = useNavigate();
+const Currency: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -2123,165 +2085,156 @@ const Currency = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center px-3 pt-2">
-            <button onClick={handleBackClick} className="mr-3 p-0">
-              <img className="h-8 w-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="m-0 text-white text-lg font-medium">Currency</h1>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch h-[calc(100vh-90px)] overflow-y-auto">
+          <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
+            <input
+              type="radio"
+              name="currency"
+              id="currency-usd"
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="currency-usd"
+              className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current"
+              >
+                <path
+                  d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              USD
+            </label>
           </div>
 
-          <div className="bg-blue-700 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch h-[calc(100vh-90px)] overflow-y-auto">
-            <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
-              <input
-                type="radio"
-                name="currency"
-                id="currency-usd"
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="currency-usd"
-                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+          <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
+            <input
+              type="radio"
+              name="currency"
+              id="currency-sar"
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="currency-sar"
+              className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current"
-                >
-                  <path
-                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                USD
-              </label>
-            </div>
+                <path
+                  d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              SAR
+            </label>
+          </div>
 
-            <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
-              <input
-                type="radio"
-                name="currency"
-                id="currency-sar"
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="currency-sar"
-                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+          <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
+            <input
+              type="radio"
+              name="currency"
+              id="currency-aed"
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="currency-aed"
+              className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current"
-                >
-                  <path
-                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                SAR
-              </label>
-            </div>
+                <path
+                  d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              AED
+            </label>
+          </div>
 
-            <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
-              <input
-                type="radio"
-                name="currency"
-                id="currency-aed"
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="currency-aed"
-                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+          <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
+            <input
+              type="radio"
+              name="currency"
+              id="currency-qar"
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="currency-qar"
+              className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current"
-                >
-                  <path
-                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                AED
-              </label>
-            </div>
+                <path
+                  d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              QAR
+            </label>
+          </div>
 
-            <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4">
-              <input
-                type="radio"
-                name="currency"
-                id="currency-qar"
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="currency-qar"
-                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+          <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 border-b-0">
+            <input
+              type="radio"
+              name="currency"
+              id="currency-egp"
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="currency-egp"
+              className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="stroke-current"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current"
-                >
-                  <path
-                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                QAR
-              </label>
-            </div>
-
-            <div className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 border-b-0">
-              <input
-                type="radio"
-                name="currency"
-                id="currency-egp"
-                className="peer sr-only"
-              />
-              <label
-                htmlFor="currency-egp"
-                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="stroke-current"
-                >
-                  <path
-                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                EGP
-              </label>
-            </div>
+                <path
+                  d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              EGP
+            </label>
           </div>
         </div>
       </div>
@@ -2294,17 +2247,11 @@ export default Currency;
 
 --- C:\Users\hanos\cb\frontend\src\pages\Delete.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Delete = () => {
-  const navigate = useNavigate();
+const Delete: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -2317,33 +2264,24 @@ const Delete = () => {
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center pt-8 px-3">
-            <button onClick={handleBackClick} className="mr-3 p-0">
-              <img className="h-8 w-auto" src={buttonBack} alt="Go back" />
-            </button>
-            <h1 className="m-0 text-white text-lg font-medium">Delete Account</h1>
-          </div>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
+          <h2 className="text-gray-900 dark:text-gray-200 text-lg font-semibold leading-6 pt-6">
+            Why are you leaving PayFast?
+          </h2>
 
-          <div className="bg-blue-700 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
-            <h2 className="text-gray-900 dark:text-gray-200 text-lg font-semibold leading-6 pt-6">
-              Why are you leaving PayFast?
-            </h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+            We’re sorry to see you go! Authentication and account control are now handled via secure login.
+          </p>
 
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
-              We’re sorry to see you go! Authentication and account control are now handled via secure login.
-            </p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
+            Tapping “Delete Account” will redirect you to the centralized login to manage or confirm deletion.{" "}
+            <span className="text-gray-900 dark:text-gray-200">Jessica Smith.</span>
+          </p>
 
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
-              Tapping “Delete Account” will redirect you to the centralized login to manage or confirm deletion.{" "}
-              <span className="text-gray-900 dark:text-gray-200">Jessica Smith.</span>
-            </p>
-
-            <div className="flex flex-col items-center justify-center">
-              <div className="w-full py-4 bg-blue-100 dark:bg-gray-700 text-blue-800 text-lg font-medium rounded-xl mb-4 flex justify-center items-center">
-                <Link to="/lets-you-in">Delete Account</Link>
-              </div>
+          <div className="flex flex-col items-center justify-center">
+            <div className="w-full py-4 bg-blue-100 dark:bg-gray-700 text-blue-800 text-lg font-medium rounded-xl mb-4 flex justify-center items-center">
+              <Link to="/login">Delete Account</Link>
             </div>
           </div>
         </div>
@@ -2357,26 +2295,23 @@ export default Delete;
 
 --- C:\Users\hanos\cb\frontend\src\pages\DentgoChat.tsx ---
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import { askDentgo } from "../api/chat";
 import { fetchChatSession, endChatSession } from "../api/chats";
-import buttonBack from "../assets/images/Button-Back.png";
-import chatMenuImg from "../assets/images/chat-menu-img.png";
 import Loader from "../components/ui/Loader";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle";
 
 // Detect Arabic characters for RTL support
-function isRTL(text) {
+function isRTL(text: string) {
   return /[\u0600-\u06FF]/.test(text);
 }
 
-function MessageBubble({ text, type }) {
+function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" }) {
   const rtl = isRTL(text);
 
-  // USER (personal) bubble: dark primary background, white text
   if (type === "personal") {
     return (
       <div
@@ -2399,17 +2334,13 @@ function MessageBubble({ text, type }) {
         style={{ direction: rtl ? "rtl" : "ltr" }}
         aria-label="Your message"
       >
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeSanitize]}
-        >
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
           {text}
         </ReactMarkdown>
       </div>
     );
   }
 
-  // BOT bubble: light primary background, primary text
   return (
     <div
       className={`
@@ -2431,10 +2362,7 @@ function MessageBubble({ text, type }) {
       style={{ direction: rtl ? "rtl" : "ltr" }}
       aria-label="Bot response"
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
         {text}
       </ReactMarkdown>
     </div>
@@ -2446,25 +2374,23 @@ export default function DentgoChat() {
   const { search } = useLocation();
 
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<{ text: string; type: "personal" | "bot" }[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setThinking] = useState(false);
-  const historyRef = useRef([]);
-  const containerRef = useRef(null);
-  const [sessionId, setSessionId] = useState(null);
+  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
 
   // On mount: check for sessionId in URL, fetch history if present
   useEffect(() => {
     const params = new URLSearchParams(search);
-    const sid = params.has("sessionId")
-      ? Number(params.get("sessionId"))
-      : null;
+    const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
 
     if (sid) {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs = session.messages.map((m) => ({
+          const msgs = session.messages.map((m: any) => ({
             text: m.content,
             type: m.role === "USER" ? "personal" : "bot",
           }));
@@ -2475,7 +2401,7 @@ export default function DentgoChat() {
           }));
         })
         .catch(() => {
-          // If fetch fails, we just proceed without initial history
+          // Proceed without initial history if fetch fails
         })
         .finally(() => setLoading(false));
     } else {
@@ -2496,8 +2422,7 @@ export default function DentgoChat() {
   // If not loading and no existing session, show greeting
   useEffect(() => {
     if (!loading && sessionId === null) {
-      const greeting =
-        "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+      const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
       setMessages([{ text: greeting, type: "bot" }]);
       historyRef.current = [{ role: "assistant", text: greeting }];
     }
@@ -2509,10 +2434,7 @@ export default function DentgoChat() {
     if (!prompt || isThinking) return;
 
     // Append user message immediately
-    setMessages((prev) => [
-      ...prev,
-      { text: prompt, type: "personal" },
-    ]);
+    setMessages((prev) => [...prev, { text: prompt, type: "personal" }]);
     historyRef.current.push({ role: "user", text: prompt });
     setInput("");
     setThinking(true);
@@ -2531,16 +2453,10 @@ export default function DentgoChat() {
       }
 
       // Append bot’s answer
-      setMessages((prev) => [
-        ...prev,
-        { text: answer, type: "bot" },
-      ]);
+      setMessages((prev) => [...prev, { text: answer, type: "bot" }]);
       historyRef.current.push({ role: "assistant", text: answer });
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { text: `❌ ${err.message}`, type: "bot" },
-      ]);
+    } catch (err: any) {
+      setMessages((prev) => [...prev, { text: `❌ ${err.message}`, type: "bot" }]);
     } finally {
       setThinking(false);
     }
@@ -2550,197 +2466,122 @@ export default function DentgoChat() {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col font-sans">
-      {/* === HEADER === */}
-      <header className="bg-primary pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center px-2">
-            {/* Back Button */}
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label="Go back"
-            >
-              <img
-                src={buttonBack}
-                alt="Back"
-                className="h-8 w-auto"
-              />
-            </button>
+      {/* === CHAT AREA === */}
+      <div className="mx-auto max-w-lg px-4 flex-1 flex flex-col">
+        <div className="bg-white mt-5 rounded-t-2xl pt-3 px-4 flex flex-col flex-1 shadow-md">
+          <div className="flex-1 flex flex-col">
+            {/* MESSAGE LIST */}
+            <div className="flex-1 overflow-y-hidden relative">
+              <div
+                className="overflow-y-auto max-h-full pr-2"
+                ref={containerRef}
+                aria-label="Chat messages"
+              >
+                {messages.map((m, idx) => (
+                  <MessageBubble key={idx} {...m} />
+                ))}
 
-            {/* Title */}
-            <div className="flex-1 text-center">
-              <h1 className="text-white text-lg font-medium">
-                Dentgo
-              </h1>
+                {isThinking && (
+                  <div
+                    className="
+                      italic 
+                      text-gray-500 
+                      mt-2 
+                      bg-primary/10 
+                      text-primary 
+                      rounded-tl-2xl 
+                      rounded-tr-2xl 
+                      rounded-bl-2xl 
+                      rounded-br 
+                      p-3 
+                      my-3 
+                      max-w-[80%] 
+                      float-left
+                    "
+                    aria-label="Bot is typing"
+                  >
+                    <em>Dentgo is typing…</em>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Chat Menu Toggle */}
-            <button
-              className="p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#chatOffcanvas"
-              aria-label="Open chat menu"
-            >
-              <img
-                src={chatMenuImg}
-                alt="Menu"
-                className="h-6 w-auto"
-              />
-            </button>
-          </div>
-
-          {/* Chat area */}
-          <div className="bg-white mt-3 rounded-t-2xl pt-3 px-4 flex flex-col h-[calc(100vh-85px)] shadow-md">
-            <div className="flex-1 flex flex-col">
-              {/* OFFCANVAS MENU (right side) */}
-              <div
-                className="offcanvas offcanvas-end"
-                id="chatOffcanvas"
-                tabIndex="-1"
-                aria-labelledby="chatOffcanvasLabel"
-              >
-                <div className="offcanvas-body bg-gray-100 p-0">
-                  <Link
-                    to="#"
-                    className="block border-b border-gray-200 py-3 text-gray-800 px-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    Rename
-                  </Link>
-                  <Link
-                    to="#"
-                    className="block border-b border-gray-200 py-3 text-gray-800 px-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    Clear Chat
-                  </Link>
-                  <Link
-                    to="#"
-                    className="block border-b border-gray-200 py-3 text-gray-800 px-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    Export Chat
-                  </Link>
-                  <Link
-                    to="#end-session-modal"
-                    data-bs-toggle="modal"
-                    className="block py-3 text-gray-800 px-4 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    End Session
-                  </Link>
-                </div>
-              </div>
-
-              {/* MESSAGE LIST */}
-              <div className="flex-1 overflow-y-hidden relative">
-                <div
-                  className="overflow-y-auto max-h-[70vh] pr-2"
-                  ref={containerRef}
-                  aria-label="Chat messages"
-                >
-                  {messages.map((m, idx) => (
-                    <MessageBubble key={idx} {...m} />
-                  ))}
-
-                  {isThinking && (
-                    <div
-                      className="
-                        italic 
-                        text-gray-500 
-                        mt-2 
-                        bg-primary/10 
-                        text-primary 
-                        rounded-tl-2xl 
-                        rounded-tr-2xl 
-                        rounded-bl-2xl 
-                        rounded-br 
-                        p-3 
-                        my-3 
-                        max-w-[80%] 
-                        float-left
-                      "
-                      aria-label="Bot is typing"
-                    >
-                      <em>Dentgo is typing…</em>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* INPUT AREA */}
-              <div className="flex gap-3 mt-2 pb-4">
-                <div className="flex-1">
-                  <textarea
-                    className="
-                      w-full 
-                      h-12 
-                      p-2 
-                      rounded-lg 
-                      border 
-                      border-transparent 
-                      bg-gray-100 
-                      text-base 
-                      text-gray-500 
-                      resize-none 
-                      focus:border-primary 
-                      focus:bg-primary/10 
-                      focus:outline-none 
-                      focus:ring-2 
-                      focus:ring-primary/50 
-                      transition
-                    "
-                    placeholder="Write here…"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        send();
-                      }
-                    }}
-                    aria-label="Type your message"
-                  />
-                </div>
-                <button
+            {/* INPUT AREA */}
+            <div className="flex gap-3 mt-2 pb-4">
+              <div className="flex-1">
+                <textarea
                   className="
-                    w-12 
+                    w-full 
                     h-12 
+                    p-2 
                     rounded-lg 
-                    bg-primary 
-                    text-white 
-                    flex 
-                    items-center 
-                    justify-center 
-                    hover:bg-primary/90 
+                    border 
+                    border-transparent 
+                    bg-gray-100 
+                    text-base 
+                    text-gray-500 
+                    resize-none 
+                    focus:border-primary 
+                    focus:bg-primary/10 
                     focus:outline-none 
                     focus:ring-2 
                     focus:ring-primary/50 
                     transition
                   "
-                  onClick={send}
-                  disabled={isThinking}
-                  aria-label="Send message"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                    className="fill-current"
-                    aria-hidden="true"
-                  >
-                    <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
-                  </svg>
-                </button>
+                  placeholder="Write here…"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
+                    }
+                  }}
+                  aria-label="Type your message"
+                />
               </div>
+              <button
+                className="
+                  w-12 
+                  h-12 
+                  rounded-lg 
+                  bg-primary 
+                  text-white 
+                  flex 
+                  items-center 
+                  justify-center 
+                  hover:bg-primary/90 
+                  focus:outline-none 
+                  focus:ring-2 
+                  focus:ring-primary/50 
+                  transition
+                "
+                onClick={send}
+                disabled={isThinking}
+                aria-label="Send message"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  className="fill-current"
+                  aria-hidden="true"
+                >
+                  <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* === END SESSION MODAL === */}
       <div
         className="modal fade"
         id="end-session-modal"
-        tabIndex="-1"
+        tabIndex={-1}
         aria-labelledby="endSessionModalLabel"
         aria-hidden="true"
       >
@@ -2754,8 +2595,7 @@ export default function DentgoChat() {
                 End Session
               </h2>
               <p className="text-gray-500 text-base mb-4">
-                This session will be saved in history and can be retrieved
-                anytime.
+                This session will be saved in history and can be retrieved anytime.
               </p>
               <div className="flex justify-center gap-3">
                 <button
@@ -2777,12 +2617,9 @@ export default function DentgoChat() {
                     if (sessionId) {
                       await endChatSession(sessionId);
                     }
-                    const modalEl = document.getElementById(
-                      "end-session-modal"
-                    );
+                    const modalEl = document.getElementById("end-session-modal");
                     if (modalEl) {
-                      const bsModal =
-                        bootstrap.Modal.getInstance(modalEl);
+                      const bsModal = bootstrap.Modal.getInstance(modalEl);
                       if (bsModal) bsModal.hide();
                     }
                     navigate("/dentgo-gpt-home");
@@ -2870,112 +2707,6 @@ const DentgoGptHome: React.FC = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
-      {/* ===== HEADER ===== */}
-      <header className="relative bg-primary py-4">
-        {/* Subtle bottom accent gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0" />
-
-        <div className="mx-auto max-w-lg px-4 flex items-center justify-between">
-          {/* Logo + Title */}
-          <Link
-            to="/dentgo-gpt-home"
-            className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white"
-            aria-label="Dentgo Home"
-          >
-            <img src={logo} alt="Dentgo Logo" className="h-8 w-auto" />
-            <span className="text-white text-lg font-medium">Dentgo</span>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            {/* Notification Icon */}
-            <Link
-              to="/notification"
-              className="relative p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label="View notifications"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="stroke-current text-white"
-              >
-                <mask
-                  id="notif-mask"
-                  maskUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
-                  width="24"
-                  height="24"
-                >
-                  <rect width="24" height="24" fill="white" />
-                </mask>
-                <g mask="url(#notif-mask)">
-                  <path
-                    d="M10 5C10 4.46957 10.2107 3.96086 10.5858 3.58579C10.9609 3.21071 11.4696 3 12 3C12.5304 3 13.0391 3.21071 13.4142 3.58579C13.7893 3.96086 14 4.46957 14 5C15.1484 5.54303 16.1274 6.38833 16.8321 7.4453C17.5367 8.50227 17.9404 9.73107 18 11V14C18.0753 14.6217 18.2954 15.2171 18.6428 15.7381C18.9902 16.2592 19.4551 16.6914 20 17H4C4.54494 16.6914 5.00981 16.2592 5.35719 15.7381C5.70457 15.2171 5.92474 14.6217 6 14V11C6.05956 9.73107 6.4633 8.50227 7.16795 7.4453C7.8726 6.38833 8.85159 5.54303 10 5Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M9 17V18C9 18.7956 9.31607 19.5587 9.87868 20.1213C10.4413 20.6839 11.2044 21 12 21C12.7956 21 13.5587 20.6839 14.1213 20.1213C14.6839 19.5587 15 18.7956 15 18V17"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </g>
-              </svg>
-              <span className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full bg-red-600 text-white text-xs">
-                5
-              </span>
-            </Link>
-
-            {/* Menu Button (Offcanvas toggle) */}
-            <button
-              className="p-2 rounded-full hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-white"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasMenu"
-              aria-label="Open menu"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="stroke-current text-white"
-              >
-                <mask
-                  id="menu-mask"
-                  maskUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
-                  width="24"
-                  height="24"
-                >
-                  <rect width="24" height="24" fill="white" />
-                </mask>
-                <g mask="url(#menu-mask)">
-                  <path
-                    d="M19 6.87298C19.3062 7.04978 19.5601 7.30461 19.7358 7.6115C19.9115 7.9184 20.0026 8.26638 20 8.61998V15.156C19.9999 15.5126 19.9045 15.8628 19.7235 16.1701C19.5426 16.4775 19.2828 16.7308 18.971 16.904L12.971 20.737C12.674 20.9019 12.3398 20.9885 12 20.9885C11.6602 20.9885 11.326 20.9019 11.029 20.737L5.029 16.904C4.71736 16.7309 4.45763 16.4777 4.27671 16.1705C4.0958 15.8634 4.00026 15.5135 4 15.157V8.61998C4.00008 8.26334 4.09553 7.9132 4.27646 7.60585C4.45739 7.29851 4.71721 7.04513 5.029 6.87198L11.029 3.29998C11.3348 3.12975 11.679 3.04041 12.029 3.04041C12.379 3.04041 12.7232 3.12975 13.029 3.29998L19.029 6.87298H19V6.87298Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </g>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 bg-gray-100">
         <div className="mx-auto max-w-lg px-4">
@@ -3128,7 +2859,7 @@ const DentgoGptHome: React.FC = () => {
                     strokeLinejoin="round"
                   />
                   <path
-                    d="M15.0498 23.0001C15.2739 20.8001 16.3001 18.7597 17.9325 17.268C19.565 15.7764 21.6895 14.938 23.9007 14.9127C26.1119 14.8874 28.255 15.6771 29.9211 17.1311C31.5872 18.5851 32.6597 20.6015 32.934 22.7958C33.2083 24.99 32.6651 27.2085 31.4082 29.0278C30.1512 30.8472 28.2684 32.1401 26.1191 32.6599C23.9697 33.1797 21.7042 32.89 19.7548 31.8461C17.8054 30.8022 16.3085 29.0772 15.5498 27.0001M15.0498 32.0001V27.0001H20.0498"
+                    d="M15.0498 23.0001C15.2739 20.8001 16.3001 18.7597 17.9325 17.268C19.565 15.7764 21.6895 14.938 23.9007 14.9127C26.1119 14.8874 28.255 15.6771 29.9211 17.1311C31.5872 18.5851 32.6597 20.6015 32.934 22.7958C33.2083 24.99 32.6651 27.2085 31.4082 29.0278C30.1512 30.8472 28.2684 32.1401 26.1191 32.6599C23.9697 33.1797 21.7042 32.89 19.7548 31.8461C17.8054 30.8022 16.3082 29.0772 15.5498 27.0001M15.0498 32.0001V27.0001H20.0498"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -3704,7 +3435,6 @@ export default DentgoGptHome;
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
-import buttonBack from "../assets/images/Button-Back.png";
 import chatMenuImg from "../assets/images/chat-menu-img.png";
 import { fetchChatSessions } from "../api/chats";
 
@@ -3728,13 +3458,8 @@ export default function History() {
   if (error) {
     return (
       <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-        <div className="bg-blue-800 pt-4 pb-8">
-          <div className="mx-auto max-w-lg px-4">
-            <button className="p-0 mb-3" onClick={() => navigate(-1)}>
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h2 className="text-red text-base font-medium">Error: {error}</h2>
-          </div>
+        <div className="mx-auto max-w-lg px-4">
+          <h2 className="text-red text-base font-medium">Error: {error}</h2>
         </div>
       </div>
     );
@@ -3770,40 +3495,30 @@ export default function History() {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <div className="flex items-center mb-4">
-            <button className="p-0 mr-2" onClick={() => navigate(-1)}>
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h1 className="text-white text-lg font-medium leading-6">
-              History
-            </h1>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto">
+          <div className="pt-4">
+            <h2 className="text-gray-800 text-xl font-semibold leading-7">
+              Active Chats
+            </h2>
+            {active.length > 0 ? (
+              renderList(active, false)
+            ) : (
+              <p className="text-gray-500 text-sm leading-5">
+                No active chats.
+              </p>
+            )}
+            <h2 className="text-gray-800 text-xl font-semibold leading-7 pt-6">
+              Ended Chats
+            </h2>
+            {ended.length > 0 ? (
+              renderList(ended, true)
+            ) : (
+              <p className="text-gray-500 text-sm leading-5">
+                No ended chats.
+              </p>
+            )}
           </div>
-        </div>
-      </div>
-      <div className="bg-white mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto">
-        <div className="pt-4">
-          <h2 className="text-gray-800 text-xl font-semibold leading-7">
-            Active Chats
-          </h2>
-          {active.length > 0 ? (
-            renderList(active, false)
-          ) : (
-            <p className="text-gray-500 text-sm leading-5">
-              No active chats.
-            </p>
-          )}
-          <h2 className="text-gray-800 text-xl font-semibold leading-7 pt-6">
-            Ended Chats
-          </h2>
-          {ended.length > 0 ? (
-            renderList(ended, true)
-          ) : (
-            <p className="text-gray-500 text-sm leading-5">
-              No ended chats.
-            </p>
-          )}
         </div>
       </div>
     </div>
@@ -3830,26 +3545,28 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-blue-800 p-4 flex justify-between">
-        <div className="text-white font-bold">Dashboard</div>
-        <div className="flex items-center">
-          {user && (
-            <>
-              <span className="text-white mr-4">Hello, {user.name}</span>
-              <button
-                onClick={() => logout()}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
-      <main className="p-4">
-        <h1 className="text-2xl font-semibold mb-4">Welcome to Your Dashboard</h1>
-        {/* Link to PaymentMethod removed to prevent blank screen issue */}
-      </main>
+      <div className="mx-auto max-w-lg px-4">
+        <main className="p-4">
+          <h1 className="text-2xl font-semibold mb-4">
+            Welcome to Your Dashboard
+          </h1>
+          <div className="flex items-center justify-between">
+            {user && (
+              <>
+                <span className="text-gray-800 dark:text-gray-200">
+                  Hello, {user.name}
+                </span>
+                <button
+                  onClick={() => logout()}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
@@ -3861,7 +3578,6 @@ export default Home;
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
-import buttonBack from "../assets/images/Button-Back.png";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
 import GoogleIcon from "../assets/images/Icon-google.png";
@@ -3879,17 +3595,14 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // 1) Load Google Identity script
   useGoogleIdentity();
 
-  // 2) If already logged in (once initializing ends), redirect immediately
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // 3) Handle credential response from Google One-Tap
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -3898,7 +3611,6 @@ const Login: React.FC = () => {
         return;
       }
       try {
-        // Send credential to backend, get user & cookies set there
         const user = await loginWithGoogleAPI(credential);
         login(user);
         navigate("/dentgo-gpt-home", { replace: true });
@@ -3913,7 +3625,6 @@ const Login: React.FC = () => {
     [login, navigate, setError]
   );
 
-  // 4) Initialize Google One-Tap once the script is loaded
   useEffect(() => {
     let retryTimeout: number | null = null;
 
@@ -3935,7 +3646,6 @@ const Login: React.FC = () => {
         setGoogleReady(true);
         setLoading(false);
       } else {
-        // If still not loaded, retry after a short delay
         retryTimeout = window.setTimeout(tryInitialize, 100);
       }
     };
@@ -3946,31 +3656,22 @@ const Login: React.FC = () => {
     };
   }, [handleCredentialResponse]);
 
-  // 1a) If we’re waiting for auth to finish, show loader
   if (initializing || loading) {
     return <Loader />;
   }
 
-  // 2a) If already authenticated, redirect
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
-      {/* ===== HEADER ===== */}
-      <div className="flex-none bg-primary relative">
-        <header className="pt-6 px-4 flex items-center">
-          <button onClick={() => navigate(-1)} className="p-0" aria-label="Go Back">
-            <img src={buttonBack} alt="Go Back" className="w-6 h-auto" />
-          </button>
-        </header>
-        <div className="flex flex-col items-center justify-center py-4">
-          <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
-          <h1 className="text-white text-2xl font-semibold mt-3 text-center">
-            DentGo AI
-          </h1>
-        </div>
+      {/* ===== LOGO AND TITLE ===== */}
+      <div className="flex flex-col items-center justify-center bg-primary py-6">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+          DentGo AI
+        </h1>
       </div>
 
       {/* ===== MAIN LOGIN SECTION ===== */}
@@ -4034,7 +3735,6 @@ const Login: React.FC = () => {
               "
               onClick={async () => {
                 try {
-                  // Apple login will redirect the user to Apple, then back with cookies set
                   loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);
@@ -4066,17 +3766,12 @@ export default Login;
 
 --- C:\Users\hanos\cb\frontend\src\pages\Notification.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Notification = () => {
+const Notification: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500);
@@ -4088,19 +3783,6 @@ const Notification = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="bg-[#0078D7] pt-4 pb-8">
-        <div className="mx-auto max-w-[480px] px-4">
-          <div className="flex items-center">
-            <button onClick={handleBackClick} className="p-0 mr-2">
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h1 className="text-white text-[18px] font-medium leading-[24px]">
-              Notification
-            </h1>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white mt-5 rounded-t-[24px] px-4 flex flex-col gap-4 pb-4">
         <div className="flex items-center justify-between bg-white rounded-lg p-3">
           <div className="flex items-center gap-4">
@@ -4248,17 +3930,11 @@ export default Notification;
 --- C:\Users\hanos\cb\frontend\src\pages\NotificationAllow.tsx ---
 import React, { useEffect, useState } from "react";
 import notificationImg from "../assets/images/notification-img.png";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const NotificationAllow = () => {
-  const navigate = useNavigate();
+const NotificationAllow: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500);
@@ -4270,32 +3946,21 @@ const NotificationAllow = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="bg-[#0078D7] pt-4 pb-8">
-        <div className="mx-auto max-w-[480px] px-4">
-          <div className="flex items-center">
-            <button onClick={handleBackClick} className="p-0 mr-2">
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h1 className="text-white text-[18px] font-medium leading-[24px]">
-              Notifications
-            </h1>
+      <div className="mx-auto max-w-[480px] px-4">
+        <div className="bg-white mt-5 rounded-t-[24px] px-4 flex flex-col items-center">
+          <img src={notificationImg} alt="notification" className="max-w-full mb-4" />
+          <p className="text-gray-500 text-[18px] leading-[24px] text-center mb-6 px-2">
+            Stay updated on offers, car listings, and status alerts. You can manage notifications from
+            settings later.
+          </p>
+          <div className="w-full max-w-[343px] mb-4">
+            <Link
+              to="/login"
+              className="block bg-white text-[#0078D7] font-medium text-[18px] leading-[24px] text-center py-4 rounded-[12px] hover:bg-[#0064ba] transition"
+            >
+              Continue with Google or Apple
+            </Link>
           </div>
-        </div>
-      </div>
-
-      <div className="bg-white mt-5 rounded-t-[24px] px-4 flex flex-col items-center">
-        <img src={notificationImg} alt="notification" className="max-w-full mb-4" />
-        <p className="text-gray-500 text-[18px] leading-[24px] text-center mb-6 px-2">
-          Stay updated on offers, car listings, and status alerts. You can manage notifications from
-          settings later.
-        </p>
-        <div className="w-full max-w-[343px] mb-4">
-          <Link
-            to="/lets-you-in"
-            className="block bg-white text-[#0078D7] font-medium text-[18px] leading-[24px] text-center py-4 rounded-[12px] hover:bg-[#0064ba] transition"
-          >
-            Continue with Google or Apple
-          </Link>
         </div>
       </div>
     </div>
@@ -4307,17 +3972,10 @@ export default NotificationAllow;
 
 --- C:\Users\hanos\cb\frontend\src\pages\NotificationSetting.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const NotificationSetting = () => {
-  const navigate = useNavigate();
+const NotificationSetting: React.FC = () => {
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500);
@@ -4329,72 +3987,61 @@ const NotificationSetting = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="bg-[#0078D7] pt-4 pb-8">
-        <div className="mx-auto max-w-[480px] px-4">
-          <div className="flex items-center">
-            <button onClick={handleBackClick} className="p-0 mr-2">
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h1 className="text-white text-[18px] font-medium leading-[24px]">
-              Notification Settings
-            </h1>
+      <div className="mx-auto max-w-[480px] px-4">
+        <div className="bg-white mt-5 rounded-t-[24px] px-4 pt-6 flex flex-col space-y-4">
+          <h2 className="text-gray-800 text-[18px] font-semibold leading-[24px] text-center">
+            We will notify you when...
+          </h2>
+
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">Your invoices are paid</p>
+            <input type="checkbox" name="invoice" />
           </div>
-        </div>
-      </div>
 
-      <div className="bg-white mt-5 rounded-t-[24px] px-4 pt-6 flex flex-col space-y-4">
-        <h2 className="text-gray-800 text-[18px] font-semibold leading-[24px] text-center">
-          We will notify you when...
-        </h2>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">Someone requests money from you</p>
+            <input type="checkbox" name="money-request" defaultChecked />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">Your invoices are paid</p>
-          <input type="checkbox" name="invoice" />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You send money to someone</p>
+            <input type="checkbox" name="money-sent" />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">Someone requests money from you</p>
-          <input type="checkbox" name="money-request" defaultChecked />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive money from someone</p>
+            <input type="checkbox" name="money-received" />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You send money to someone</p>
-          <input type="checkbox" name="money-sent" />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You purchase something</p>
+            <input type="checkbox" name="purchase" defaultChecked />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive money from someone</p>
-          <input type="checkbox" name="money-received" />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive a QR code payment</p>
+            <input type="checkbox" name="qr-payment" />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You purchase something</p>
-          <input type="checkbox" name="purchase" defaultChecked />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive a direct payment</p>
+            <input type="checkbox" name="direct-payment" />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive a QR code payment</p>
-          <input type="checkbox" name="qr-payment" />
-        </div>
+          <div className="flex items-center justify-between border-b border-gray-200 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive subscriptions info</p>
+            <input type="checkbox" name="subscription-info" />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive a direct payment</p>
-          <input type="checkbox" name="direct-payment" />
-        </div>
+          <div className="flex items-center justify-between border-b-0 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive announcements & offers</p>
+            <input type="checkbox" name="announcements" defaultChecked />
+          </div>
 
-        <div className="flex items-center justify-between border-b border-gray-200 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive subscriptions info</p>
-          <input type="checkbox" name="subscription-info" />
-        </div>
-
-        <div className="flex items-center justify-between border-b-0 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive announcements & offers</p>
-          <input type="checkbox" name="announcements" defaultChecked />
-        </div>
-
-        <div className="flex items-center justify-between border-b-0 py-4">
-          <p className="text-gray-800 text-[16px] font-medium">You receive app updates info</p>
-          <input type="checkbox" name="app-updates" />
+          <div className="flex items-center justify-between border-b-0 py-4">
+            <p className="text-gray-800 text-[16px] font-medium">You receive app updates info</p>
+            <input type="checkbox" name="app-updates" />
+          </div>
         </div>
       </div>
     </div>
@@ -4408,7 +4055,6 @@ export default NotificationSetting;
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchCards } from "../api/cards";
-import buttonBack from "../assets/images/Button-Back.png";
 import Loader from "../components/ui/Loader";
 import {
   StripeElements,
@@ -4418,14 +4064,14 @@ import {
   useStripe,
 } from "../lib/stripeClient";
 
+import { API_BASE } from "../config";
+
 interface Card {
   id: number;
   network: string | null;
   last4: string;
   isActive: boolean;
 }
-
-import { API_BASE } from "../config";
 
 const PaymentMethodForm: React.FC = () => {
   const navigate = useNavigate();
@@ -4436,13 +4082,11 @@ const PaymentMethodForm: React.FC = () => {
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const [canMakePayment, setCanMakePayment] = useState<boolean>(false);
 
-  // simulate loader
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // load saved cards once not loading
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -4456,7 +4100,6 @@ const PaymentMethodForm: React.FC = () => {
     })();
   }, [loading]);
 
-  // initialize PaymentRequest (to save a new card via Apple/Google Pay)
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -4471,15 +4114,11 @@ const PaymentMethodForm: React.FC = () => {
         });
 
         pr.on("paymentmethod", async (event: any) => {
-          // 1) Ask backend for a SetupIntent clientSecret
           try {
             const clientSecret = await createSetupIntent();
-            // 2) Confirm SetupIntent—pass in event.paymentMethod.id
             const { error, setupIntent } = await stripe.confirmCardSetup(
               clientSecret,
-              {
-                payment_method: event.paymentMethod.id,
-              }
+              { payment_method: event.paymentMethod.id }
             );
             if (error || !setupIntent) {
               event.complete("fail");
@@ -4487,7 +4126,6 @@ const PaymentMethodForm: React.FC = () => {
               return;
             }
 
-            // 3) Persist the new card on our server (FIXED URL)
             const pmId = setupIntent.payment_method as string;
             await fetch(`${API_BASE}/api/payments/cards`, {
               method: "POST",
@@ -4497,7 +4135,6 @@ const PaymentMethodForm: React.FC = () => {
             });
 
             event.complete("success");
-            // 4) Refresh local list of cards
             const updated = await fetchCards();
             setCards(updated);
           } catch (err) {
@@ -4516,101 +4153,85 @@ const PaymentMethodForm: React.FC = () => {
     })();
   }, [loading, stripe]);
 
-  const handleBack = () => navigate(-1);
   const handleAddNew = () => navigate("/add-new-card");
 
   if (loading) return <Loader />;
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <header className="pt-8 flex items-center px-3">
-            <button onClick={handleBack} className="mr-3 p-0" aria-label="Go back">
-              <img
-                className="inline-block w-8 h-auto"
-                src={buttonBack}
-                alt="Go Back"
-              />
-            </button>
-            <h1 className="m-0 text-white text-lg font-medium">Payment Method</h1>
-          </header>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          {canMakePayment && paymentRequest ? (
+            <div className="border-b-2 border-gray-200">
+              <PaymentRequestButtonElement options={{ paymentRequest }} />
+            </div>
+          ) : (
+            <div className="border-b-2 border-gray-200">
+              <p className="text-sm text-gray-500 my-4">
+                Apple Pay / Google Pay currently unavailable
+              </p>
+              <small className="block text-xs text-gray-500 mb-4">
+                Make sure you’re on a supported browser (Safari for Apple Pay,
+                Chrome for Google Pay), using HTTPS or localhost, and that{" "}
+                <code>VITE_STRIPE_PUBLISHABLE_KEY</code> is set.
+              </small>
+            </div>
+          )}
 
-          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            {canMakePayment && paymentRequest ? (
-              <div className="border-b-2 border-gray-200">
-                <PaymentRequestButtonElement
-                  options={{ paymentRequest }}
-                />
-              </div>
-            ) : (
-              <div className="border-b-2 border-gray-200">
-                <p className="text-sm text-gray-500 my-4">
-                  Apple Pay / Google Pay currently unavailable
-                </p>
-                <small className="block text-xs text-gray-500 mb-4">
-                  Make sure you’re on a supported browser (Safari for Apple Pay,
-                  Chrome for Google Pay), using HTTPS or localhost, and that{" "}
-                  <code>VITE_STRIPE_PUBLISHABLE_KEY</code> is set.
-                </small>
-              </div>
-            )}
+          {fetchError && (
+            <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
+              {fetchError}
+            </div>
+          )}
 
-            {fetchError && (
-              <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
-                {fetchError}
-              </div>
-            )}
-
-            {cards.length > 0 ? (
-              cards.map((card) => (
-                <div key={card.id} className="border-b-2 border-gray-200">
-                  <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
-                    <span className="border border-gray-200 px-5 py-2 rounded flex items-center justify-center w-12 h-8">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="20"
-                        viewBox="0 0 32 20"
-                        fill="none"
+          {cards.length > 0 ? (
+            cards.map((card) => (
+              <div key={card.id} className="border-b-2 border-gray-200">
+                <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
+                  <span className="border border-gray-200 px-5 py-2 rounded flex items-center justify-center w-12 h-8">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="20"
+                      viewBox="0 0 32 20"
+                      fill="none"
+                    >
+                      <rect width="32" height="20" rx="3" fill="#E0E0E0" />
+                      <text
+                        x="16"
+                        y="13"
+                        textAnchor="middle"
+                        fontSize="10"
+                        fill="#333"
                       >
-                        <rect width="32" height="20" rx="3" fill="#E0E0E0" />
-                        <text
-                          x="16"
-                          y="13"
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#333"
-                        >
-                          {card.network}
-                        </text>
-                      </svg>
-                    </span>
-                    <div className="pl-4">
-                      <div className="text-gray-800 text-base font-semibold leading-6">
                         {card.network}
-                      </div>
-                      <div className="text-gray-500 text-sm font-medium leading-5">
-                        <span className={card.isActive ? "text-blue-800" : "text-red"}>
-                          {card.isActive ? "Active" : "Inactive"}
-                        </span>{" "}
-                        | Card Number **** {card.last4}
-                      </div>
+                      </text>
+                    </svg>
+                  </span>
+                  <div className="pl-4">
+                    <div className="text-gray-800 text-base font-semibold leading-6">
+                      {card.network}
+                    </div>
+                    <div className="text-gray-500 text-sm font-medium leading-5">
+                      <span className={card.isActive ? "text-blue-800" : "text-red"}>
+                        {card.isActive ? "Active" : "Inactive"}
+                      </span>{" "}
+                      | Card Number **** {card.last4}
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
-            )}
-
-            <div className="flex flex-col items-center justify-center">
-              <div
-                className="w-full bg-blue-800 text-white text-lg font-medium rounded-xl py-4 my-4 flex justify-center items-center transition hover:bg-blue-700 cursor-pointer"
-                onClick={handleAddNew}
-              >
-                Add New Payment
               </div>
+            ))
+          ) : (
+            <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
+          )}
+
+          <div className="flex flex-col items-center justify-center">
+            <div
+              className="w-full bg-blue-800 text-white text-lg font-medium rounded-xl py-4 my-4 flex justify-center items-center transition hover:bg-blue-700 cursor-pointer"
+              onClick={handleAddNew}
+            >
+              Add New Payment
             </div>
           </div>
         </div>
@@ -4630,17 +4251,12 @@ export default PaymentMethod;
 
 --- C:\Users\hanos\cb\frontend\src\pages\PlusSubscription.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const PlusSubscription = () => {
+const PlusSubscription: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   const handleSubscribe = () => {
     navigate("/subscription-payment");
@@ -4655,132 +4271,117 @@ const PlusSubscription = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-lg px-4">
-          <header className="pt-8 flex items-center px-3">
-            <button onClick={handleBackClick} className="mr-3 p-0" aria-label="Go back">
-              <img
-                className="w-8 h-auto"
-                src={buttonBack}
-                alt="Go Back"
-              />
-            </button>
-            <h1 className="m-0 text-white text-lg font-medium">
-              Dentgo Plus Subscription
-            </h1>
-          </header>
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          <div className="flex flex-col flex-1">
+            <h2 className="text-gray-800 text-3xl font-bold leading-10 pt-2 pb-4">
+              Dentgo Plus
+            </h2>
 
-          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            <div className="flex flex-col flex-1">
-              <h2 className="text-gray-800 text-3xl font-bold leading-10 pt-2 pb-4">
-                Dentgo Plus
-              </h2>
-
-              <div className="flex gap-4 pb-6">
-                <div className="flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
-                    viewBox="0 0 30 30"
-                    fill="none"
-                    className="text-red"
-                  >
-                    <path
-                      d="M16.25 3.75V12.5H23.75L13.75 26.25V17.5H6.25L16.25 3.75Z"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
-                    Premium Dental AI Tools
-                  </h3>
-                  <p className="text-gray-500 text-lg leading-6">
-                    Get access to advanced diagnosis, tailored treatment plans, and early beta features.
-                  </p>
-                </div>
+            <div className="flex gap-4 pb-6">
+              <div className="flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 30 30"
+                  fill="none"
+                  className="text-red"
+                >
+                  <path
+                    d="M16.25 3.75V12.5H23.75L13.75 26.25V17.5H6.25L16.25 3.75Z"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
-
-              <div className="flex gap-4 pb-6">
-                <div className="flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
-                    viewBox="0 0 30 30"
-                    fill="none"
-                    className="text-red"
-                  >
-                    <path
-                      d="M15 15C17.5 11.3 15 6.25 13.75 5C13.75 8.7975 11.5337 10.9263 10 12.5C8.4675 14.075 7.5 16.55 7.5 18.75C7.5 20.7391 8.29018 22.6468 9.6967 24.0533C11.1032 25.4598 13.0109 26.25 15 26.25C16.9891 26.25 18.8968 25.4598 20.3033 24.0533C21.7098 22.6468 22.5 20.7391 22.5 18.75C22.5 16.835 21.18 13.825 20 12.5C17.7675 16.25 16.5112 16.25 15 15Z"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
-                    Priority Access
-                  </h3>
-                  <p className="text-gray-500 text-lg leading-6">
-                    Enjoy uninterrupted access even when demand is high — no queues or wait times.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 pb-6">
-                <div className="flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="30"
-                    height="30"
-                    viewBox="0 0 30 30"
-                    fill="none"
-                    className="text-red"
-                  >
-                    <path
-                      d="M7.04501 24.205C5.47168 22.6317 4.40023 20.6271 3.96616 18.4448C3.53209 16.2626 3.75488 14.0006 4.60637 11.9449C5.45786 9.88924 6.8998 8.13224 8.74985 6.89608C10.5999 5.65992 12.775 5.00012 15 5.00012C17.225 5.00012 19.4001 5.65992 21.2502 6.89608C23.1002 8.13224 24.5421 9.88924 25.3936 11.9449C26.2451 14.0006 26.4679 16.2626 26.0338 18.4448C25.5998 20.6271 24.5283 22.6317 22.955 24.205"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M20 11.25L15 16.25"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
-                    Faster Results
-                  </h3>
-                  <p className="text-gray-500 text-lg leading-6">
-                    Get up to 10 detailed AI responses per hour — ideal for busy dental clinics.
-                  </p>
-                </div>
+              <div>
+                <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
+                  Premium Dental AI Tools
+                </h3>
+                <p className="text-gray-500 text-lg leading-6">
+                  Get access to advanced diagnosis, tailored treatment plans, and early beta features.
+                </p>
               </div>
             </div>
 
-            <div className="mt-auto flex flex-col items-center">
-              <p className="text-gray-500 text-lg leading-6 pb-6 text-center">
-                Auto-renews at $25/month. Cancel anytime.
-              </p>
-              <div
-                className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs py-4 bg-white text-blue text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-100"
-                onClick={handleSubscribe}
-              >
-                <Link to="/subscription-payment">Subscribe</Link>
+            <div className="flex gap-4 pb-6">
+              <div className="flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 30 30"
+                  fill="none"
+                  className="text-red"
+                >
+                  <path
+                    d="M15 15C17.5 11.3 15 6.25 13.75 5C13.75 8.7975 11.5337 10.9263 10 12.5C8.4675 14.075 7.5 16.55 7.5 18.75C7.5 20.7391 8.29018 22.6468 9.6967 24.0533C11.1032 25.4598 13.0109 26.25 15 26.25C16.9891 26.25 18.8968 25.4598 20.3033 24.0533C21.7098 22.6468 22.5 20.7391 22.5 18.75C22.5 16.835 21.18 13.825 20 12.5C17.7675 16.25 16.5112 16.25 15 15Z"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
+              <div>
+                <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
+                  Priority Access
+                </h3>
+                <p className="text-gray-500 text-lg leading-6">
+                  Enjoy uninterrupted access even when demand is high — no queues or wait times.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 pb-6">
+              <div className="flex-shrink-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 30 30"
+                  fill="none"
+                  className="text-red"
+                >
+                  <path
+                    d="M7.04501 24.205C5.47168 22.6317 4.40023 20.6271 3.96616 18.4448C3.53209 16.2626 3.75488 14.0006 4.60637 11.9449C5.45786 9.88924 6.8998 8.13224 8.74985 6.89608C10.5999 5.65992 12.775 5.00012 15 5.00012C17.225 5.00012 19.4001 5.65992 21.2502 6.89608C23.1002 8.13224 24.5421 9.88924 25.3936 11.9449C26.2451 14.0006 26.4679 16.2626 26.0338 18.4448C25.5998 20.6271 24.5283 22.6317 22.955 24.205"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M20 11.25L15 16.25"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-gray-800 text-2xl font-bold leading-7 pb-1">
+                  Faster Results
+                </h3>
+                <p className="text-gray-500 text-lg leading-6">
+                  Get up to 10 detailed AI responses per hour — ideal for busy dental clinics.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-auto flex flex-col items-center">
+            <p className="text-gray-500 text-lg leading-6 pb-6 text-center">
+              Auto-renews at $25/month. Cancel anytime.
+            </p>
+            <div
+              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs py-4 bg-white text-blue text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-100"
+              onClick={handleSubscribe}
+            >
+              <Link to="/subscription-payment">Subscribe</Link>
             </div>
           </div>
         </div>
@@ -4796,7 +4397,6 @@ export default PlusSubscription;
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { fetchCards } from "../api/cards";
-import buttonBack from "../assets/images/Button-Back.png";
 import Loader from "../components/ui/Loader";
 import {
   StripeElements,
@@ -4821,13 +4421,11 @@ const InnerSelectPaymentMethod: React.FC = () => {
   const [fetchError, setFetchError] = useState<string>("");
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
 
-  // simulate loader
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
 
-  // initialize PaymentRequest for one-time $50.00 (5000¢) order
   useEffect(() => {
     (async () => {
       if (!stripe) return;
@@ -4845,10 +4443,8 @@ const InnerSelectPaymentMethod: React.FC = () => {
           }
         });
         pr.on("paymentmethod", async (event: any) => {
-          // 1) ask backend for a one-time PaymentIntent:
           try {
             const clientSecret = await createPaymentIntent(5000);
-            // 2) confirm the PaymentIntent with Stripe using event.paymentMethod.id
             const { error, paymentIntent } = await stripe.confirmCardPayment(
               clientSecret,
               { payment_method: event.paymentMethod.id }
@@ -4859,7 +4455,6 @@ const InnerSelectPaymentMethod: React.FC = () => {
               return;
             }
             event.complete("success");
-            // 3) navigate to PIN entry
             navigate("/confirm-payment-pin");
           } catch (err) {
             console.error("Error during PaymentRequest flow:", err);
@@ -4872,7 +4467,6 @@ const InnerSelectPaymentMethod: React.FC = () => {
     })();
   }, [stripe, navigate]);
 
-  // load saved cards after loader done
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -4886,97 +4480,83 @@ const InnerSelectPaymentMethod: React.FC = () => {
     })();
   }, [loading]);
 
-  const handleBackClick = () => navigate(-1);
   const handleContinue = () => navigate("/confirm-payment-pin");
 
   if (loading) return <Loader />;
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="bg-blue-800 pt-4 pb-8">
-        <div className="mx-auto max-w-[480px] px-4">
-          <header className="flex items-center px-3 py-2">
-            <button
-              onClick={handleBackClick}
-              className="mr-3 p-0 bg-transparent"
-              aria-label="Go back"
-            >
-              <img className="w-6 h-6" src={buttonBack} alt="Back" />
-            </button>
-            <h1 className="text-white text-lg font-medium">Payment Method</h1>
-          </header>
+      <div className="mx-auto max-w-[480px] px-4">
+        <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          {paymentRequest && (
+            <div className="mb-4">
+              <PaymentRequestButtonElement options={{ paymentRequest }} />
+            </div>
+          )}
 
-          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-            {paymentRequest && (
-              <div className="mb-4">
-                <PaymentRequestButtonElement options={{ paymentRequest }} />
-              </div>
-            )}
+          {fetchError && (
+            <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
+              {fetchError}
+            </div>
+          )}
 
-            {fetchError && (
-              <div className="text-sm p-2 border border-red-600 rounded text-red-600 bg-red-100 mb-3">
-                {fetchError}
-              </div>
-            )}
-
-            {cards.length > 0 ? (
-              cards.map((card) => (
-                <div
-                  key={card.id}
-                  className="border-b-2 border-gray-200 px-0"
-                >
-                  <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer transition-colors hover:bg-gray-50">
-                    <span className="flex items-center justify-center w-12 h-8 border border-gray-200 rounded">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="20"
-                        viewBox="0 0 32 20"
-                        fill="none"
+          {cards.length > 0 ? (
+            cards.map((card) => (
+              <div
+                key={card.id}
+                className="border-b-2 border-gray-200 px-0"
+              >
+                <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer transition-colors hover:bg-gray-50">
+                  <span className="flex items-center justify-center w-12 h-8 border border-gray-200 rounded">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="20"
+                      viewBox="0 0 32 20"
+                      fill="none"
+                    >
+                      <rect width="32" height="20" rx="3" fill="#E0E0E0" />
+                      <text
+                        x="16"
+                        y="13"
+                        textAnchor="middle"
+                        fontSize="10"
+                        fill="#333"
                       >
-                        <rect width="32" height="20" rx="3" fill="#E0E0E0" />
-                        <text
-                          x="16"
-                          y="13"
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#333"
-                        >
-                          {card.network}
-                        </text>
-                      </svg>
-                    </span>
-                    <div className="pl-4">
-                      <div className="text-gray-800 text-base font-bold leading-6">
                         {card.network}
-                      </div>
-                      <div className="text-gray-500 text-sm font-medium leading-5">
-                        <span className={card.isActive ? "text-blue" : "text-red"}>
-                          {card.isActive ? "Active" : "Inactive"}
-                        </span>{" "}
-                        | Card Number **** {card.last4}
-                      </div>
+                      </text>
+                    </svg>
+                  </span>
+                  <div className="pl-4">
+                    <div className="text-gray-800 text-base font-bold leading-6">
+                      {card.network}
+                    </div>
+                    <div className="text-gray-500 text-sm font-medium leading-5">
+                      <span className={card.isActive ? "text-blue" : "text-red"}>
+                        {card.isActive ? "Active" : "Inactive"}
+                      </span>{" "}
+                      | Card Number **** {card.last4}
                     </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
-            )}
-
-            <div className="mb-4">
-              <Link to="/add-new-card" className="text-blue text-base font-medium">
-                + Link a New Card
-              </Link>
-            </div>
-
-            <div className="flex items-center justify-center flex-col mt-auto mb-4">
-              <div
-                className="w-full py-4 bg-white text-blue text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-50"
-                onClick={handleContinue}
-              >
-                Continue
               </div>
+            ))
+          ) : (
+            <p className="text-gray-500 my-3 text-sm">No saved cards found.</p>
+          )}
+
+          <div className="mb-4">
+            <Link to="/add-new-card" className="text-blue text-base font-medium">
+              + Link a New Card
+            </Link>
+          </div>
+
+          <div className="flex items-center justify-center flex-col mt-auto mb-4">
+            <div
+              className="w-full py-4 bg-white text-blue text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-50"
+              onClick={handleContinue}
+            >
+              Continue
             </div>
           </div>
         </div>
@@ -5036,12 +4616,9 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
   ];
 
   useEffect(() => {
-    console.log("[Lifecycle] Splash.tsx → Splash mounted");
     const timer = setTimeout(() => {
-      console.log("[Splash] Showing initial splash for 1.5s, then starting slides");
       setShowInitialSplash(false);
     }, 1500);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -5049,12 +4626,9 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
     if (activeSlide < slides.length - 1) {
       setActiveSlide((prev) => prev + 1);
     } else {
-      console.log("[Splash] Last slide completed → calling onComplete()");
       onComplete();
     }
   };
-
-  console.log(`[Splash] Rendering ${showInitialSplash ? "initial splash" : `slide #${activeSlide}`}`);
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden">
@@ -5065,7 +4639,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
               <img
                 className="w-48 object-contain"
                 src={dotsPattern}
-                alt="Decorative pattern top"
+                alt=""
+                aria-hidden="true"
               />
             </div>
             <div className="flex flex-col items-center">
@@ -5079,7 +4654,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
               <img
                 className="w-48 object-contain"
                 src={dotsPatternBottom}
-                alt="Decorative pattern bottom"
+                alt=""
+                aria-hidden="true"
               />
             </div>
           </div>
@@ -5099,7 +4675,8 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
                     <img
                       className="w-full max-w-xs mb-4"
                       src={slide.imgSrc}
-                      alt={`Slide illustration for: ${slide.title}`}
+                      alt=""
+                      aria-hidden="true"
                     />
                     <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
                       {slide.title}
@@ -5131,6 +4708,7 @@ const Splash: React.FC<SplashProps> = ({ onComplete }) => {
                       : "bg-gray-200 w-2 h-2"
                   }`}
                   onClick={() => setActiveSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
@@ -5147,9 +4725,8 @@ export default Splash;
 --- C:\Users\hanos\cb\frontend\src\pages\SubscriptionPayment.tsx ---
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import buttonBack from "../assets/images/Button-Back.png";
-import logo from "../assets/images/logo.png";
 import Loader from "../components/ui/Loader";
+import logo from "../assets/images/logo.png";
 import {
   Elements as ElementsWrapper,
   useStripe,
@@ -5160,16 +4737,12 @@ import {
   createPaymentRequest,
   createSubscriptionIntent,
 } from "../lib/stripeClient";
-import { API_BASE } from "../config";
 
 const PaymentRequestSection = () => {
   const stripe = useStripe();
   const navigate = useNavigate();
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
-    null
-  );
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
 
-  // 1) build PaymentRequest
   useEffect(() => {
     if (!stripe) return;
     (async () => {
@@ -5186,19 +4759,15 @@ const PaymentRequestSection = () => {
         });
 
         pr.on("paymentmethod", async (event: any) => {
-          // 2) when user taps Apple/Google Pay, attach that paymentMethod to a Subscription
           try {
-            // create a new Subscription on the backend
             const priceId = import.meta.env.VITE_STRIPE_PRICE_ID || "";
             const paymentMethodId = event.paymentMethod.id as string;
 
-            // ask backend to create subscription Intent
             const { clientSecret } = await createSubscriptionIntent(
               priceId,
               paymentMethodId
             );
 
-            // confirm via Stripe
             const { error, paymentIntent } = await stripe.confirmCardPayment(
               clientSecret,
               { payment_method: paymentMethodId }
@@ -5210,7 +4779,6 @@ const PaymentRequestSection = () => {
             }
 
             event.complete("success");
-            // redirect to PIN / confirmation flow
             navigate("/confirm-payment-pin");
           } catch (err) {
             console.error("Error creating subscription:", err);
@@ -5251,12 +4819,7 @@ const SubscriptionPayment = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  const handleBackClick = () => {
-    navigate(-1);
-  };
-
   const handleProceedToCheckout = () => {
-    // as a fallback, navigate to confirm-pin (in case user wants to pick a saved card)
     navigate("/confirm-payment-pin");
   };
 
@@ -5272,108 +4835,93 @@ const SubscriptionPayment = () => {
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
       <ElementsWrapper stripe={stripePromise}>
-        <div className="bg-blue-800 pt-4 pb-8">
-          <div className="mx-auto max-w-lg px-4">
-            <div className="flex items-center space-x-3 px-3 py-2">
-              <button
-                type="button"
-                onClick={handleBackClick}
-                className="p-0"
-                aria-label="Go Back"
-              >
-                <img className="w-6 h-6" src={buttonBack} alt="Go Back" />
-              </button>
-              <h1 className="text-white text-lg font-medium">
-                DentGo Plus Subscription
-              </h1>
+        <div className="mx-auto max-w-lg px-4">
+          <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl flex-1 overflow-y-auto">
+            <div className="flex justify-center mb-4">
+              <img className="w-24 h-auto" src={logo} alt="DentGo logo" />
             </div>
-            <div className="bg-white pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl flex-1 overflow-y-auto">
-              <div className="flex justify-center mb-4">
-                <img className="w-24 h-auto" src={logo} alt="logo" />
-              </div>
-              <h2 className="text-center text-xl font-semibold text-gray-800 leading-7 mb-2">
-                DentGo Plus Subscription
-              </h2>
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Subscription Due at 15 Dec 2024
-              </p>
-              <h2 className="text-center text-5xl font-medium text-gray-800 leading-none mb-4">
-                $25.00
-              </h2>
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Choose a card or bank for payout
-              </p>
+            <h2 className="text-center text-xl font-semibold text-gray-800 leading-7 mb-2">
+              DentGo Plus Subscription
+            </h2>
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Subscription Due at 15 Dec 2024
+            </p>
+            <h2 className="text-center text-5xl font-medium text-gray-800 leading-none mb-4">
+              $25.00
+            </h2>
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Choose a card or bank for payout
+            </p>
 
-              <PaymentRequestSection />
+            <PaymentRequestSection />
 
-              <p className="text-center text-sm text-gray-500 mb-4">
-                Or select a saved payment method
-              </p>
-              <div className="flex items-center justify-between w-full mb-4">
-                <div className="flex w-full items-center gap-2">
-                  <span className="border border-gray-200 p-2 rounded w-12 h-8 flex items-center justify-center">
-                    <svg
-                      width="31"
-                      height="19"
-                      viewBox="0 0 31 19"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
-                        fill="#ED0006"
-                      />
-                      <path
-                        fillRule="evenodd"
-                        clipRule="evenodd"
-                        d="M15.0957 16.4389C17.0557 14.8004 18.2985 12.3624 18.2985 9.63996C18.2985 6.91754 17.0557 4.47955 15.0957 2.84102C16.6878 1.51009 18.753 0.706627 21.0098 0.706627C26.0449 0.706627 30.1267 4.70622 30.1267 9.63996C30.1267 14.5737 26.0449 18.5733 21.0098 18.5733C18.753 18.5733 16.6878 17.7698 15.0957 16.4389Z"
-                        fill="#F9A000"
-                      />
-                    </svg>
-                  </span>
-                  <div className="pl-4">
-                    <div className="text-gray-800 text-base font-semibold leading-6">
-                      Master Card
-                    </div>
-                    <div className="text-gray-500 text-sm font-medium leading-5">
-                      Card Number **** 7887
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate("/select-payment-method")}
-                  className="text-gray-800 text-2xl"
-                  aria-label="Choose saved payment method"
-                >
-                  <i className="ri-arrow-down-s-line"></i>
-                </button>
-              </div>
-
-              <div className="mb-4">
-                <p className="text-sm text-gray-500 mb-2">Promo Code</p>
-                <div>
-                  <div className="relative mb-4">
-                    <input
-                      type="number"
-                      id="promo_code"
-                      className="w-full h-16 bg-gray-200 border-2 border-gray-200 rounded-xl px-4 pt-4 text-lg text-gray-800 focus:border-blue outline-none"
-                      autoComplete="off"
-                      required
+            <p className="text-center text-sm text-gray-500 mb-4">
+              Or select a saved payment method
+            </p>
+            <div className="flex items-center justify-between w-full mb-4">
+              <div className="flex w-full items-center gap-2">
+                <span className="border border-gray-200 p-2 rounded w-12 h-8 flex items-center justify-center">
+                  <svg
+                    width="31"
+                    height="19"
+                    viewBox="0 0 31 19"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046Z"
+                      fill="#ED0006"
                     />
-                    <label
-                      htmlFor="promo_code"
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-500 transition-all"
-                    >
-                      Enter Code Here
-                    </label>
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M15.0957 16.4389C17.0557 14.8004 18.2985 12.3624 18.2985 9.63996C18.2985 6.91754 17.0557 4.47955 15.0957 2.84102C16.6878 1.51009 18.753 0.706627 21.0098 0.706627C26.0449 0.706627 30.1267 4.70622 30.1267 9.63996C30.1267 14.5737 26.0449 18.5733 21.0098 18.5733C18.753 18.5733 16.6878 17.7698 15.0957 16.4389Z"
+                      fill="#F9A000"
+                    />
+                  </svg>
+                </span>
+                <div className="pl-4">
+                  <div className="text-gray-800 text-base font-semibold leading-6">
+                    Master Card
+                  </div>
+                  <div className="text-gray-500 text-sm font-medium leading-5">
+                    Card Number **** 7887
                   </div>
                 </div>
               </div>
-
-              <div className="mt-auto"></div>
+              <button
+                onClick={() => navigate("/select-payment-method")}
+                className="text-gray-800 text-2xl"
+                aria-label="Choose saved payment method"
+              >
+                <i className="ri-arrow-down-s-line"></i>
+              </button>
             </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-500 mb-2">Promo Code</p>
+              <div>
+                <div className="relative mb-4">
+                  <input
+                    type="number"
+                    id="promo_code"
+                    className="w-full h-16 bg-gray-200 border-2 border-gray-200 rounded-xl px-4 pt-4 text-lg text-gray-800 focus:border-blue outline-none"
+                    autoComplete="off"
+                    required
+                  />
+                  <label
+                    htmlFor="promo_code"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-gray-500 transition-all"
+                  >
+                    Enter Code Here
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto"></div>
           </div>
         </div>
 
@@ -5396,17 +4944,10 @@ export default SubscriptionPayment;
 
 --- C:\Users\hanos\cb\frontend\src\pages\TermsAndPrivacy.tsx ---
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
 const TermsAndPrivacy = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -5419,127 +4960,113 @@ const TermsAndPrivacy = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col">
-      <div className="h-72 bg-blue-800 bg-top bg-no-repeat">
-        <div className="mx-auto max-w-lg p-0">
-          <header className="flex items-center pt-8 px-3 max-w-xl">
-            <button onClick={handleBackClick} className="p-0">
-              <img
-                className="inline-block w-8 h-auto"
-                src={buttonBack}
-                alt="Go Back"
-              />
-            </button>
-            <h1 className="ml-4 text-white font-medium text-lg">
-              Terms of Service and Privacy Policy
-            </h1>
-          </header>
-          <div className="bg-white px-4 pt-4 flex flex-col flex-1 items-stretch mt-5 rounded-t-3xl h-screen overflow-y-auto w-full">
-            <div className="pt-2.5 pb-4.5 border-b border-gray-200 w-full">
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                <strong>Last updated: 31/05/2025</strong>
-              </p>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                Welcome to DentGo (“we,” “us,” or “our”). This document
-                contains both our Terms of Service and our Privacy Policy. By
-                using DentGo’s web app, you agree to comply with these terms
-                and acknowledge how we handle your data.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                1. Introduction
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                DentGo is a chatbot web application specializing in dental
-                assistance. Our service provides free daily messaging and the
-                option to upgrade to a premium subscription for additional
-                features.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                2. Account Registration
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                Users must create an account using Google or Apple
-                authentication. We do not collect any other login credentials.
-                There is no minimum age requirement, but parents or guardians
-                should supervise minors’ use.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                3. Usage Terms
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                You may use DentGo to chat with our dental chatbot for
-                information and support. Misuse of the service—including but
-                not limited to spamming, harassment, or any illegal
-                activity—is prohibited. We reserve the right to suspend or
-                terminate accounts that violate these terms.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                4. Subscriptions and Payments
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                DentGo offers one free daily message for all users.
-                Additional features, such as unlimited messaging, require a
-                monthly subscription. Subscription fees are clearly stated
-                before purchase and are billed monthly.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                5. Privacy Policy
-              </h2>
-              <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                5.1 Data Collection
-              </h3>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                We only collect your email address via Google or Apple
-                sign-in. We store your chatbot conversations to allow you to
-                access your chat history. No sensitive health information is
-                collected. We do not collect or process any additional
-                personal data.
-              </p>
-              <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                5.2 Cookies and Analytics
-              </h3>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                We use cookies solely for Google Analytics 4 (GA4) to
-                understand usage patterns and improve the service.
-              </p>
-              <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                5.3 Data Sharing
-              </h3>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                We do <strong>not</strong> share your data with third parties.
-                Your information is used strictly for providing and improving
-                the DentGo service.
-              </p>
-              <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                5.4 Data Security
-              </h3>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                We use industry-standard encryption and secure hosting to
-                protect your data.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                6. Jurisdiction
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                DentGo is based in Wyoming, USA. These Terms and Privacy
-                Policy are governed by the laws of Wyoming and the United
-                States.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                7. Contact Us
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                If you have any questions about these Terms or our Privacy
-                practices, please contact us at: cs@dentgo.ai.
-              </p>
-              <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
-                8. Updates
-              </h2>
-              <p className="text-gray-500 font-medium text-base leading-6 pb-2">
-                We may update these Terms and Privacy Policy from time to
-                time. Changes will be posted on this page with the new
-                effective date.
-              </p>
-            </div>
+      <div className="mx-auto max-w-lg p-0">
+        <div className="bg-white px-4 pt-4 flex flex-col flex-1 items-stretch mt-5 rounded-t-3xl h-screen overflow-y-auto w-full">
+          <div className="pt-2.5 pb-4.5 border-b border-gray-200 w-full">
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              <strong>Last updated: 31/05/2025</strong>
+            </p>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              Welcome to DentGo (“we,” “us,” or “our”). This document
+              contains both our Terms of Service and our Privacy Policy. By
+              using DentGo’s web app, you agree to comply with these terms
+              and acknowledge how we handle your data.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              1. Introduction
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              DentGo is a chatbot web application specializing in dental
+              assistance. Our service provides free daily messaging and the
+              option to upgrade to a premium subscription for additional
+              features.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              2. Account Registration
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              Users must create an account using Google or Apple
+              authentication. We do not collect any other login credentials.
+              There is no minimum age requirement, but parents or guardians
+              should supervise minors’ use.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              3. Usage Terms
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              You may use DentGo to chat with our dental chatbot for
+              information and support. Misuse of the service—including but
+              not limited to spamming, harassment, or any illegal
+              activity—is prohibited. We reserve the right to suspend or
+              terminate accounts that violate these terms.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              4. Subscriptions and Payments
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              DentGo offers one free daily message for all users.
+              Additional features, such as unlimited messaging, require a
+              monthly subscription. Subscription fees are clearly stated
+              before purchase and are billed monthly.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              5. Privacy Policy
+            </h2>
+            <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              5.1 Data Collection
+            </h3>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              We only collect your email address via Google or Apple
+              sign-in. We store your chatbot conversations to allow you to
+              access your chat history. No sensitive health information is
+              collected. We do not collect or process any additional
+              personal data.
+            </p>
+            <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              5.2 Cookies and Analytics
+            </h3>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              We use cookies solely for Google Analytics 4 (GA4) to
+              understand usage patterns and improve the service.
+            </p>
+            <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              5.3 Data Sharing
+            </h3>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              We do <strong>not</strong> share your data with third parties.
+              Your information is used strictly for providing and improving
+              the DentGo service.
+            </p>
+            <h3 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              5.4 Data Security
+            </h3>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              We use industry-standard encryption and secure hosting to
+              protect your data.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              6. Jurisdiction
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              DentGo is based in Wyoming, USA. These Terms and Privacy
+              Policy are governed by the laws of Wyoming and the United
+              States.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              7. Contact Us
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              If you have any questions about these Terms or our Privacy
+              practices, please contact us at: cs@dentgo.ai.
+            </p>
+            <h2 className="text-gray-500 font-medium text-base leading-6 pb-2">
+              8. Updates
+            </h2>
+            <p className="text-gray-500 font-medium text-base leading-6 pb-2">
+              We may update these Terms and Privacy Policy from time to
+              time. Changes will be posted on this page with the new
+              effective date.
+            </p>
           </div>
         </div>
       </div>

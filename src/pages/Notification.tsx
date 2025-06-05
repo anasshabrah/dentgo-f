@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from "react";
-import buttonBack from "../assets/images/Button-Back.png";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
-const Notification = () => {
+const Notification: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const handleBackClick = () => {
-    navigate(-1);
-  };
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500);
@@ -21,19 +16,6 @@ const Notification = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4">
-      <div className="bg-[#0078D7] pt-4 pb-8">
-        <div className="mx-auto max-w-[480px] px-4">
-          <div className="flex items-center">
-            <button onClick={handleBackClick} className="p-0 mr-2">
-              <img src={buttonBack} alt="Back" className="w-8 h-auto" />
-            </button>
-            <h1 className="text-white text-[18px] font-medium leading-[24px]">
-              Notification
-            </h1>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white mt-5 rounded-t-[24px] px-4 flex flex-col gap-4 pb-4">
         <div className="flex items-center justify-between bg-white rounded-lg p-3">
           <div className="flex items-center gap-4">
