@@ -9,7 +9,7 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ModalProvider>
-        <React.Suspense fallback={<Loader />}>
+        <React.Suspense fallback={<Loader fullscreen />}>
           <RoutesConfig />
         </React.Suspense>
       </ModalProvider>
