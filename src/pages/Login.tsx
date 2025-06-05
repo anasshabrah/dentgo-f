@@ -1,4 +1,5 @@
 // src/pages/Login.tsx
+
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
@@ -19,17 +20,17 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // 1) Load Google Identity script
+  // Initialize Google Identity script
   useGoogleIdentity();
 
-  // 2) If already authenticated, redirect to /dentgo-gpt-home
+  // If authenticated, redirect
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // 3) Handle credential response from Google One-Tap
+  // Handle Google One-Tap credential
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -52,7 +53,7 @@ const Login: React.FC = () => {
     [login, navigate, setError]
   );
 
-  // 4) Initialize Google One-Tap once the script is loaded
+  // Initialize Google One-Tap
   useEffect(() => {
     let retryTimeout: number | null = null;
 
@@ -74,7 +75,6 @@ const Login: React.FC = () => {
         setGoogleReady(true);
         setLoading(false);
       } else {
-        // Retry if the script hasn’t loaded
         retryTimeout = window.setTimeout(tryInitialize, 100);
       }
     };
@@ -85,19 +85,17 @@ const Login: React.FC = () => {
     };
   }, [handleCredentialResponse]);
 
-  // 1a) If we’re waiting for auth or Google initialization, show loader
   if (initializing || loading) {
     return <Loader />;
   }
 
-  // 2a) If authenticated, we’ve already redirected above, but just in case:
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
 
   return (
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
-      {/* ===== LOGO AND TITLE ===== */}
+      {/* Header */}
       <div className="flex flex-col items-center justify-center bg-primary py-6">
         <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
         <h1 className="text-white text-2xl font-semibold mt-3 text-center">
@@ -105,7 +103,7 @@ const Login: React.FC = () => {
         </h1>
       </div>
 
-      {/* ===== MAIN LOGIN SECTION ===== */}
+      {/* Main Login */}
       <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full max-w-md">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
@@ -129,15 +127,13 @@ const Login: React.FC = () => {
           )}
 
           <div className="flex flex-col gap-4 w-full">
-            {/* Google One-Tap / Button */}
+            {/* Google Login */}
             <button
               type="button"
               disabled={!googleReady}
-              className={`
-                flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg 
-                bg-white font-semibold text-base text-black transition
-                ${googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"}
-              `}
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
+                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={() => {
                 if (window.google?.accounts?.id && googleReady) {
                   try {
@@ -145,7 +141,9 @@ const Login: React.FC = () => {
                   } catch (err: any) {
                     if (err.name !== "AbortError") {
                       console.error("Google prompt error:", err);
-                      setError("Unexpected error when opening Google login. Please try again.");
+                      setError(
+                        "Unexpected error when opening Google login. Please try again."
+                      );
                     }
                   }
                 } else {
@@ -160,16 +158,16 @@ const Login: React.FC = () => {
             {/* Apple Login */}
             <button
               type="button"
-              className="
-                flex items-center justify-center gap-3 w-full py-3 border border-gray-300 
-                rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100
-              "
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
               onClick={async () => {
                 try {
                   await loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);
-                  setError(err?.message || "Apple authentication failed. Please try again.");
+                  setError(
+                    err?.message ||
+                      "Apple authentication failed. Please try again."
+                  );
                 }
               }}
             >
@@ -180,7 +178,7 @@ const Login: React.FC = () => {
         </div>
       </div>
 
-      {/* ===== FOOTER ILLUSTRATION ===== */}
+      {/* Footer Illustration */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
         <img
           src={dentaiBottom}

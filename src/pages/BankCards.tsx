@@ -1,3 +1,5 @@
+// src/pages/BankCards.tsx
+
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
@@ -31,7 +33,7 @@ const BankCards: React.FC = () => {
     loadCards();
   }, []);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader fullscreen />;
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
@@ -49,7 +51,11 @@ const BankCards: React.FC = () => {
                 <div className="border-b-2 border-gray-200 dark:border-gray-700 px-0">
                   <div className="flex items-center gap-2 py-4 pr-8 cursor-pointer">
                     <span className="w-8 h-8 flex items-center justify-center">
-                      <svg width="32" height="32" className="text-blue">
+                      <svg
+                        width="32"
+                        height="32"
+                        className="text-blue-500 dark:text-primary"
+                      >
                         <circle cx="16" cy="16" r="16" fill="currentColor" />
                       </svg>
                     </span>
@@ -58,7 +64,11 @@ const BankCards: React.FC = () => {
                         {card.network || "Unknown Network"}
                       </div>
                       <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
-                        <span className={card.isActive ? "text-blue-700" : "text-red-600"}>
+                        <span
+                          className={
+                            card.isActive ? "text-blue-700" : "text-red-600"
+                          }
+                        >
                           {card.isActive ? "Active" : "Inactive"}
                         </span>{" "}
                         | Card Number **** {card.last4}

@@ -1,3 +1,5 @@
+// src/pages/ContactUs.tsx
+
 import React, { useEffect, useState } from "react";
 import contactUsImg from "../assets/images/contact-us-img.png";
 import Loader from "../components/ui/Loader";
@@ -10,21 +12,30 @@ const ContactUs: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
-    return <Loader />;
-  }
+  if (loading) return <Loader fullscreen />;
 
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
       <div className="mx-auto max-w-lg px-4">
         <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          {/* Header Image */}
+          <div className="flex items-center justify-center">
+            <img
+              src={contactUsImg}
+              alt="Contact Us"
+              className="max-w-full pb-4"
+            />
+          </div>
+
+          {/* Contact Header */}
           <h2 className="text-gray-900 dark:text-gray-100 text-center text-2xl font-semibold leading-9 mb-2">
             Contact Us
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 mb-6">
-            If you face any trouble for item ordering feel free to contact us.
+            If you face any trouble with ordering items or have questions, feel free to reach out.
           </p>
 
+          {/* Contact Email */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-shrink-0">
               <svg
@@ -60,6 +71,7 @@ const ContactUs: React.FC = () => {
             </a>
           </div>
 
+          {/* Contact Website */}
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-shrink-0">
               <svg
@@ -110,19 +122,22 @@ const ContactUs: React.FC = () => {
             </div>
             <a
               href="https://dentgo.ai"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-gray-900 dark:text-gray-100 text-lg underline"
             >
               dentgo.ai
             </a>
           </div>
 
+          {/* About Us */}
           <div className="mt-6 w-full">
             <h2 className="text-gray-900 dark:text-gray-100 text-xl font-semibold mb-2">
               About Us
             </h2>
             <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
-              DentGo is your intelligent dental assistant — designed to save you time and enhance patient care. It
-              helps you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
+              DentGo is your intelligent dental assistant — designed to save you time and enhance patient care. It helps
+              you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
             </p>
             <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
               Whether you're managing a busy clinic or just starting out, DentGo streamlines your workflow and connects

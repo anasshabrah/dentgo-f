@@ -1,3 +1,4 @@
+// src/components/ui/Loader.tsx
 import React from "react";
 
 interface LoaderProps {
@@ -6,7 +7,7 @@ interface LoaderProps {
 }
 
 const Loader: React.FC<LoaderProps> = ({ fullscreen = false }) => {
-  // If fullscreen, use h-screen w-screen; otherwise h-full (relative to parent)
+  // If fullscreen, use h-screen w-screen; otherwise h-full w-full
   const containerClasses = fullscreen
     ? "flex items-center justify-center h-screen w-screen"
     : "flex items-center justify-center h-full w-full";

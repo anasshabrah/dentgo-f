@@ -1,3 +1,5 @@
+// src/pages/DentgoChat.tsx
+
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -13,58 +15,28 @@ function isRTL(text: string) {
   return /[\u0600-\u06FF]/.test(text);
 }
 
-function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" }) {
+function MessageBubble({
+  text,
+  type,
+}: {
+  text: string;
+  type: "personal" | "bot";
+}) {
   const rtl = isRTL(text);
-
-  if (type === "personal") {
-    return (
-      <div
-        className={`
-          float-right 
-          my-3 
-          max-w-[80%] 
-          bg-primary 
-          text-white 
-          p-3 
-          text-sm 
-          leading-5 
-          font-sans 
-          ${rtl ? "text-right" : "text-left"} 
-          rounded-tl-2xl 
-          rounded-tr-2xl 
-          rounded-br-2xl 
-          rounded-bl
-        `}
-        style={{ direction: rtl ? "rtl" : "ltr" }}
-        aria-label="Your message"
-      >
-        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-          {text}
-        </ReactMarkdown>
-      </div>
-    );
-  }
 
   return (
     <div
-      className={`
-        float-left 
-        my-3 
-        max-w-[80%] 
-        bg-primary/10 
-        text-primary 
-        p-3 
-        text-sm 
-        leading-5 
-        font-sans 
-        ${rtl ? "text-right" : "text-left"} 
-        rounded-tl-2xl 
-        rounded-tr-2xl 
-        rounded-bl-2xl 
-        rounded-br
-      `}
+      className={`my-3 max-w-[80%] p-3 text-sm leading-5 font-sans rounded-2xl ${
+        type === "personal"
+          ? `float-right bg-primary text-white ${
+              rtl ? "text-right" : "text-left"
+            } rounded-br`
+          : `float-left bg-primary/10 text-primary ${
+              rtl ? "text-right" : "text-left"
+            } rounded-bl`
+      }`}
       style={{ direction: rtl ? "rtl" : "ltr" }}
-      aria-label="Bot response"
+      aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
         {text}
@@ -73,19 +45,21 @@ function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" 
   );
 }
 
-export default function DentgoChat() {
+const DentgoChat: React.FC = () => {
   const navigate = useNavigate();
   const { search } = useLocation();
 
   const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState<{ text: string; type: "personal" | "bot" }[]>([]);
+  const [messages, setMessages] = useState<
+    { text: string; type: "personal" | "bot" }[]
+  >([]);
   const [input, setInput] = useState("");
   const [isThinking, setThinking] = useState(false);
   const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
 
-  // On mount: check for sessionId in URL, fetch history if present
+  // Load chat session if sessionId is in URL
   useEffect(() => {
     const params = new URLSearchParams(search);
     const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
@@ -104,16 +78,14 @@ export default function DentgoChat() {
             text: m.text,
           }));
         })
-        .catch(() => {
-          // Proceed without initial history if fetch fails
-        })
+        .catch(() => {})
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [search]);
 
-  // Scroll to bottom whenever messages or thinking state change
+  // Scroll to bottom
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTo({
@@ -123,21 +95,21 @@ export default function DentgoChat() {
     }
   }, [messages, isThinking]);
 
-  // If not loading and no existing session, show greeting
+  // Show greeting if new session
   useEffect(() => {
     if (!loading && sessionId === null) {
-      const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+      const greeting =
+        "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
       setMessages([{ text: greeting, type: "bot" }]);
       historyRef.current = [{ role: "assistant", text: greeting }];
     }
   }, [loading, sessionId]);
 
-  // Send a new prompt
+  // Send a message
   const send = async () => {
     const prompt = input.trim();
     if (!prompt || isThinking) return;
 
-    // Append user message immediately
     setMessages((prev) => [...prev, { text: prompt, type: "personal" }]);
     historyRef.current.push({ role: "user", text: prompt });
     setInput("");
@@ -150,17 +122,18 @@ export default function DentgoChat() {
         sessionId
       );
 
-      // If this is the first question, update sessionId and URL
       if (!sessionId) {
         setSessionId(newSid);
         navigate(`?sessionId=${newSid}`, { replace: true });
       }
 
-      // Append bot’s answer
       setMessages((prev) => [...prev, { text: answer, type: "bot" }]);
       historyRef.current.push({ role: "assistant", text: answer });
     } catch (err: any) {
-      setMessages((prev) => [...prev, { text: `❌ ${err.message}`, type: "bot" }]);
+      setMessages((prev) => [
+        ...prev,
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
+      ]);
     } finally {
       setThinking(false);
     }
@@ -170,11 +143,11 @@ export default function DentgoChat() {
 
   return (
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col font-sans">
-      {/* === CHAT AREA === */}
+      {/* Chat Container */}
       <div className="mx-auto max-w-lg px-4 flex-1 flex flex-col">
         <div className="bg-white mt-5 rounded-t-2xl pt-3 px-4 flex flex-col flex-1 shadow-md">
           <div className="flex-1 flex flex-col">
-            {/* MESSAGE LIST */}
+            {/* Message List */}
             <div className="flex-1 overflow-y-hidden relative">
               <div
                 className="overflow-y-auto max-h-full pr-2"
@@ -187,21 +160,7 @@ export default function DentgoChat() {
 
                 {isThinking && (
                   <div
-                    className="
-                      italic 
-                      text-gray-500 
-                      mt-2 
-                      bg-primary/10 
-                      text-primary 
-                      rounded-tl-2xl 
-                      rounded-tr-2xl 
-                      rounded-bl-2xl 
-                      rounded-br 
-                      p-3 
-                      my-3 
-                      max-w-[80%] 
-                      float-left
-                    "
+                    className="italic text-gray-500 mt-2 bg-primary/10 text-primary rounded-2xl p-3 my-3 max-w-[80%] float-left"
                     aria-label="Bot is typing"
                   >
                     <em>Dentgo is typing…</em>
@@ -210,28 +169,11 @@ export default function DentgoChat() {
               </div>
             </div>
 
-            {/* INPUT AREA */}
+            {/* Input Area */}
             <div className="flex gap-3 mt-2 pb-4">
               <div className="flex-1">
                 <textarea
-                  className="
-                    w-full 
-                    h-12 
-                    p-2 
-                    rounded-lg 
-                    border 
-                    border-transparent 
-                    bg-gray-100 
-                    text-base 
-                    text-gray-500 
-                    resize-none 
-                    focus:border-primary 
-                    focus:bg-primary/10 
-                    focus:outline-none 
-                    focus:ring-2 
-                    focus:ring-primary/50 
-                    transition
-                  "
+                  className="w-full h-12 p-2 rounded-lg border border-transparent bg-gray-100 text-base text-gray-500 resize-none focus:border-primary focus:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   placeholder="Write here…"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -245,21 +187,7 @@ export default function DentgoChat() {
                 />
               </div>
               <button
-                className="
-                  w-12 
-                  h-12 
-                  rounded-lg 
-                  bg-primary 
-                  text-white 
-                  flex 
-                  items-center 
-                  justify-center 
-                  hover:bg-primary/90 
-                  focus:outline-none 
-                  focus:ring-2 
-                  focus:ring-primary/50 
-                  transition
-                "
+                className="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                 onClick={send}
                 disabled={isThinking}
                 aria-label="Send message"
@@ -281,7 +209,7 @@ export default function DentgoChat() {
         </div>
       </div>
 
-      {/* === END SESSION MODAL === */}
+      {/* End Session Modal */}
       <div
         className="modal fade"
         id="end-session-modal"
@@ -303,20 +231,7 @@ export default function DentgoChat() {
               </p>
               <div className="flex justify-center gap-3">
                 <button
-                  className="
-                    bg-primary 
-                    text-white 
-                    px-6 
-                    py-3 
-                    rounded-xl 
-                    text-lg 
-                    font-medium 
-                    hover:bg-primary/90 
-                    focus:outline-none 
-                    focus:ring-2 
-                    focus:ring-primary/50 
-                    transition
-                  "
+                  className="bg-primary text-white px-6 py-3 rounded-xl text-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   onClick={async () => {
                     if (sessionId) {
                       await endChatSession(sessionId);
@@ -333,20 +248,7 @@ export default function DentgoChat() {
                   Yes, End
                 </button>
                 <button
-                  className="
-                    bg-gray-100 
-                    text-primary 
-                    px-6 
-                    py-3 
-                    rounded-xl 
-                    text-lg 
-                    font-medium 
-                    hover:bg-gray-200 
-                    focus:outline-none 
-                    focus:ring-2 
-                    focus:ring-primary/50 
-                    transition
-                  "
+                  className="bg-gray-100 text-primary px-6 py-3 rounded-xl text-lg font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   data-bs-dismiss="modal"
                   aria-label="Cancel end session"
                 >
@@ -359,4 +261,6 @@ export default function DentgoChat() {
       </div>
     </div>
   );
-}
+};
+
+export default DentgoChat;
