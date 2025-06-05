@@ -1,7 +1,7 @@
 // src/components/layout/AppHeader.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "../context/ModalContext";
 import SideMenu from "./SideMenu";
 
 interface Props {
