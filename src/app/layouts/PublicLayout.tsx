@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import AppHeader from "../../components/layout/AppHeader";
+import AppHeader from "../../components/AppHeader";
 
 const PublicLayout: React.FC = () => {
   // Crude path-to-title map – expand as needed
