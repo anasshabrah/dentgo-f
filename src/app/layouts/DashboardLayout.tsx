@@ -1,8 +1,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { useModal } from "../../context/ModalContext";
-import SideMenu from "../../components/layout/SideMenu";
-import AppHeader from "../../components/layout/AppHeader";
+import SideMenu from "../../components/SideMenu";
+import AppHeader from "../../components/AppHeader";
 
 const DashboardLayout: React.FC = () => {
   const { open } = useModal();
