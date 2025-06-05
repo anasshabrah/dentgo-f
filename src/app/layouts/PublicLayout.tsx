@@ -1,21 +1,30 @@
+// src/layouts/PublicLayout.tsx
 import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import AppHeader from "../../components/AppHeader";
 
 const PublicLayout: React.FC = () => {
-  // Crude path-to-title map – expand as needed
   const { pathname } = useLocation();
-  const title = ({
-    "/login": "Login",
+  const navigate = useNavigate();
+
+  // Only show "Back" if we are neither on "/" nor on "/login"
+  const showBack = pathname !== "/" && pathname !== "/login";
+
+  // Simple map of path → title
+  const titleMap: Record<string, string> = {
     "/": "Dentgo",
-  } as Record<string, string>)[pathname] ?? "Dentgo";
+    "/login": "Login",
+    // add other public‐facing paths here if needed
+  };
+  const title = titleMap[pathname] ?? "Dentgo";
 
   return (
     <>
-      {/* Shared header with back button */}
+      {/* AppHeader expects a title and a showBack flag */}
       <AppHeader
         title={title}
-        showBack={pathname !== "/"}
+        showBack={showBack}
+        onBack={() => navigate(-1)}
       />
       <main>
         <Outlet />
