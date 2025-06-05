@@ -1,143 +1,195 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import logo from "../assets/images/logo.png";
-import dotsPattern from "../assets/images/dots_pattern.png";
-import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
-import imageUnscreen from "../assets/images/Image.png";
-import robotSlider from "../assets/images/robot-slider-img2.png";
-import robotSlider3 from "../assets/images/robot-slider-img3.png";
+// src/pages/Login.tsx
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import Loader from "../components/ui/Loader";
+import logo from "../assets/images/logo-w.png";
+import AppleIcon from "../assets/images/Icon-apple.png";
+import GoogleIcon from "../assets/images/Icon-google.png";
+import dentaiBottom from "../assets/images/dentaiBottom.png";
 
-const Splash: React.FC = () => {
+import useGoogleIdentity from "../hooks/useGoogleIdentity";
+import { useAuth } from "../context/AuthContext";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
+
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [showInitialSplash, setShowInitialSplash] = useState(true);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const { login, isAuthenticated, initializing, error, setError } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
 
-  const slides = [
-    {
-      id: 0,
-      imgSrc: imageUnscreen,
-      title: "Welcome to Dentgo, Your Smart Dental Assistant",
-      content:
-        "Diagnose cases accurately, build precise treatment plans, and get a tailored list of required materials with trusted suppliers — all in one place.",
-    },
-    {
-      id: 1,
-      imgSrc: robotSlider,
-      title: "AI-Powered Treatment Planning in Seconds",
-      content:
-        "Let Dentgo analyze your cases and suggest complete, customized treatment plans backed by dental AI — helping you deliver better care, faster.",
-    },
-    {
-      id: 2,
-      imgSrc: robotSlider3,
-      title: "Get What You Need — Delivered to Your Clinic",
-      content:
-        "Easily source the supplies and tools you need from top suppliers and have them delivered right to your door — saving you time and effort.",
-    },
-  ];
+  // 1) Load Google Identity script
+  useGoogleIdentity();
 
+  // 2) If already authenticated, redirect to /dentgo-gpt-home
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowInitialSplash(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleNext = () => {
-    if (activeSlide < slides.length - 1) {
-      setActiveSlide((prev) => prev + 1);
-    } else {
-      navigate("/login");
+    if (!initializing && isAuthenticated) {
+      navigate("/dentgo-gpt-home", { replace: true });
     }
-  };
+  }, [initializing, isAuthenticated, navigate]);
+
+  // 3) Handle credential response from Google One-Tap
+  const handleCredentialResponse = useCallback(
+    async (response: any) => {
+      const { credential } = response;
+      if (!credential) {
+        setError("No credentials returned. Please try again.");
+        return;
+      }
+      try {
+        const user = await loginWithGoogleAPI(credential);
+        login(user);
+        navigate("/dentgo-gpt-home", { replace: true });
+      } catch (err: any) {
+        console.error("Google login error:", err);
+        setError(
+          err?.message ||
+            "Authentication failed. Please try again or use a different browser mode."
+        );
+      }
+    },
+    [login, navigate, setError]
+  );
+
+  // 4) Initialize Google One-Tap once the script is loaded
+  useEffect(() => {
+    let retryTimeout: number | null = null;
+
+    const tryInitialize = () => {
+      if (window.google?.accounts?.id) {
+        if (!CLIENT_ID) {
+          console.error("Missing VITE_GOOGLE_CLIENT_ID!");
+          alert("Google Login misconfigured: missing client ID.");
+          setLoading(false);
+          return;
+        }
+
+        window.google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: handleCredentialResponse,
+          ux_mode: "popup",
+        });
+
+        setGoogleReady(true);
+        setLoading(false);
+      } else {
+        // Retry if the script hasn’t loaded
+        retryTimeout = window.setTimeout(tryInitialize, 100);
+      }
+    };
+
+    tryInitialize();
+    return () => {
+      if (retryTimeout) clearTimeout(retryTimeout);
+    };
+  }, [handleCredentialResponse]);
+
+  // 1a) If we’re waiting for auth or Google initialization, show loader
+  if (initializing || loading) {
+    return <Loader />;
+  }
+
+  // 2a) If authenticated, we’ve already redirected above, but just in case:
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dentgo-gpt-home" replace />;
+  }
 
   return (
-    <div className="bg-white h-screen w-full overflow-hidden">
-      {showInitialSplash ? (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-          <div className="relative h-full w-full flex flex-col items-center justify-center">
-            <div className="absolute top-0 left-0">
-              <img
-                className="w-48 object-contain"
-                src={dotsPattern}
-                alt=""
-                aria-hidden="true"
-              />
+    <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
+      {/* ===== LOGO AND TITLE ===== */}
+      <div className="flex flex-col items-center justify-center bg-primary py-6">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+          DentGo AI
+        </h1>
+      </div>
+
+      {/* ===== MAIN LOGIN SECTION ===== */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
+        <div className="w-full max-w-md">
+          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
+            Welcome
+          </h2>
+
+          {error && (
+            <div
+              role="alert"
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
+              onClick={() => setError(null)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setError(null);
+                }
+              }}
+              tabIndex={0}
+            >
+              {error}
             </div>
-            <div className="flex flex-col items-center">
-              <img className="w-48 h-auto" src={logo} alt="Dentgo logo" />
-              <h1 className="text-3xl font-bold mt-4 text-gray-800">Dentgo</h1>
-              <p className="text-gray-500 text-center text-lg font-medium leading-6 mt-2">
-                Smarter Dentistry Starts Here
-              </p>
-            </div>
-            <div className="absolute bottom-0 left-0">
-              <img
-                className="w-48 object-contain"
-                src={dotsPatternBottom}
-                alt=""
-                aria-hidden="true"
-              />
-            </div>
+          )}
+
+          <div className="flex flex-col gap-4 w-full">
+            {/* Google One-Tap / Button */}
+            <button
+              type="button"
+              disabled={!googleReady}
+              className={`
+                flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg 
+                bg-white font-semibold text-base text-black transition
+                ${googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"}
+              `}
+              onClick={() => {
+                if (window.google?.accounts?.id && googleReady) {
+                  try {
+                    window.google.accounts.id.prompt();
+                  } catch (err: any) {
+                    if (err.name !== "AbortError") {
+                      console.error("Google prompt error:", err);
+                      setError("Unexpected error when opening Google login. Please try again.");
+                    }
+                  }
+                } else {
+                  alert("Google login is not ready yet.");
+                }
+              }}
+            >
+              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
+              <span>Continue with Google</span>
+            </button>
+
+            {/* Apple Login */}
+            <button
+              type="button"
+              className="
+                flex items-center justify-center gap-3 w-full py-3 border border-gray-300 
+                rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100
+              "
+              onClick={async () => {
+                try {
+                  await loginWithApple();
+                } catch (err: any) {
+                  console.error("Apple login error:", err);
+                  setError(err?.message || "Apple authentication failed. Please try again.");
+                }
+              }}
+            >
+              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
+              <span>Continue with Apple</span>
+            </button>
           </div>
         </div>
-      ) : (
-        <>
-          <div className="w-full h-full flex flex-col">
-            <div className="flex-1 w-full flex flex-col">
-              {slides.map((slide, index) => (
-                <div
-                  key={slide.id}
-                  className={`${
-                    activeSlide === index ? "flex" : "hidden"
-                  } flex-1 flex-col items-center justify-between w-full h-full`}
-                >
-                  <div className="flex flex-col items-center px-4 pt-8">
-                    <img
-                      className="w-full max-w-xs mb-4"
-                      src={slide.imgSrc}
-                      alt=""
-                      aria-hidden="true"
-                    />
-                    <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
-                      {slide.title}
-                    </h2>
-                    <p className="text-center text-base text-gray-500">
-                      {slide.content}
-                    </p>
-                  </div>
+      </div>
 
-                  <div className="w-full px-4 pb-8">
-                    <button
-                      className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
-                      onClick={handleNext}
-                    >
-                      {index < slides.length - 1 ? "Next" : "Get Started"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-center gap-2 mb-4">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  className={`rounded-full transition-all ${
-                    activeSlide === index
-                      ? "bg-gray-800 w-8 h-2"
-                      : "bg-gray-200 w-2 h-2"
-                  }`}
-                  onClick={() => setActiveSlide(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+      {/* ===== FOOTER ILLUSTRATION ===== */}
+      <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
+        <img
+          src={dentaiBottom}
+          alt="Dental AI graphic"
+          className="w-full h-full object-cover"
+        />
+      </div>
     </div>
   );
 };
 
-export default Splash;
+export default Login;
