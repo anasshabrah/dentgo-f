@@ -1,6 +1,14 @@
-const API_BASE = import.meta.env.VITE_SERVER_URL || "";
+import { API_BASE } from "../config";
 
-export async function fetchChatSessions() {
+export interface ChatSession {
+  id: number;
+  title?: string;
+  startedAt: string;
+  endedAt: string | null;
+  messages: Array<{ role: "USER" | "ASSISTANT"; content: string }>;
+}
+
+export async function fetchChatSessions(): Promise<ChatSession[]> {
   const res = await fetch(`${API_BASE}/api/chats`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -13,7 +21,9 @@ export async function fetchChatSessions() {
   return res.json();
 }
 
-export async function fetchChatSession(id) {
+export async function fetchChatSession(
+  id: number
+): Promise<ChatSession> {
   const res = await fetch(`${API_BASE}/api/chats/${id}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -26,7 +36,7 @@ export async function fetchChatSession(id) {
   return res.json();
 }
 
-export async function endChatSession(sessionId) {
+export async function endChatSession(sessionId: number): Promise<void> {
   const res = await fetch(`${API_BASE}/api/chats/${sessionId}/end`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },

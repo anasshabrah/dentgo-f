@@ -1,6 +1,11 @@
-const API_BASE = import.meta.env.VITE_SERVER_URL || "";
+import { API_BASE } from "../config";
 
-export async function askDentgo(prompt, history = [], sessionId = null, signal) {
+export async function askDentgo(
+  prompt: string,
+  history: Array<{ role: string; text: string }> = [],
+  sessionId: number | null = null,
+  signal?: AbortSignal
+): Promise<{ sessionId: number; answer: string }> {
   const res = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

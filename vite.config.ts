@@ -11,7 +11,8 @@ export default defineConfig({
         target: process.env.VITE_SERVER_URL,
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
+        // Strip the leading `/api` before forwarding to the backend URL:
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

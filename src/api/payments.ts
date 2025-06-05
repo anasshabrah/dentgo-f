@@ -1,33 +1,48 @@
-// src/api/payments.js
-import axios from 'axios';
+import axios from "axios";
+import { API_BASE } from "../config";
 
-const API_BASE = import.meta.env.VITE_SERVER_URL || '';
+export interface StripeCustomerResponse {
+  customerId: string;
+}
 
-export async function createStripeCustomer() {
+export async function createStripeCustomer(): Promise<StripeCustomerResponse> {
   const resp = await axios.post(
     `${API_BASE}/api/payments/create-customer`,
     {},
     {
       withCredentials: true,
-      headers: { 'Content-Type': 'application/json' },
-    }
-  );
-  return resp.data; // { customerId: 'cus_...' }
-}
-
-export async function createSubscription(priceId, paymentMethodId) {
-  const resp = await axios.post(
-    `${API_BASE}/api/payments/create-subscription`,
-    { priceId, paymentMethodId },
-    {
-      withCredentials: true,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     }
   );
   return resp.data;
 }
 
-export async function fetchActiveSubscription() {
+export interface SubscriptionResponse {
+  subscriptionId: string;
+  clientSecret: string;
+  status: string;
+}
+
+export async function createSubscription(
+  priceId: string,
+  paymentMethodId: string
+): Promise<SubscriptionResponse> {
+  const resp = await axios.post(
+    `${API_BASE}/api/payments/create-subscription`,
+    { priceId, paymentMethodId },
+    {
+      withCredentials: true,
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  return resp.data;
+}
+
+export async function fetchActiveSubscription(): Promise<{
+  subscriptionId: string;
+  status: string;
+  currentPeriodEnd: number;
+}> {
   const resp = await axios.get(`${API_BASE}/api/subscriptions`, {
     withCredentials: true,
   });
