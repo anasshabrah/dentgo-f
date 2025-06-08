@@ -1,3 +1,4 @@
+// src/api/auth.ts
 export interface User {
   id: number;
   name: string;
@@ -14,7 +15,7 @@ export async function loginWithGoogle(
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // Always include credentials
+    credentials: "include",
     body: JSON.stringify({ credential }),
   });
   if (!res.ok) {
