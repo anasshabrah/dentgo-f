@@ -6,7 +6,7 @@ import { useModal } from "../context/ModalContext";
 import { useAuth } from "../context/AuthContext";
 
 export default function SideMenu() {
-  const { close } = useModal();
+  const { isOpen, close } = useModal();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -23,7 +23,7 @@ export default function SideMenu() {
 
   return (
     <Transition appear show as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={close}>
+      <Dialog as="div" className="relative z-50" open={isOpen} onClose={close}>
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
