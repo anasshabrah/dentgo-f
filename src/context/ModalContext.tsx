@@ -1,26 +1,40 @@
+// src/context/ModalContext.tsx
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalCtx {
+  isOpen: boolean;
   open: (content: React.ReactNode) => void;
   close: () => void;
 }
+
 const Ctx = createContext<ModalCtx | null>(null);
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [node, setNode] = useState<React.ReactNode>(null);
-  const open = useCallback((content: React.ReactNode) => setNode(content), []);
-  const close = useCallback(() => setNode(null), []);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback((content: React.ReactNode) => {
+    setNode(content);
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    // Optionally, delay clearing node until animation completes
+    setTimeout(() => setNode(null), 300);
+  }, []);
 
   return (
-    <Ctx.Provider value={{ open, close }}>
+    <Ctx.Provider value={{ isOpen, open, close }}>
       {children}
-      {node && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          {node}
-        </div>,
-        document.body
-      )}
+      {isOpen && node &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            {node}
+          </div>,
+          document.body
+        )}
     </Ctx.Provider>
   );
 };

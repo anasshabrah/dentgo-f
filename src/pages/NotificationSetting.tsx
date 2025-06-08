@@ -1,7 +1,7 @@
 // src/pages/NotificationSetting.tsx
 
 import React, { useEffect, useState } from "react";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 interface NotificationSettings {
   email: boolean;

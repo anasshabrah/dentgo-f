@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import contactUsImg from "../assets/images/contact-us-img.png";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 const ContactUs: React.FC = () => {
   const [loading, setLoading] = useState(true);

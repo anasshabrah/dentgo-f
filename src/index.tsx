@@ -3,8 +3,8 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./app/App";
 import reportWebVitals from "./reportWebVitals";
-import { DarkModeProvider } from "./components/DarkModeContext";
-import { AuthProvider } from "./context/AuthContext";
+import { DarkModeProvider } from "@components/DarkModeContext";
+import { AuthProvider } from "@context/AuthContext";
 
 declare global {
   interface Window {
@@ -30,4 +30,4 @@ root.render(
 
 console.log("[Startup] index.tsx → <App /> render call done");
 
-reportWebVitals();
+reportWebVitals(() => {});

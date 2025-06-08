@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import Loader from "../components/ui/Loader";
+import { useAuth } from "@context/AuthContext";
+import Loader from "@components/ui/Loader";
 
 const Home: React.FC = () => {
   const { user, logout, isAuthenticated, initializing } = useAuth();

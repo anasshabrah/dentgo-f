@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 import { StripeElements } from "../lib/stripeClient";
 import {
   createPaymentRequest,
@@ -12,6 +12,7 @@ import {
 } from "../lib/stripeClient";
 import { fetchCards } from "../api/cards";
 import { API_BASE } from "../config";
+import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
 
 interface Card {
   id: number;
@@ -26,9 +27,7 @@ const PaymentMethodForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [cards, setCards] = useState<Card[]>([]);
   const [fetchError, setFetchError] = useState<string>("");
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
-    null
-  );
+  const [paymentRequest, setPaymentRequest] = useState<StripePaymentRequest | null>(null);
   const [canMakePayment, setCanMakePayment] = useState<boolean>(false);
 
   // Initial loading delay
@@ -96,7 +95,8 @@ const PaymentMethodForm: React.FC = () => {
           }
         });
 
-        if (await pr.canMakePayment()) {
+        const result = await pr.canMakePayment();
+        if (result) {
           setPaymentRequest(pr);
           setCanMakePayment(true);
         }

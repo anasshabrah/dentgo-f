@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 import { StripeElements } from "../lib/stripeClient";
 import {
   createPaymentRequest,
@@ -11,6 +11,7 @@ import {
   useStripe,
 } from "../lib/stripeClient";
 import { fetchCards } from "../api/cards";
+import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
 
 interface Card {
   id: number;
@@ -25,9 +26,7 @@ const InnerSelectPaymentMethod: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [cards, setCards] = useState<Card[]>([]);
   const [fetchError, setFetchError] = useState<string>("");
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
-    null
-  );
+  const [paymentRequest, setPaymentRequest] = useState<StripePaymentRequest | null>(null);
 
   // Simulate initial loading delay
   useEffect(() => {
@@ -116,7 +115,7 @@ const InnerSelectPaymentMethod: React.FC = () => {
                 Apple Pay / Google Pay currently unavailable.
               </p>
               <small className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Ensure you’re on Safari (Apple Pay) or Chrome (Google Pay), using HTTPS or localhost. 
+                Ensure you’re on Safari (Apple Pay) or Chrome (Google Pay), using HTTPS or localhost.
               </small>
             </div>
           )}
@@ -162,7 +161,13 @@ const InnerSelectPaymentMethod: React.FC = () => {
                         {card.network}
                       </div>
                       <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
-                        <span className={card.isActive ? "text-blue-800 dark:text-primary" : "text-red-600"}>
+                        <span
+                          className={
+                            card.isActive
+                              ? "text-blue-800 dark:text-primary"
+                              : "text-red-600"
+                          }
+                        >
                           {card.isActive ? "Active" : "Inactive"}
                         </span>{" "}
                         | Card Number **** {card.last4}

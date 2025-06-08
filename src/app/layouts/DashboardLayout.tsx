@@ -1,8 +1,9 @@
+// src/app/layouts/DashboardLayout.tsx
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { useModal } from "../../context/ModalContext";
-import SideMenu from "../../components/SideMenu";
-import AppHeader from "../../components/AppHeader";
+import { useModal } from "@context/ModalContext";
+import SideMenu from "@components/SideMenu";
+import AppHeader from "@components/AppHeader";
 
 const DashboardLayout: React.FC = () => {
   const { open } = useModal();

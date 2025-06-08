@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { createCard } from "../api/cards";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 import {
   Elements,
   CardElement,

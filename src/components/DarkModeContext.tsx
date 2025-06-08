@@ -1,10 +1,25 @@
-// src/context/DarkModeContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+// src/context/DarkModeContext.tsx
 
-const DarkModeContext = createContext();
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export const DarkModeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+interface DarkModeContextValue {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const defaultValue: DarkModeContextValue = {
+  isDarkMode: false,
+  toggleDarkMode: () => {}
+};
+
+const DarkModeContext = createContext<DarkModeContextValue>(defaultValue);
+
+interface DarkModeProviderProps {
+  children: ReactNode;
+}
+
+export const DarkModeProvider: React.FC<DarkModeProviderProps> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('darkMode') === 'true';
     }

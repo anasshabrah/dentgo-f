@@ -1,7 +1,7 @@
 // src/pages/TermsAndPrivacy.tsx
 
 import React, { useEffect, useState } from "react";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 const TermsAndPrivacy: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);

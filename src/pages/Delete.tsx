@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 const Delete: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);

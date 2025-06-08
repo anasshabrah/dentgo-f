@@ -1,0 +1,13 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./app/App";
+import reportWebVitals from "./reportWebVitals";
+import { DarkModeProvider } from "@components/DarkModeContext";
+import { AuthProvider } from "@context/AuthContext";
+console.log("[Startup] index.tsx → about to create root and render <App />");
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(_jsx(React.StrictMode, { children: _jsx(DarkModeProvider, { children: _jsx(AuthProvider, { children: _jsx(App, {}) }) }) }));
+console.log("[Startup] index.tsx → <App /> render call done");
+reportWebVitals(() => { });

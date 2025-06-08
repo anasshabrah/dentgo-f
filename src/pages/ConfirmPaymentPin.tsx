@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 const ConfirmPaymentPin: React.FC = () => {
   const navigate = useNavigate();

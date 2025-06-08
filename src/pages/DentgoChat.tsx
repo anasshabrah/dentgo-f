@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import { askDentgo } from "../api/chat";
 import { fetchChatSession, endChatSession } from "../api/chats";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 import bootstrap from "bootstrap/dist/js/bootstrap.bundle";
 
 // Detect Arabic characters for RTL support
@@ -70,7 +70,7 @@ const DentgoChat: React.FC = () => {
         .then((session) => {
           const msgs = session.messages.map((m: any) => ({
             text: m.content,
-            type: m.role === "USER" ? "personal" : "bot",
+            type: m.role === "USER" ? "personal" as const : "bot" as const,
           }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({

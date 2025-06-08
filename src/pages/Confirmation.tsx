@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 import confirmationImg from "../assets/images/confirmation-img.png";
 
 const Confirmation: React.FC = () => {

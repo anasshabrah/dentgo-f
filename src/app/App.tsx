@@ -1,9 +1,9 @@
 // src/app/App.tsx
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import { ModalProvider } from "../context/ModalContext";
+import { ModalProvider } from "@context/ModalContext";
 import RoutesConfig from "./routes";
-import Loader from "../components/ui/Loader";
+import Loader from "@components/ui/Loader";
 
 const App: React.FC = () => {
   return (

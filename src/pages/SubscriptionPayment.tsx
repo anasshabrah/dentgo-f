@@ -1,16 +1,17 @@
-// src/pages/SelectPaymentMethod.tsx
+// src/pages/SubscriptionPayment.tsx
 
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import Loader from "../components/ui/Loader";
+import { useNavigate } from "react-router-dom";
+import Loader from "@components/ui/Loader";
 import { StripeElements } from "../lib/stripeClient";
 import {
   createPaymentRequest,
-  createPaymentIntent,
+  createSubscriptionIntent,
   PaymentRequestButtonElement,
   useStripe,
 } from "../lib/stripeClient";
 import { fetchCards } from "../api/cards";
+import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
 
 interface Card {
   id: number;
@@ -19,23 +20,20 @@ interface Card {
   isActive: boolean;
 }
 
-const InnerSelectPaymentMethod: React.FC = () => {
+const SubscriptionPaymentForm: React.FC = () => {
   const navigate = useNavigate();
   const stripe = useStripe();
   const [loading, setLoading] = useState<boolean>(true);
   const [cards, setCards] = useState<Card[]>([]);
   const [fetchError, setFetchError] = useState<string>("");
-  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(
-    null
-  );
+  const [paymentRequest, setPaymentRequest] = useState<StripePaymentRequest | null>(null);
 
-  // Simulate initial loading state
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Initialize Apple/Google Pay
+  // Initialize PaymentRequest for Apple/Google Pay
   useEffect(() => {
     if (loading || !stripe) return;
 
@@ -44,7 +42,7 @@ const InnerSelectPaymentMethod: React.FC = () => {
         const pr = await createPaymentRequest({
           country: "US",
           currency: "usd",
-          total: { label: "Your Order", amount: 5000 },
+          total: { label: "Subscription", amount: 1000 },
           requestPayerName: true,
           requestPayerEmail: true,
         });
@@ -55,18 +53,26 @@ const InnerSelectPaymentMethod: React.FC = () => {
 
         pr.on("paymentmethod", async (event: any) => {
           try {
-            const clientSecret = await createPaymentIntent(5000);
+            // Create subscription intent using the payment method and amount
+            const { clientSecret, subscriptionId, status } = await createSubscriptionIntent(
+              event.paymentMethod.id,
+              "1000" // amount as a string
+            );
+
+            // Confirm the subscription payment
             const { error, paymentIntent } = await stripe.confirmCardPayment(
               clientSecret,
               { payment_method: event.paymentMethod.id }
             );
+
             if (error || !paymentIntent) {
               event.complete("fail");
-              console.error("PaymentIntent confirmation error:", error);
+              console.error("Subscription confirmation error:", error);
               return;
             }
+
             event.complete("success");
-            navigate("/confirm-payment-pin");
+            navigate("/subscription-success");
           } catch (err) {
             console.error("Error during PaymentRequest flow:", err);
             event.complete("fail");
@@ -78,7 +84,6 @@ const InnerSelectPaymentMethod: React.FC = () => {
     })();
   }, [loading, stripe, navigate]);
 
-  // Fetch saved cards after loading completes
   useEffect(() => {
     if (loading) return;
     (async () => {
@@ -91,10 +96,6 @@ const InnerSelectPaymentMethod: React.FC = () => {
       }
     })();
   }, [loading]);
-
-  const handleContinue = () => {
-    navigate("/confirm-payment-pin");
-  };
 
   if (loading) {
     return <Loader fullscreen />;
@@ -179,36 +180,16 @@ const InnerSelectPaymentMethod: React.FC = () => {
               No saved cards found.
             </p>
           )}
-
-          {/* Link a New Card */}
-          <div className="mb-4">
-            <Link
-              to="/add-new-card"
-              className="text-blue-600 dark:text-primary text-base font-medium"
-            >
-              + Link a New Card
-            </Link>
-          </div>
-
-          {/* Continue Button */}
-          <div className="flex items-center justify-center flex-col mt-auto mb-4">
-            <div
-              className="w-full py-4 bg-white dark:bg-gray-700 text-blue-600 dark:text-primary text-lg font-medium rounded-xl text-center cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600 transition"
-              onClick={handleContinue}
-            >
-              Continue
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const SelectPaymentMethod: React.FC = () => (
+const SubscriptionPayment: React.FC = () => (
   <StripeElements>
-    <InnerSelectPaymentMethod />
+    <SubscriptionPaymentForm />
   </StripeElements>
 );
 
-export default SelectPaymentMethod;
+export default SubscriptionPayment;
