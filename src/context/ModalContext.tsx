@@ -30,8 +30,11 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {isOpen && node &&
         createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            {node}
+          // Only render the modal content. Backdrop is handled by HeadlessUI Dialog.
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              {node}
+            </div>
           </div>,
           document.body
         )}
