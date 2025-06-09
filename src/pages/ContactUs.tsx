@@ -25,8 +25,9 @@ const ContactUs: React.FC = () => {
             If you run into any trouble or have questions, please reach out below.
           </p>
 
-          {/* Contact Email Only */}
+          {/* Email */}
           <div className="flex items-center justify-center space-x-3 mb-6">
+            {/* Envelope icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-blue-500 flex-shrink-0"
@@ -38,12 +39,12 @@ const ContactUs: React.FC = () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M16 12l-4-4-4 4m0 4l4-4 4 4"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8H3m18-8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v2"
               />
             </svg>
             <a
               href="mailto:cs@dentgo.ai"
-              className="text-blue-600 dark:text-blue-400 underline"
+              className="text-blue-600 dark:text-blue-400 underline text-lg"
             >
               cs@dentgo.ai
             </a>
