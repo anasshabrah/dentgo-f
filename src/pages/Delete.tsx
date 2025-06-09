@@ -40,8 +40,12 @@ const Delete: React.FC = () => {
               We’re sorry to see you go! All your data will be permanently removed.
             </p>
 
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+              This includes your chats, cards, and any other data associated with your account.
+            </p>
+
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
-              Confirm below to delete your account and all associated data.
+              Confirm below to delete your account and all associated data forever.
             </p>
 
             <div className="flex flex-col items-center justify-center pb-6">
