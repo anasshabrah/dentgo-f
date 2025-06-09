@@ -5,16 +5,14 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "@components/ui/Loader";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
+import GoogleIcon from "../assets/images/Icon-google.png";
 import dentaiBottom from "../assets/images/dentaiBottom.png";
 
 import useGoogleIdentity from "@hooks/useGoogleIdentity";
 import { useAuth } from "@context/AuthContext";
-import {
-  loginWithGoogle as loginWithGoogleAPI,
-  loginWithApple,
-} from "../api/auth";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -22,17 +20,17 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Load Google Identity script
+  // Initialize Google Identity script
   useGoogleIdentity();
 
-  // Redirect if already logged in
+  // If authenticated, redirect
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // Handle the credential response from Google One-Tap
+  // Handle Google One-Tap credential
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -55,11 +53,11 @@ const Login: React.FC = () => {
     [login, navigate, setError]
   );
 
-  // Initialize Google One-Tap and render the button
+  // Initialize Google One-Tap
   useEffect(() => {
-    let retry: number | null = null;
+    let retryTimeout: number | null = null;
 
-    const initGoogle = () => {
+    const tryInitialize = () => {
       if (window.google?.accounts?.id) {
         if (!CLIENT_ID) {
           console.error("Missing VITE_GOOGLE_CLIENT_ID!");
@@ -68,37 +66,29 @@ const Login: React.FC = () => {
           return;
         }
 
-        // 1) initialize
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
           ux_mode: "popup",
-          auto_select: false,
         });
-
-        // 2) render the button into our container
-        window.google.accounts.id.renderButton(
-          // @ts-ignore
-          document.getElementById("google-signin-button"),
-          { theme: "outline", size: "large", width: "100%" }
-        );
 
         setGoogleReady(true);
         setLoading(false);
       } else {
-        retry = window.setTimeout(initGoogle, 100);
+        retryTimeout = window.setTimeout(tryInitialize, 100);
       }
     };
 
-    initGoogle();
+    tryInitialize();
     return () => {
-      if (retry) clearTimeout(retry);
+      if (retryTimeout) clearTimeout(retryTimeout);
     };
   }, [handleCredentialResponse]);
 
   if (initializing || loading) {
-    return <Loader fullscreen />;
+    return <Loader />;
   }
+
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
@@ -107,14 +97,14 @@ const Login: React.FC = () => {
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
       {/* Header */}
       <div className="flex flex-col items-center justify-center bg-primary py-6">
-        <img src={logo} alt="Dentgo logo" className="w-24 h-auto" />
-        <h1 className="text-white text-2xl font-semibold mt-3">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
           DentGo AI
         </h1>
       </div>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col items-center justify-start px-4 pt-4 relative z-10">
+      {/* Main Login */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full max-w-md">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
             Welcome
@@ -123,57 +113,72 @@ const Login: React.FC = () => {
           {error && (
             <div
               role="alert"
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded"
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
               onClick={() => setError(null)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setError(null);
+                }
+              }}
               tabIndex={0}
             >
               {error}
             </div>
           )}
 
-          {/* Google-rendered button */}
-          <div
-            id="google-signin-button"
-            className="w-full flex justify-center py-2"
-          />
-
-          {/* Fallback manual prompt button */}
-          {!googleReady && (
+          <div className="flex flex-col gap-4 w-full">
+            {/* Google Login */}
             <button
               type="button"
-              className="mt-4 w-full py-3 bg-gray-200 rounded-lg text-gray-700"
+              disabled={!googleReady}
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
+                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+              }`}
               onClick={() => {
-                if (window.google?.accounts?.id) {
-                  window.google.accounts.id.prompt();
+                if (window.google?.accounts?.id && googleReady) {
+                  try {
+                    window.google.accounts.id.prompt();
+                  } catch (err: any) {
+                    if (err.name !== "AbortError") {
+                      console.error("Google prompt error:", err);
+                      setError(
+                        "Unexpected error when opening Google login. Please try again."
+                      );
+                    }
+                  }
+                } else {
+                  alert("Google login is not ready yet.");
                 }
               }}
             >
-              Continue with Google
+              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
+              <span>Continue with Google</span>
             </button>
-          )}
 
-          {/* Apple Login */}
-          <button
-            type="button"
-            className="mt-4 flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black hover:bg-gray-100 transition"
-            onClick={async () => {
-              try {
-                await loginWithApple();
-              } catch (err: any) {
-                console.error("Apple login error:", err);
-                setError(
-                  err?.message || "Apple authentication failed. Please try again."
-                );
-              }
-            }}
-          >
-            <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
-            <span>Continue with Apple</span>
-          </button>
+            {/* Apple Login */}
+            <button
+              type="button"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              onClick={async () => {
+                try {
+                  await loginWithApple();
+                } catch (err: any) {
+                  console.error("Apple login error:", err);
+                  setError(
+                    err?.message ||
+                      "Apple authentication failed. Please try again."
+                  );
+                }
+              }}
+            >
+              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
+              <span>Continue with Apple</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Footer illustration */}
+      {/* Footer Illustration */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
         <img
           src={dentaiBottom}
