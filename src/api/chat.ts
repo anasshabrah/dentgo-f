@@ -1,4 +1,17 @@
+// src/api/chat.ts
 import { API_BASE } from "../config";
+
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
 
 export async function askDentgo(
   prompt: string,
@@ -13,10 +26,8 @@ export async function askDentgo(
     body: JSON.stringify({ prompt, history, sessionId }),
     signal,
   });
-
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Chat failed");
+    await handleErrorResponse(res, "Chat failed");
   }
   return res.json();
 }

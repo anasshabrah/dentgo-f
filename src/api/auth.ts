@@ -1,4 +1,7 @@
 // src/api/auth.ts
+
+import { API_BASE } from "../config";
+
 export interface User {
   id: number;
   name: string;
@@ -6,12 +9,23 @@ export interface User {
   picture?: string;
 }
 
-import { API_BASE } from "../config";
+/**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
 
 /* Google login */
-export async function loginWithGoogle(
-  credential: string
-): Promise<User> {
+export async function loginWithGoogle(credential: string): Promise<User> {
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -19,8 +33,7 @@ export async function loginWithGoogle(
     body: JSON.stringify({ credential }),
   });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Google login failed");
+    await handleErrorResponse(res, "Google login failed");
   }
   const { user } = (await res.json()) as { user: User };
   return user;
@@ -33,11 +46,14 @@ export function loginWithApple(): void {
 
 /* Logout */
 export async function logout(): Promise<void> {
-  await fetch(`${API_BASE}/api/auth/logout`, {
+  const res = await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
     mode: "cors",
   });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Logout failed");
+  }
 }
 
 /**
@@ -52,15 +68,6 @@ export async function deleteAccount(): Promise<void> {
     mode: "cors",
   });
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    console.error("Delete Account Response:", res.status, text);
-    let errorMsg = "Failed to delete account";
-    try {
-      const body = JSON.parse(text);
-      errorMsg = body.error || errorMsg;
-    } catch {
-      errorMsg = text || errorMsg;
-    }
-    throw new Error(errorMsg);
+    await handleErrorResponse(res, "Failed to delete account");
   }
 }

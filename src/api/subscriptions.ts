@@ -1,3 +1,4 @@
+// src/api/subscriptions.ts
 import { API_BASE } from "../config";
 
 export interface Subscription {
@@ -10,13 +11,25 @@ export interface Subscription {
   userId: number;
 }
 
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
 export async function fetchSubscriptions(): Promise<Subscription[]> {
   const res = await fetch(`${API_BASE}/api/subscriptions`, {
     method: "GET",
     credentials: "include",
   });
   if (!res.ok) {
-    throw new Error("Failed to fetch subscriptions");
+    await handleErrorResponse(res, "Failed to fetch subscriptions");
   }
   return res.json();
 }
@@ -27,7 +40,7 @@ export async function fetchSubscription(id: number): Promise<Subscription> {
     credentials: "include",
   });
   if (!res.ok) {
-    throw new Error("Failed to fetch subscription");
+    await handleErrorResponse(res, "Failed to fetch subscription");
   }
   return res.json();
 }
@@ -50,7 +63,7 @@ export async function createSubscription(
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    throw new Error("Failed to create subscription");
+    await handleErrorResponse(res, "Failed to create subscription");
   }
   return res.json();
 }
@@ -72,7 +85,7 @@ export async function updateSubscription(
     body: JSON.stringify(updates),
   });
   if (!res.ok) {
-    throw new Error("Failed to update subscription");
+    await handleErrorResponse(res, "Failed to update subscription");
   }
   return res.json();
 }
@@ -83,6 +96,6 @@ export async function deleteSubscription(id: number): Promise<void> {
     credentials: "include",
   });
   if (!res.ok) {
-    throw new Error("Failed to delete subscription");
+    await handleErrorResponse(res, "Failed to delete subscription");
   }
 }

@@ -1,3 +1,6 @@
+// src/api/cards.ts
+import { API_BASE } from "../config";
+
 export interface CardData {
   id: number;
   network: string | null;
@@ -5,14 +8,27 @@ export interface CardData {
   isActive: boolean;
 }
 
-import { API_BASE } from "../config";
+/**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
 
 export async function fetchCards(): Promise<CardData[]> {
   const res = await fetch(`${API_BASE}/api/payments/cards`, {
     credentials: "include",
   });
   if (!res.ok) {
-    throw new Error("Failed to fetch cards");
+    await handleErrorResponse(res, "Failed to fetch cards");
   }
   const data = (await res.json()) as { cards: CardData[] };
   return data.cards;
@@ -29,7 +45,6 @@ export async function createCard(payload: {
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Failed to create card");
+    await handleErrorResponse(res, "Failed to create card");
   }
 }
