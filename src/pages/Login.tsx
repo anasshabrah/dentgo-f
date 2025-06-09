@@ -5,7 +5,6 @@ import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "@components/ui/Loader";
 import logo from "../assets/images/logo-w.png";
 import AppleIcon from "../assets/images/Icon-apple.png";
-import GoogleIcon from "../assets/images/Icon-google.png";
 import dentaiBottom from "../assets/images/dentaiBottom.png";
 
 import useGoogleIdentity from "@hooks/useGoogleIdentity";
@@ -23,17 +22,17 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Initialize Google Identity script
+  // Load Google's Identity script
   useGoogleIdentity();
 
-  // If authenticated, redirect
+  // Redirect if already logged in
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // Handle Google One-Tap credential
+  // Handle the credential callback
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -56,7 +55,7 @@ const Login: React.FC = () => {
     [login, navigate, setError]
   );
 
-  // Initialize Google One-Tap
+  // Initialize Google One-Tap and render the button
   useEffect(() => {
     let retryTimeout: number | null = null;
 
@@ -73,8 +72,18 @@ const Login: React.FC = () => {
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
           ux_mode: "popup",
-          auto_select: false, // optional: disables auto-login for more control
+          auto_select: false,
         });
+
+        // Render Google's sign-in button
+        window.google.accounts.id.renderButton(
+          document.getElementById("google-signin-button")!,
+          {
+            theme: "outline",
+            size: "large",
+            type: "standard",
+          }
+        );
 
         setGoogleReady(true);
         setLoading(false);
@@ -107,7 +116,7 @@ const Login: React.FC = () => {
         </h1>
       </div>
 
-      {/* Main Login */}
+      {/* Main Login Content */}
       <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full max-w-md">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
@@ -131,46 +140,31 @@ const Login: React.FC = () => {
           )}
 
           <div className="flex flex-col gap-4 w-full">
-            {/* Google Login */}
-            <button
-              type="button"
-              disabled={!googleReady}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
-                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
-              }`}
-              onClick={() => {
-                if (window.google?.accounts?.id && googleReady) {
-                  try {
-                    window.google.accounts.id.prompt();
-                  } catch (err: any) {
-                    if (err.name !== "AbortError") {
-                      console.error("Google prompt error:", err);
-                      setError(
-                        "Unexpected error when opening Google login. Please try again."
-                      );
-                    }
-                  }
-                } else {
-                  alert("Google login is not ready yet.");
-                }
-              }}
-            >
-              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
-              <span>Continue with Google</span>
-            </button>
+            {/* Google Sign-In Button Placeholder */}
+            <div id="google-signin-button" className="w-full flex justify-center" />
+
+            {/* Optional fallback if Google isn't ready */}
+            {!googleReady && (
+              <button
+                type="button"
+                disabled
+                className="opacity-50 cursor-not-allowed flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black"
+              >
+                <span>Loading Google...</span>
+              </button>
+            )}
 
             {/* Apple Login */}
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black hover:bg-gray-100 transition"
               onClick={async () => {
                 try {
                   await loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);
                   setError(
-                    err?.message ||
-                      "Apple authentication failed. Please try again."
+                    err?.message || "Apple authentication failed. Please try again."
                   );
                 }
               }}
