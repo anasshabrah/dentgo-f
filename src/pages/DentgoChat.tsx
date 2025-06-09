@@ -168,8 +168,11 @@ const DentgoChat: React.FC = () => {
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                style={{ fill: "var(--color-primary)" }}
-                className="fill-current"
+                fill="none"
+                stroke="var(--color-primary)"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
