@@ -9,7 +9,7 @@ import React, {
 import { loginWithGoogle as loginWithGoogleAPI } from "../api/auth";
 import { API_BASE } from "../config";
 
-export interface User {
+interface User {
   id: number;
   email: string;
   name: string;
@@ -19,50 +19,70 @@ export interface User {
 
 interface AuthContextValue {
   user: User | null;
+  login: (userData: User) => void;
+  /**
+   * Can be called as either:
+   *   loginWithGoogle("credential-string")
+   * or
+   *   loginWithGoogle({ credential: "string", ... })
+   */
+  loginWithGoogle: (arg: string | { credential: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  isAuthenticated: boolean;
   initializing: boolean;
   error: string | null;
   setError: (err: string | null) => void;
-  loginWithGoogle: (credential: string) => Promise<void>;
-  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [initializing, setInitializing] = useState(true);
+  const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1) Try to load current user; if 401, try refresh
+  // 1) Try to fetch the current user; if 401, attempt refresh
   const fetchUser = async () => {
     try {
-      let res = await fetch(`${API_BASE}/api/users/me`, {
+      let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: "include",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
       });
 
-      if (res.status === 401) {
-        // Access token missing/expired → try refresh
-        const refresh = await fetch(`${API_BASE}/api/auth/refresh`, {
+      if (response.status === 401) {
+        const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
           method: "POST",
           credentials: "include",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
         });
-        if (refresh.ok) {
-          // Retry fetching user
-          res = await fetch(`${API_BASE}/api/users/me`, {
+        if (refreshResp.ok) {
+          response = await fetch(`${API_BASE}/api/users/me`, {
             credentials: "include",
+            mode: "cors",
+            headers: { "Content-Type": "application/json" },
           });
         }
       }
 
-      if (res.ok) {
-        const body = await res.json().catch(() => ({}));
-        // some endpoints return { user } vs. just user
-        setUser((body as any).user ?? (body as any));
+      if (response.ok) {
+        const text = await response.text();
+        try {
+          const parsed = JSON.parse(text) as { user: User };
+          setUser(parsed.user || null);
+        } catch {
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
     } catch (err) {
-      console.error("AuthContext.fetchUser error:", err);
+      console.error("AuthContext: Error fetching user:", err);
       setUser(null);
     } finally {
       setInitializing(false);
@@ -74,48 +94,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loginWithGoogle = async (credential: string) => {
+  const login = (userData: User) => {
+    setUser(userData);
+  };
+
+  const loginWithGoogle = async (arg: string | { credential: string }) => {
     setError(null);
+    // extract credential from either the raw string or the response object
+    const credential =
+      typeof arg === "string" ? arg : arg.credential;
+
     try {
       const userData = await loginWithGoogleAPI(credential);
       setUser(userData);
     } catch (err: any) {
-      console.error("AuthContext.loginWithGoogle error:", err);
-      if (
-        err.message.includes("AbortError") ||
-        err.message.includes("NetworkError")
-      ) {
+      console.error("AuthContext: Google login error:", err);
+      const msg = err.message || "Google login failed. Please try again.";
+      if (msg.includes("AbortError") || msg.includes("NetworkError")) {
         setError(
-          "Google login failed due to browser settings (e.g. Private Browsing). Please try again in a normal window or enable third-party cookies."
+          "Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies."
         );
       } else {
-        setError(err.message || "Google login failed");
+        setError(msg);
       }
     }
   };
 
   const logout = async () => {
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const { logout: apiLogout } = await import("../api/auth");
+      await apiLogout();
+      setUser(null);
     } catch (err) {
-      console.error("AuthContext.logout error:", err);
-    } finally {
+      console.error("AuthContext: Error logging out:", err);
       setUser(null);
     }
   };
+
+  const isAuthenticated = Boolean(user);
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        login,
+        loginWithGoogle,
+        logout,
+        isAuthenticated,
         initializing,
         error,
         setError,
-        loginWithGoogle,
-        logout,
       }}
     >
       {children}
@@ -124,7 +152,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 export const useAuth = (): AuthContextValue => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
