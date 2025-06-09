@@ -58,6 +58,7 @@ const DentgoChat: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
+  const [chatName, setChatName] = useState("");
 
   // Load chat session if sessionId is in URL
   useEffect(() => {
@@ -142,7 +143,7 @@ const DentgoChat: React.FC = () => {
   // End session handler
   const handleEndSession = async () => {
     if (sessionId) {
-      await endChatSession(sessionId);
+      await endChatSession(sessionId, chatName || undefined);
     }
     navigate("/dentgo-gpt-home");
   };
@@ -248,6 +249,14 @@ const DentgoChat: React.FC = () => {
             <p className="text-gray-500 mb-4">
               This session will be saved in history and can be retrieved anytime.
             </p>
+            <input
+              type="text"
+              className="w-full p-2 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+              placeholder="Optional: Name this chat"
+              value={chatName}
+              onChange={(e) => setChatName(e.target.value)}
+              aria-label="Chat name"
+            />
             <div className="flex justify-center gap-3">
               <button
                 className="bg-primary text-white px-6 py-3 rounded-xl text-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
