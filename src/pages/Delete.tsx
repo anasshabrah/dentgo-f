@@ -33,7 +33,7 @@ const Delete: React.FC = () => {
         <div className="mx-auto max-w-lg px-4">
           <div className="bg-gray-100 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
             <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold leading-6 pt-6">
-              Why are you leaving Dentgo?
+              Confirm Deletion of Your Dentgo Account
             </h2>
 
             <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
@@ -44,7 +44,7 @@ const Delete: React.FC = () => {
               This includes your chats, cards, and any other data associated with your account.
             </p>
 
-            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
               Confirm below to delete your account and all associated data forever.
             </p>
 
