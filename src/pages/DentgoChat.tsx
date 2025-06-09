@@ -159,7 +159,7 @@ const DentgoChat: React.FC = () => {
           <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
             <h1 className="text-xl font-semibold text-gray-800">Dentgo Chat</h1>
             <button
-              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+              className="text-primary hover:text-primary/80 focus:outline-none"
               onClick={() => setShowEndSessionModal(true)}
               aria-label="End Chat"
             >
