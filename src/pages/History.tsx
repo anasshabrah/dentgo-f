@@ -32,7 +32,7 @@ export default function History() {
   if (error) {
     return (
       <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-        <div className="mx-auto max-w-lg px-4">
+        <div className="mx-auto max-w-3xl px-4">
           <h2 className="text-red-500 text-base font-medium mt-10">
             Error: {error}
           </h2>
@@ -67,8 +67,8 @@ export default function History() {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="mx-auto max-w-lg px-4">
-        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto">
+      <div className="mx-auto max-w-3xl px-4 w-full">
+        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto w-full">
           <div className="pt-4">
             <h2 className="text-gray-800 dark:text-gray-100 text-xl font-semibold leading-7">
               Active Chats
