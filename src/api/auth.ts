@@ -36,6 +36,7 @@ export async function logout(): Promise<void> {
   await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
+    mode: "cors",
   });
 }
 
@@ -48,9 +49,18 @@ export async function deleteAccount(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/delete`, {
     method: "DELETE",
     credentials: "include",
+    mode: "cors",
   });
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Failed to delete account");
+    const text = await res.text().catch(() => "");
+    console.error("Delete Account Response:", res.status, text);
+    let errorMsg = "Failed to delete account";
+    try {
+      const body = JSON.parse(text);
+      errorMsg = body.error || errorMsg;
+    } catch {
+      errorMsg = text || errorMsg;
+    }
+    throw new Error(errorMsg);
   }
 }
