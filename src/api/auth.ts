@@ -12,7 +12,10 @@ export interface User {
 /**
  * Utility: Parses error responses consistently.
  */
-async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+async function handleErrorResponse(
+  res: Response,
+  defaultMessage: string
+): Promise<never> {
   const text = await res.text().catch(() => "");
   let errorMsg = defaultMessage;
   try {
