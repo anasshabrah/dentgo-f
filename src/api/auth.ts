@@ -1,5 +1,4 @@
 // src/api/auth.ts
-
 export interface User {
   id: number;
   name: string;
@@ -47,9 +46,7 @@ export async function deleteAccount(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/delete`, {
     method: "DELETE",
     credentials: "include",
-    // remove Content-Type header so browser won't pre-flight
   });
-
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || "Failed to delete account");
