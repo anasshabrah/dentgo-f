@@ -156,7 +156,7 @@ const AddNewCardForm: React.FC = () => {
                         fontFamily: "'Satoshi', sans-serif",
                         "::placeholder": {
                           color: "#6B7280",
-                          fontSize: "14px", // Adjusted placeholder font size
+                          fontSize: "14px",
                         },
                       },
                       invalid: { color: "#FF484D" },
