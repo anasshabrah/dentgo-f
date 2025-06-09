@@ -1,7 +1,6 @@
 // src/pages/ContactUs.tsx
 
 import React, { useEffect, useState } from "react";
-import contactUsImg from "../assets/images/contact-us-img.png";
 import Loader from "@components/ui/Loader";
 
 const ContactUs: React.FC = () => {
@@ -15,137 +14,80 @@ const ContactUs: React.FC = () => {
   if (loading) return <Loader fullscreen />;
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="mx-auto max-w-lg px-4">
-        <div className="bg-blue-700 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
-          {/* Header Image */}
-          <div className="flex items-center justify-center">
-            <img
-              src={contactUsImg}
-              alt="Contact Us"
-              className="max-w-full pb-4"
-            />
-          </div>
-
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col">
+      <div className="mx-auto w-full max-w-xl px-4 py-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
           {/* Contact Header */}
-          <h2 className="text-gray-900 dark:text-gray-100 text-center text-2xl font-semibold leading-9 mb-2">
+          <h2 className="text-gray-800 dark:text-gray-100 text-2xl font-semibold text-center mb-4">
             Contact Us
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 mb-6">
-            If you face any trouble with ordering items or have questions, feel free to reach out.
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            If you run into any trouble or have questions, please reach out below.
           </p>
 
           {/* Contact Email */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-shrink-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <g>
-                  <path
-                    d="M17 20.5H7C4 20.5 2 19 2 15.5V8.5C2 5 4 3.5 7 3.5H17C20 3.5 22 5 22 8.5V15.5C22 19 20 20.5 17 20.5Z"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M17 9L13.87 11.5C12.84 12.32 11.15 12.32 10.12 11.5L7 9"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </g>
-              </svg>
-            </div>
+          <div className="flex items-center space-x-3 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-blue-500 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M16 12l-4-4-4 4m0 4l4-4 4 4"
+              />
+            </svg>
             <a
               href="mailto:cs@dentgo.ai"
-              className="text-gray-900 dark:text-gray-100 text-lg underline"
+              className="text-blue-600 dark:text-blue-400 underline"
             >
               cs@dentgo.ai
             </a>
           </div>
 
           {/* Contact Website */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-shrink-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <g>
-                  <path
-                    d="M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 9.61305 20.0518 7.32387 18.364 5.63604C16.6761 3.94821 14.3869 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12Z"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3.60156 9H20.4016"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M3.60156 15H20.4016"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M11.4997 3C9.81501 5.69961 8.92188 8.81787 8.92188 12C8.92188 15.1821 9.81501 18.3004 11.4997 21"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M12.5 3C14.1847 5.69961 15.0778 8.81787 15.0778 12C15.0778 15.1821 14.1847 18.3004 12.5 21"
-                    stroke="#0078D7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </g>
-              </svg>
-            </div>
+          <div className="flex items-center space-x-3 mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-blue-500 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
             <a
               href="https://dentgo.ai"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-900 dark:text-gray-100 text-lg underline"
+              className="text-blue-600 dark:text-blue-400 underline"
             >
               dentgo.ai
             </a>
           </div>
 
           {/* About Us */}
-          <div className="mt-6 w-full">
-            <h2 className="text-gray-900 dark:text-gray-100 text-xl font-semibold mb-2">
+          <div>
+            <h3 className="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-2">
               About Us
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
-              DentGo is your intelligent dental assistant — designed to save you time and enhance patient care. It helps
-              you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              DentGo is your intelligent dental assistant—designed to save you time and enhance patient care.
             </p>
-            <p className="text-gray-600 dark:text-gray-400 text-base leading-6 mb-2">
-              Whether you're managing a busy clinic or just starting out, DentGo streamlines your workflow and connects
-              you with trusted suppliers that deliver right to your clinic's door.
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              We help you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
             </p>
-            <p className="text-gray-600 dark:text-gray-400 text-base leading-6">
-              Powered by AI, DentGo turns complex decisions into clear, actionable steps — allowing you to focus more on
-              your patients and less on logistics.
+            <p className="text-gray-600 dark:text-gray-400">
+              Powered by AI, DentGo turns complex decisions into clear, actionable steps—so you can focus more on patients and less on logistics.
             </p>
           </div>
         </div>
