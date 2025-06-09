@@ -1,52 +1,43 @@
 // src/config.ts
+
+// 1. Detect whether we’re running in dev mode
+export const DEV = import.meta.env.DEV;
+
 /**
- * Frontend configuration for API base URL and CORS origins.
- *
- * - In development, defaults to http://localhost:4000
- * - In production, reads VITE_SERVER_URL from env
+ * 2. Backend base URL
+ *    - Development: http://localhost:4000
+ *    - Production: VITE_SERVER_URL
  */
+export const API_BASE: string = DEV
+  ? 'http://localhost:4000'
+  : (import.meta.env.VITE_SERVER_URL as string);
 
-const DEV_API = 'http://localhost:4000';
-export const API_BASE: string =
-  import.meta.env.PROD
-    ? (import.meta.env.VITE_SERVER_URL as string)
-    : DEV_API;
+/**
+ * 3. Google Client ID (used in Login.tsx)
+ */
+export const GOOGLE_CLIENT_ID: string = import.meta.env
+  .VITE_GOOGLE_CLIENT_ID as string;
 
-// Allowed origins for CORS.  Make sure your backend corsOptions.origin
-// whitelist includes each of these.
+/**
+ * 4. Stripe Publishable Key
+ */
+export const STRIPE_PK: string = import.meta.env
+  .VITE_STRIPE_PUBLISHABLE_KEY as string;
+
+/**
+ * 5. Frontend allowed origins (for CORS checks or iframe embeds, if needed)
+ *    Always includes localhost in dev and your prod server URL.
+ *    You can extend via VITE_FRONTEND_PROD_DOMAINS = "myapp.com,another.com"
+ */
+const PROD_DOMAINS = import.meta.env.VITE_FRONTEND_PROD_DOMAINS
+  ? (import.meta.env.VITE_FRONTEND_PROD_DOMAINS as string).split(',')
+  : [];
+
 export const ALLOWED_ORIGINS: Array<string | RegExp> = [
+  // Dev local host
   'http://localhost:5173',
-  'https://dentgo-b.onrender.com',
-  // You can add additional prod domains via VITE_FRONTEND_PROD_DOMAINS
-  ...(import.meta.env.VITE_FRONTEND_PROD_DOMAINS
-    ? (import.meta.env.VITE_FRONTEND_PROD_DOMAINS as string)
-        .split(',')
-        .map((d) => new RegExp(`^https?://[\\w-]+\\${d}$`))
-    : []),
+  // Your primary prod frontend
+  (import.meta.env.VITE_SERVER_URL as string),
+  // Any additional domains you list in VITE_FRONTEND_PROD_DOMAINS
+  ...PROD_DOMAINS.map((d) => new RegExp(`^https?://[\\w-]+\\.${d.replace(/^\.*|\.*$/g, '')}$`)),
 ];
-
-// CORS options object to mirror backend settings if needed client-side
-export const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    if (!origin) return callback(null, true);
-    const ok = ALLOWED_ORIGINS.some((o) =>
-      typeof o === 'string' ? o === origin : o.test(origin)
-    );
-    return ok
-      ? callback(null, true)
-      : callback(new Error(`CORS blocked for origin: ${origin}`));
-  },
-  credentials: true,
-};
-
-// Cookie settings for client-side reference (backend must match)
-const isProd = import.meta.env.PROD;
-export const cookieConfig = {
-  secure: isProd,
-  httpOnly: (import.meta.env.VITE_COOKIE_HTTP_ONLY === 'true'),
-  sameSite: 'none' as const,
-  maxAge: Number(import.meta.env.VITE_COOKIE_MAX_AGE) || 1000 * 60 * 60 * 24 * 7,
-  ...(isProd && import.meta.env.VITE_COOKIE_DOMAIN
-    ? { domain: import.meta.env.VITE_COOKIE_DOMAIN as string }
-    : {}),
-};
