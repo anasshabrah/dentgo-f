@@ -8,7 +8,6 @@ import rehypeSanitize from "rehype-sanitize";
 import { askDentgo } from "../api/chat";
 import { fetchChatSession, endChatSession } from "../api/chats";
 import Loader from "@components/ui/Loader";
-import bootstrap from "bootstrap/dist/js/bootstrap.bundle";
 
 // Detect Arabic characters for RTL support
 function isRTL(text: string) {
@@ -58,6 +57,7 @@ const DentgoChat: React.FC = () => {
   const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
 
   // Load chat session if sessionId is in URL
   useEffect(() => {
@@ -139,6 +139,14 @@ const DentgoChat: React.FC = () => {
     }
   };
 
+  // End session handler
+  const handleEndSession = async () => {
+    if (sessionId) {
+      await endChatSession(sessionId);
+    }
+    navigate("/dentgo-gpt-home");
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -149,40 +157,22 @@ const DentgoChat: React.FC = () => {
           {/* Header */}
           <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
             <h1 className="text-xl font-semibold text-gray-800">Dentgo Chat</h1>
-            <div className="dropdown">
-              <button
-                className="text-gray-600 hover:text-gray-800 focus:outline-none"
-                type="button"
-                id="dropdownMenuButton"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+            <button
+              className="text-gray-600 hover:text-gray-800 focus:outline-none"
+              onClick={() => setShowEndSessionModal(true)}
+              aria-label="End Chat"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                className="fill-current"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                  className="fill-current"
-                >
-                  <path d="M12 16a2 2 0 110 4 2 2 0 010-4zm0-6a2 2 0 110 4 2 2 0 010-4zm0-6a2 2 0 110 4 2 2 0 010-4z" />
-                </svg>
-              </button>
-              <ul
-                className="dropdown-menu dropdown-menu-end shadow-lg p-2 mt-1"
-                aria-labelledby="dropdownMenuButton"
-              >
-                <li>
-                  <button
-                    className="dropdown-item text-red-600 hover:bg-gray-100"
-                    data-bs-toggle="modal"
-                    data-bs-target="#end-session-modal"
-                  >
-                    End Chat
-                  </button>
-                </li>
-              </ul>
-            </div>
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Chat Messages */}
@@ -249,55 +239,34 @@ const DentgoChat: React.FC = () => {
       </div>
 
       {/* End Session Modal */}
-      <div
-        className="modal fade"
-        id="end-session-modal"
-        tabIndex={-1}
-        aria-labelledby="endSessionModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-body text-center p-4">
-              <h2
-                id="endSessionModalLabel"
-                className="text-gray-800 text-2xl font-semibold mb-2"
+      {showEndSessionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">
+              End Session
+            </h2>
+            <p className="text-gray-500 mb-4">
+              This session will be saved in history and can be retrieved anytime.
+            </p>
+            <div className="flex justify-center gap-3">
+              <button
+                className="bg-primary text-white px-6 py-3 rounded-xl text-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                onClick={handleEndSession}
+                aria-label="Confirm end session"
               >
-                End Session
-              </h2>
-              <p className="text-gray-500 text-base mb-4">
-                This session will be saved in history and can be retrieved anytime.
-              </p>
-              <div className="flex justify-center gap-3">
-                <button
-                  className="bg-primary text-white px-6 py-3 rounded-xl text-lg font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  onClick={async () => {
-                    if (sessionId) {
-                      await endChatSession(sessionId);
-                    }
-                    const modalEl = document.getElementById("end-session-modal");
-                    if (modalEl) {
-                      const bsModal = bootstrap.Modal.getInstance(modalEl);
-                      if (bsModal) bsModal.hide();
-                    }
-                    navigate("/dentgo-gpt-home");
-                  }}
-                  aria-label="Confirm end session"
-                >
-                  Yes, End
-                </button>
-                <button
-                  className="bg-gray-100 text-primary px-6 py-3 rounded-xl text-lg font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  data-bs-dismiss="modal"
-                  aria-label="Cancel end session"
-                >
-                  Cancel
-                </button>
-              </div>
+                Yes, End
+              </button>
+              <button
+                className="bg-gray-100 text-primary px-6 py-3 rounded-xl text-lg font-medium hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                onClick={() => setShowEndSessionModal(false)}
+                aria-label="Cancel end session"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
