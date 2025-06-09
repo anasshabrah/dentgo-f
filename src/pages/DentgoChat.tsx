@@ -159,7 +159,7 @@ const DentgoChat: React.FC = () => {
           <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
             <h1 className="text-xl font-semibold text-gray-800">Dentgo Chat</h1>
             <button
-              className="text-primary hover:text-primary/80 focus:outline-none"
+              className="hover:opacity-80 focus:outline-none"
               onClick={() => setShowEndSessionModal(true)}
               aria-label="End Chat"
             >
@@ -169,7 +169,7 @@ const DentgoChat: React.FC = () => {
                 height="24"
                 fill="currentColor"
                 viewBox="0 0 24 24"
-                className="fill-current"
+                className="fill-[var(--color-primary)]"
               >
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -228,7 +228,7 @@ const DentgoChat: React.FC = () => {
                   height="20"
                   fill="currentColor"
                   viewBox="0 0 24 24"
-                  className="fill-[var(--color-primary)]"
+                  className="fill-current"
                   aria-hidden="true"
                 >
                   <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
