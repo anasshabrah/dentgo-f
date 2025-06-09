@@ -111,21 +111,21 @@ const PaymentMethodForm: React.FC = () => {
   if (loading) return <Loader fullscreen />;
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
-      <div className="mx-auto max-w-lg px-4">
-        <div className="bg-white dark:bg-gray-800 pt-4 px-4 mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto flex flex-col">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col items-center">
+      <div className="w-full max-w-lg px-4 py-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4">
           {/* Payment Request Button (Apple/Google Pay) */}
           {canMakePayment && paymentRequest ? (
-            <div className="border-b-2 border-gray-200 dark:border-gray-700 mb-4">
+            <div className="mb-4">
               <PaymentRequestButtonElement options={{ paymentRequest }} />
             </div>
           ) : (
-            <div className="border-b-2 border-gray-200 dark:border-gray-700 mb-4 px-2 py-4">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 mb-4 bg-gray-50 dark:bg-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Apple Pay / Google Pay currently unavailable.
               </p>
               <small className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Ensure you’re on Safari (Apple Pay) or Chrome (Google Pay), using HTTPS or localhost, and that{" "}
+                Use Safari (Apple Pay) or Chrome (Google Pay) with HTTPS or localhost, and make sure{" "}
                 <code>VITE_STRIPE_PUBLISHABLE_KEY</code> is set.
               </small>
             </div>
@@ -140,68 +140,53 @@ const PaymentMethodForm: React.FC = () => {
 
           {/* Saved Cards List */}
           {cards.length > 0 ? (
-            <div className="flex-1 overflow-y-auto">
+            <div className="space-y-4">
               {cards.map((card) => (
                 <div
                   key={card.id}
-                  className="border-b-2 border-gray-200 dark:border-gray-700 px-0"
+                  className="flex items-center justify-between border rounded-lg p-3 bg-gray-50 dark:bg-gray-700"
                 >
-                  <div className="flex items-center gap-2 py-4 pr-8">
-                    <span className="border border-gray-200 dark:border-gray-700 px-5 py-2 rounded flex items-center justify-center w-12 h-8">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="20"
-                        viewBox="0 0 32 20"
-                        fill="none"
-                      >
-                        <rect width="32" height="20" rx="3" fill="#E0E0E0" />
-                        <text
-                          x="16"
-                          y="13"
-                          textAnchor="middle"
-                          fontSize="10"
-                          fill="#333"
-                        >
-                          {card.network}
-                        </text>
-                      </svg>
+                  <div className="flex items-center gap-3">
+                    <span className="border border-gray-300 dark:border-gray-600 px-4 py-1 rounded bg-white dark:bg-gray-800">
+                      {card.network}
                     </span>
-                    <div className="pl-4">
-                      <div className="text-gray-800 dark:text-gray-200 text-base font-semibold leading-6">
+                    <div>
+                      <div className="text-gray-800 dark:text-gray-200 font-semibold">
                         {card.network}
                       </div>
-                      <div className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5">
-                        <span
-                          className={
-                            card.isActive
-                              ? "text-blue-800 dark:text-primary"
-                              : "text-red-600"
-                          }
-                        >
-                          {card.isActive ? "Active" : "Inactive"}
-                        </span>{" "}
-                        | Card Number **** {card.last4}
+                      <div className="text-gray-500 dark:text-gray-400 text-sm">
+                        **** {card.last4}
                       </div>
                     </div>
+                  </div>
+                  <div>
+                    <span
+                      className={`text-xs font-medium ${
+                        card.isActive
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-red-600 dark:text-red-400"
+                      }`}
+                    >
+                      {card.isActive ? "Active" : "Inactive"}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 dark:text-gray-400 my-3 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 my-3 text-center text-sm">
               No saved cards found.
             </p>
           )}
 
           {/* Add New Payment Button */}
-          <div className="flex flex-col items-center justify-center mt-4">
-            <div
-              className="w-full bg-blue-800 dark:bg-blue-700 text-white text-lg font-medium rounded-xl py-4 my-4 flex justify-center items-center hover:bg-blue-700 dark:hover:bg-blue-600 cursor-pointer transition"
+          <div className="mt-6">
+            <button
               onClick={handleAddNew}
+              className="w-full bg-blue-800 hover:bg-blue-700 text-white text-lg font-medium rounded-lg py-3 transition"
             >
               Add New Payment
-            </div>
+            </button>
           </div>
         </div>
       </div>
