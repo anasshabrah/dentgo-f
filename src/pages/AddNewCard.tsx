@@ -23,7 +23,6 @@ const AddNewCardForm: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  // simulate initial loader
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
@@ -110,75 +109,92 @@ const AddNewCardForm: React.FC = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col items-center">
-      <div className="w-full max-w-lg px-4 py-6">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 flex flex-col gap-4"
-        >
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center px-4 py-6">
+      <div className="w-full max-w-md">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+          <h1 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
             Add New Card
           </h1>
 
-          <div className="relative">
-            <input
-              type="text"
-              id="cardName"
-              autoComplete="off"
-              required
-              value={cardName}
-              onChange={handleCardNameChange}
-              placeholder="Card Name"
-              className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-3 text-base text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 p-3">
-            <CardElement
-              id="card-element"
-              options={{
-                style: {
-                  base: {
-                    fontSize: "16px",
-                    color: "#374151",
-                    fontFamily: "'Satoshi', sans-serif",
-                    "::placeholder": { color: "#6B7280" },
-                  },
-                  invalid: { color: "#FF484D" },
-                },
-                hidePostalCode: true,
-              }}
-            />
-          </div>
-
-          {error && (
-            <div
-              className="text-sm p-2 border border-red-600 rounded bg-red-100 text-red-600"
-              role="alert"
-              aria-live="assertive"
-            >
-              {error}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Card Name */}
+            <div>
+              <label
+                htmlFor="cardName"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Cardholder Name
+              </label>
+              <input
+                type="text"
+                id="cardName"
+                autoComplete="off"
+                required
+                value={cardName}
+                onChange={handleCardNameChange}
+                placeholder="e.g. John Doe"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-3 text-base text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-600 text-white text-lg font-medium rounded-lg py-3 text-center transition disabled:opacity-50"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <span
-                  className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
-                  aria-hidden="true"
+            {/* Card Element */}
+            <div>
+              <label
+                htmlFor="card-element"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Card Details
+              </label>
+              <div className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-3 bg-white dark:bg-gray-700">
+                <CardElement
+                  id="card-element"
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "16px",
+                        color: "#374151",
+                        fontFamily: "'Satoshi', sans-serif",
+                        "::placeholder": { color: "#6B7280" },
+                      },
+                      invalid: { color: "#FF484D" },
+                    },
+                    hidePostalCode: true,
+                  }}
                 />
-                Adding…
-              </>
-            ) : (
-              "Add My Card"
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div
+                className="text-sm p-2 border border-red-600 rounded bg-red-100 text-red-600"
+                role="alert"
+                aria-live="assertive"
+              >
+                {error}
+              </div>
             )}
-          </button>
-        </form>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full bg-primary text-white text-lg font-medium rounded-lg py-3 text-center hover:bg-primary/90 transition disabled:opacity-50"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span
+                    className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
+                    aria-hidden="true"
+                  />
+                  Adding…
+                </>
+              ) : (
+                "Add My Card"
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
