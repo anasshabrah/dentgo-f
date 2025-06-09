@@ -25,8 +25,8 @@ const ContactUs: React.FC = () => {
             If you run into any trouble or have questions, please reach out below.
           </p>
 
-          {/* Contact Email */}
-          <div className="flex items-center space-x-3 mb-4">
+          {/* Contact Email Only */}
+          <div className="flex items-center justify-center space-x-3 mb-6">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-blue-500 flex-shrink-0"
@@ -46,32 +46,6 @@ const ContactUs: React.FC = () => {
               className="text-blue-600 dark:text-blue-400 underline"
             >
               cs@dentgo.ai
-            </a>
-          </div>
-
-          {/* Contact Website */}
-          <div className="flex items-center space-x-3 mb-6">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-blue-500 flex-shrink-0"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <a
-              href="https://dentgo.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 underline"
-            >
-              dentgo.ai
             </a>
           </div>
 
