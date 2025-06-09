@@ -156,7 +156,7 @@ const DentgoChat: React.FC = () => {
       <div className="mx-auto max-w-lg px-4 flex-1 flex flex-col">
         <div className="bg-white mt-5 rounded-t-2xl flex flex-col flex-1 shadow-md">
           {/* Header */}
-          <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
+          <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200 bg-white">
             <h1 className="text-xl font-semibold text-gray-800">Dentgo Chat</h1>
             <button
               className="hover:opacity-80 focus:outline-none"
@@ -167,9 +167,9 @@ const DentgoChat: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
                 height="24"
-                fill="currentColor"
                 viewBox="0 0 24 24"
-                className="fill-[var(--color-primary)]"
+                style={{ fill: "var(--color-primary)" }}
+                className="fill-current"
               >
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
