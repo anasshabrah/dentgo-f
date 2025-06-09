@@ -4,27 +4,16 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
 import { useAuth } from "../context/AuthContext";
-import { deleteAccount } from "../api/auth";
 
 export default function SideMenu() {
   const { isOpen, close } = useModal();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete your account?")) {
-      return;
-    }
-    try {
-      await deleteAccount();
-      await logout();
-      navigate("/login", { replace: true });
-    } catch (err) {
-      console.error("Delete failed", err);
-      alert("Could not delete account. Please try again.");
-    } finally {
-      close();
-    }
+  // Navigate to the Delete page (which handles actual account deletion)
+  const goToDeletePage = () => {
+    close();
+    navigate("/delete");
   };
 
   const handleLogout = async () => {
@@ -600,37 +589,19 @@ export default function SideMenu() {
                             strokeLinejoin="round"
                           />
                           <path
-                            d="M30 15H32C32.2652 15 32.5196 15.1054 32.7071 15.2929C32.8946 15.4804 33 15.7348 33 16V18C33 18.2652 32.8946 18.5196 32.7071 18.7071C32.5196 18.8946 32.2652 19 32 19H30C29.7348 19 29.4804 18.8946 29.2929 18.7071C29.1054 18.5196 29 18.2652 29 18V16C29 15.7348 29.1054 15.4804 29.2929 15.2929C29.4804 15.1054 29.7348 15 30 15Z"
+                            d="M30 15H32C32.2652 15 32.5196 15.1054 32.7071 15.2929C32.8946 15.4804 33 15.7348 33 16V18C33 18.2652 32.8946 18.5196 32.7071 18.7071C32.5196 18.8946 32.2652 19 32 19H30C29.7348 19 29.4804 18.8946 29.2929 18.7071C29.1054 18.5196 29 18.2652 29 18V16C29 15.7348 29.1054 15.4804 29 15.2929C29.4804 15.1054 29.7348 15 30 15Z"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
-                            d="M23 15H25C25.2652 15 25.5196 15.1054 25.7071 15.2929C25.8946 15.4804 26 15.7348 26 16V18C26 18.2652 25.8946 18.5196 25.7071 18.7071C25.5196 18.8946 25.2652 19 25 19H23C22.7348 19 22.4804 18.8946 22.2929 18.7071C22.1054 18.5196 22 18.2652 22 18V16C22 15.7348 22.1054 15.4804 22.2929 15.2929C22.4804 15.1054 22.7348 15 23 15Z"
+                            d="M23 15H25C25.2652 15 25.5196 15.1054 25.7071 15.2929C25.8946 15.4804 26 15.7348 26 16V18C26 18.2652 25.8946 18.5196 25.7071 18.7071C25.5196 18.8946 25.2652 19 25 19H23C22.7348 19 22.4804 18.8946 22.2929 18.7071C22.1054 18.5196 22 18.2652 22 18V16C22 15.7348 22.1054 15.4804 22 15.2929C22.4804 15.1054 22.7348 15 23 15Z"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
                             d="M16 22H18C18.2652 22 18.5196 22.1054 18.7071 22.2929C18.8946 22.4804 19 22.7348 19 23V25C19 25.2652 18.8946 25.5196 18.7071 25.7071C18.5196 25.8946 18.2652 26 18 26H16C15.7348 26 15.4804 25.8946 15.2929 25.7071C15.1054 25.5196 15 25.2652 15 25V23C15 22.7348 15.1054 22.4804 15 22.2929C15.4804 22.1054 15.7348 22 16 22Z"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M30 22H32C32.2652 22 32.5196 22.1054 32.7071 22.2929C32.8946 22.4804 33 22.7348 33 23V25C33 25.2652 32.8946 25.5196 32.7071 25.7071C32.5196 25.8946 32.2652 26 32 26H30C29.7348 26 29.4804 25.8946 29.2929 25.7071C29.1054 25.5196 29 25.2652 29 25V23C29 22.7348 29.1054 22.4804 29 22.2929C29.4804 22.1054 29.7348 22 30 22Z"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M23 22H25C25.2652 22 25.5196 22.1054 25.7071 22.2929C25.8946 22.4804 26 22.7348 26 23V25C26 25.2652 25.8946 25.5196 25.7071 25.7071C25.5196 25.8946 25.2652 26 25 26H23C22.7348 26 22.4804 25.8946 22.2929 25.7071C22.1054 25.5196 22 25.2652 22 25V23C22 22.7348 22.1054 22.4804 22 22.2929C22.4804 22.1054 22.7348 22 23 22Z"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M23 29H25C25.2652 29 25.5196 29.1054 25.7071 29.2929C25.8946 29.4804 26 29.7348 26 30V32C26 32.2652 25.8946 32.5196 25.7071 32.7071C25.5196 32.8946 25.2652 33 25 33H23C22.7348 33 22.4804 32.8946 22.2929 32.7071C22.1054 32.5196 22 32.2652 22 32V30C22 29.7348 22.1054 29.4804 22 29.2929C22.4804 29.1054 22.7348 29 23 29Z"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -659,7 +630,7 @@ export default function SideMenu() {
 
                   {/* Delete Account */}
                   <button
-                    onClick={handleDeleteAccount}
+                    onClick={goToDeletePage}
                     className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition"
                   >
                     <div className="flex items-center gap-4">
