@@ -117,7 +117,7 @@ const AddNewCardForm: React.FC = () => {
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Card Name */}
+            {/* Cardholder Name */}
             <div>
               <label
                 htmlFor="cardName"
@@ -154,7 +154,10 @@ const AddNewCardForm: React.FC = () => {
                         fontSize: "16px",
                         color: "#374151",
                         fontFamily: "'Satoshi', sans-serif",
-                        "::placeholder": { color: "#6B7280" },
+                        "::placeholder": {
+                          color: "#6B7280",
+                          fontSize: "14px", // Adjusted placeholder font size
+                        },
                       },
                       invalid: { color: "#FF484D" },
                     },
