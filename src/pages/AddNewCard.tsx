@@ -1,3 +1,5 @@
+// src/pages/AddNewCard.tsx
+
 import React, { useState, useEffect, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { createCard } from "../api/cards";
@@ -36,7 +38,6 @@ const AddNewCardForm: React.FC = () => {
     setSubmitting(true);
 
     try {
-      // 1) Ensure a Stripe Customer exists (backend creates or returns existing)
       await fetch(`${API_BASE}/api/payments/create-customer`, {
         method: "POST",
         credentials: "include",
@@ -55,7 +56,6 @@ const AddNewCardForm: React.FC = () => {
         return;
       }
 
-      // 2) Ask backend to create a SetupIntent
       const setupResp = await fetch(
         `${API_BASE}/api/payments/create-setup-intent`,
         {
@@ -74,7 +74,6 @@ const AddNewCardForm: React.FC = () => {
         clientSecret: string;
       };
 
-      // 3) Confirm the SetupIntent with Stripe
       const result = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
           card: cardElement,
@@ -83,9 +82,7 @@ const AddNewCardForm: React.FC = () => {
       });
 
       if (result.error || !result.setupIntent) {
-        setError(
-          result.error?.message || "Failed to confirm SetupIntent."
-        );
+        setError(result.error?.message || "Failed to confirm SetupIntent.");
         setSubmitting(false);
         return;
       }
@@ -97,13 +94,11 @@ const AddNewCardForm: React.FC = () => {
         return;
       }
 
-      // 4) Persist card details in our database
       await createCard({
         paymentMethodId,
         nickName: cardName || null,
       });
 
-      // 5) Redirect to payment-methods list
       navigate("/payment-method");
     } catch (err: any) {
       console.error("AddNewCard error:", err);
@@ -115,13 +110,17 @@ const AddNewCardForm: React.FC = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
-      <div className="mx-auto max-w-lg px-4">
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col items-center">
+      <div className="w-full max-w-lg px-4 py-6">
         <form
-          className="bg-blue-800 pt-4 px-4 flex flex-col items-stretch mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto"
           onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-4 flex flex-col gap-4"
         >
-          <div className="relative mb-3">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+            Add New Card
+          </h1>
+
+          <div className="relative">
             <input
               type="text"
               id="cardName"
@@ -129,40 +128,32 @@ const AddNewCardForm: React.FC = () => {
               required
               value={cardName}
               onChange={handleCardNameChange}
-              placeholder=" "
-              className="peer w-full border border-gray-200 dark:border-gray-700 rounded px-2 py-3 text-base font-medium text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800"
+              placeholder="Card Name"
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-3 text-base text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <label
-              htmlFor="cardName"
-              className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400 transition-all peer-focus:-top-2 peer-focus:left-2 peer-focus:text-xs peer-focus:text-gray-800 dark:peer-focus:text-gray-200 peer-valid:-top-2 peer-valid:left-2 peer-valid:text-xs peer-valid:text-gray-800 dark:peer-valid:text-gray-200 bg-white dark:bg-gray-800 px-1"
-            >
-              Card Name
-            </label>
           </div>
 
-          <div className="mb-3">
-            <div className="w-full h-16 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 pt-5 text-lg text-gray-800 dark:text-gray-200">
-              <CardElement
-                id="card-element"
-                options={{
-                  style: {
-                    base: {
-                      fontSize: "18px",
-                      color: "#374151",
-                      fontFamily: "'Satoshi', sans-serif",
-                      "::placeholder": { color: "#6B7280" },
-                    },
-                    invalid: { color: "#FF484D" },
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 p-3">
+            <CardElement
+              id="card-element"
+              options={{
+                style: {
+                  base: {
+                    fontSize: "16px",
+                    color: "#374151",
+                    fontFamily: "'Satoshi', sans-serif",
+                    "::placeholder": { color: "#6B7280" },
                   },
-                  hidePostalCode: true,
-                }}
-              />
-            </div>
+                  invalid: { color: "#FF484D" },
+                },
+                hidePostalCode: true,
+              }}
+            />
           </div>
 
           {error && (
             <div
-              className="text-sm p-2 border border-red-600 rounded bg-red-100 mb-3 text-red-600"
+              className="text-sm p-2 border border-red-600 rounded bg-red-100 text-red-600"
               role="alert"
               aria-live="assertive"
             >
@@ -170,25 +161,23 @@ const AddNewCardForm: React.FC = () => {
             </div>
           )}
 
-          <div className="flex flex-col items-center justify-center">
-            <button
-              type="submit"
-              className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 dark:bg-gray-700 text-blue text-lg font-medium rounded-xl py-4 text-center disabled:opacity-50"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span
-                    className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
-                    aria-hidden="true"
-                  />
-                  Adding…
-                </>
-              ) : (
-                "Add My Card"
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-700 hover:bg-blue-600 text-white text-lg font-medium rounded-lg py-3 text-center transition disabled:opacity-50"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <span
+                  className="border-2 border-[rgba(255,255,255,0.3)] border-t-white rounded-full w-4 h-4 animate-spin inline-block mr-2 align-middle"
+                  aria-hidden="true"
+                />
+                Adding…
+              </>
+            ) : (
+              "Add My Card"
+            )}
+          </button>
         </form>
       </div>
     </div>
