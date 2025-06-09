@@ -38,3 +38,20 @@ export async function logout(): Promise<void> {
     credentials: "include",
   }).catch(() => {});
 }
+
+/**
+ * Permanently deletes the current user’s account (and revokes all sessions).
+ */
+export async function deleteAccount(): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/delete`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Failed to delete account");
+  }
+}
