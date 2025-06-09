@@ -1,3 +1,4 @@
+// src/lib/google.ts
 let loading = false;
 type Callback = () => void;
 

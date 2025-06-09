@@ -1,3 +1,4 @@
+// src/hooks/useGoogleIdentity.ts
 import { useEffect } from "react";
 
 type Callback = () => void;
