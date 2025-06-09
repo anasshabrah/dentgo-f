@@ -31,23 +31,23 @@ const Delete: React.FC = () => {
       {loading && <Loader fullscreen />}
       <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
         <div className="mx-auto max-w-lg px-4">
-          <div className="bg-blue-700 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
-            <h2 className="text-gray-900 dark:text-gray-200 text-lg font-semibold leading-6 pt-6">
+          <div className="bg-gray-100 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
+            <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold leading-6 pt-6">
               Why are you leaving Dentgo?
             </h2>
 
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
               We’re sorry to see you go! All your data will be permanently removed.
             </p>
 
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pt-6 mb-9">
               Confirm below to delete your account and all associated data.
             </p>
 
             <div className="flex flex-col items-center justify-center pb-6">
               <button
                 onClick={handleDelete}
-                className="w-full py-4 bg-red-100 dark:bg-red-700 text-red-800 dark:text-red-200 text-lg font-medium rounded-xl flex justify-center items-center hover:bg-red-200 dark:hover:bg-red-600 transition"
+                className="w-full py-4 bg-red-600 dark:bg-red-700 text-white text-lg font-medium rounded-xl flex justify-center items-center hover:bg-red-700 dark:hover:bg-red-600 transition"
               >
                 Delete Account
               </button>
