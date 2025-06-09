@@ -22,7 +22,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Load Google's Identity script
+  // Load Google Identity script
   useGoogleIdentity();
 
   // Redirect if already logged in
@@ -32,7 +32,7 @@ const Login: React.FC = () => {
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // Handle the credential callback
+  // Handle the credential response from Google One-Tap
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -57,9 +57,9 @@ const Login: React.FC = () => {
 
   // Initialize Google One-Tap and render the button
   useEffect(() => {
-    let retryTimeout: number | null = null;
+    let retry: number | null = null;
 
-    const tryInitialize = () => {
+    const initGoogle = () => {
       if (window.google?.accounts?.id) {
         if (!CLIENT_ID) {
           console.error("Missing VITE_GOOGLE_CLIENT_ID!");
@@ -68,6 +68,7 @@ const Login: React.FC = () => {
           return;
         }
 
+        // 1) initialize
         window.google.accounts.id.initialize({
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
@@ -75,33 +76,29 @@ const Login: React.FC = () => {
           auto_select: false,
         });
 
-        // Render Google's sign-in button
+        // 2) render the button into our container
         window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-button")!,
-          {
-            theme: "outline",
-            size: "large",
-            type: "standard",
-          }
+          // @ts-ignore
+          document.getElementById("google-signin-button"),
+          { theme: "outline", size: "large", width: "100%" }
         );
 
         setGoogleReady(true);
         setLoading(false);
       } else {
-        retryTimeout = window.setTimeout(tryInitialize, 100);
+        retry = window.setTimeout(initGoogle, 100);
       }
     };
 
-    tryInitialize();
+    initGoogle();
     return () => {
-      if (retryTimeout) clearTimeout(retryTimeout);
+      if (retry) clearTimeout(retry);
     };
   }, [handleCredentialResponse]);
 
   if (initializing || loading) {
     return <Loader fullscreen />;
   }
-
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
@@ -110,14 +107,14 @@ const Login: React.FC = () => {
     <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
       {/* Header */}
       <div className="flex flex-col items-center justify-center bg-primary py-6">
-        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
-        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto" />
+        <h1 className="text-white text-2xl font-semibold mt-3">
           DentGo AI
         </h1>
       </div>
 
-      {/* Main Login Content */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
+      {/* Main */}
+      <div className="flex-1 flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full max-w-md">
           <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
             Welcome
@@ -126,57 +123,57 @@ const Login: React.FC = () => {
           {error && (
             <div
               role="alert"
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
+              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded"
               onClick={() => setError(null)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setError(null);
-                }
-              }}
               tabIndex={0}
             >
               {error}
             </div>
           )}
 
-          <div className="flex flex-col gap-4 w-full">
-            {/* Google Sign-In Button Placeholder */}
-            <div id="google-signin-button" className="w-full flex justify-center" />
+          {/* Google-rendered button */}
+          <div
+            id="google-signin-button"
+            className="w-full flex justify-center py-2"
+          />
 
-            {/* Optional fallback if Google isn't ready */}
-            {!googleReady && (
-              <button
-                type="button"
-                disabled
-                className="opacity-50 cursor-not-allowed flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black"
-              >
-                <span>Loading Google...</span>
-              </button>
-            )}
-
-            {/* Apple Login */}
+          {/* Fallback manual prompt button */}
+          {!googleReady && (
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black hover:bg-gray-100 transition"
-              onClick={async () => {
-                try {
-                  await loginWithApple();
-                } catch (err: any) {
-                  console.error("Apple login error:", err);
-                  setError(
-                    err?.message || "Apple authentication failed. Please try again."
-                  );
+              className="mt-4 w-full py-3 bg-gray-200 rounded-lg text-gray-700"
+              onClick={() => {
+                if (window.google?.accounts?.id) {
+                  window.google.accounts.id.prompt();
                 }
               }}
             >
-              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
-              <span>Continue with Apple</span>
+              Continue with Google
             </button>
-          </div>
+          )}
+
+          {/* Apple Login */}
+          <button
+            type="button"
+            className="mt-4 flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black hover:bg-gray-100 transition"
+            onClick={async () => {
+              try {
+                await loginWithApple();
+              } catch (err: any) {
+                console.error("Apple login error:", err);
+                setError(
+                  err?.message || "Apple authentication failed. Please try again."
+                );
+              }
+            }}
+          >
+            <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
+            <span>Continue with Apple</span>
+          </button>
         </div>
       </div>
 
-      {/* Footer Illustration */}
+      {/* Footer illustration */}
       <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
         <img
           src={dentaiBottom}
