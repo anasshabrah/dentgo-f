@@ -4,15 +4,27 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
 import { useAuth } from "../context/AuthContext";
+import { deleteAccount } from "../api/auth";
 
 export default function SideMenu() {
   const { isOpen, close } = useModal();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleDeleteAccount = () => {
-    alert("Delete account clicked. Implement functionality here.");
-    close();
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to permanently delete your account?")) {
+      return;
+    }
+    try {
+      await deleteAccount();
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      console.error("Delete failed", err);
+      alert("Could not delete account. Please try again.");
+    } finally {
+      close();
+    }
   };
 
   const handleLogout = async () => {
