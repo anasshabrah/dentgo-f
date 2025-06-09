@@ -1,4 +1,5 @@
 // src/pages/Delete.tsx
+
 import React, { useState } from "react";
 import Loader from "@components/ui/Loader";
 import { useNavigate } from "react-router-dom";
@@ -19,9 +20,11 @@ const Delete: React.FC = () => {
       await deleteAccount();
       await logout();
       navigate("/login", { replace: true });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Delete failed", err);
-      alert("Could not delete account. Please try again.");
+      const errorMsg =
+        err?.message || "Could not delete account. Please try again.";
+      alert(errorMsg);
       setLoading(false);
     }
   };

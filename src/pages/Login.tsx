@@ -10,9 +10,12 @@ import dentaiBottom from "../assets/images/dentaiBottom.png";
 
 import useGoogleIdentity from "@hooks/useGoogleIdentity";
 import { useAuth } from "@context/AuthContext";
-import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
+import {
+  loginWithGoogle as loginWithGoogleAPI,
+  loginWithApple,
+} from "../api/auth";
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -70,6 +73,7 @@ const Login: React.FC = () => {
           client_id: CLIENT_ID,
           callback: handleCredentialResponse,
           ux_mode: "popup",
+          auto_select: false, // optional: disables auto-login for more control
         });
 
         setGoogleReady(true);
@@ -86,7 +90,7 @@ const Login: React.FC = () => {
   }, [handleCredentialResponse]);
 
   if (initializing || loading) {
-    return <Loader />;
+    return <Loader fullscreen />;
   }
 
   if (!initializing && isAuthenticated) {
