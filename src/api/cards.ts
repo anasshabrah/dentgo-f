@@ -23,8 +23,11 @@ async function handleErrorResponse(res: Response, defaultMessage: string): Promi
   throw new Error(errorMsg);
 }
 
+/**
+ * Fetches saved cards for the current user.
+ */
 export async function fetchCards(): Promise<CardData[]> {
-  const res = await fetch(`${API_BASE}/api/payments/cards`, {
+  const res = await fetch(`${API_BASE}/api/cards`, {
     credentials: "include",
   });
   if (!res.ok) {
@@ -34,11 +37,14 @@ export async function fetchCards(): Promise<CardData[]> {
   return data.cards;
 }
 
+/**
+ * Creates a new saved card for the current user.
+ */
 export async function createCard(payload: {
   paymentMethodId: string;
   nickName: string | null;
 }): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/payments/cards`, {
+  const res = await fetch(`${API_BASE}/api/cards`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
