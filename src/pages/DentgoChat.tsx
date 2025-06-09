@@ -145,9 +145,48 @@ const DentgoChat: React.FC = () => {
     <div className="bg-gray-100 min-h-screen pb-4 flex flex-col font-sans">
       {/* Chat Container */}
       <div className="mx-auto max-w-lg px-4 flex-1 flex flex-col">
-        <div className="bg-white mt-5 rounded-t-2xl pt-3 px-4 flex flex-col flex-1 shadow-md">
-          <div className="flex-1 flex flex-col">
-            {/* Message List */}
+        <div className="bg-white mt-5 rounded-t-2xl flex flex-col flex-1 shadow-md">
+          {/* Header */}
+          <div className="flex justify-between items-center py-3 px-4 border-b border-gray-200">
+            <h1 className="text-xl font-semibold text-gray-800">Dentgo Chat</h1>
+            <div className="dropdown">
+              <button
+                className="text-gray-600 hover:text-gray-800 focus:outline-none"
+                type="button"
+                id="dropdownMenuButton"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  className="fill-current"
+                >
+                  <path d="M12 16a2 2 0 110 4 2 2 0 010-4zm0-6a2 2 0 110 4 2 2 0 010-4zm0-6a2 2 0 110 4 2 2 0 010-4z" />
+                </svg>
+              </button>
+              <ul
+                className="dropdown-menu dropdown-menu-end shadow-lg p-2 mt-1"
+                aria-labelledby="dropdownMenuButton"
+              >
+                <li>
+                  <button
+                    className="dropdown-item text-red-600 hover:bg-gray-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#end-session-modal"
+                  >
+                    End Chat
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 flex flex-col px-4">
             <div className="flex-1 overflow-y-hidden relative">
               <div
                 className="overflow-y-auto max-h-full pr-2"
