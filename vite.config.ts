@@ -11,5 +11,8 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@hooks': path.resolve(__dirname, 'src/hooks'),
     }
+  },
+  build: {
+    sourcemap: true
   }
 });
