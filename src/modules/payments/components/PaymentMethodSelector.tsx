@@ -1,7 +1,7 @@
 // src/modules/payments/components/PaymentMethodSelector.tsx
 import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useStripeData } from '@/@context/StripeContext';
+import { useStripeData } from '@/context/StripeContext';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { useToast } from '@components/ui/ToastProvider';
 
