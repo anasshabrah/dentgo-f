@@ -21,7 +21,7 @@ const BankCards: React.FC = () => {
     async function loadCards() {
       try {
         const fetchedCards = await fetchCards();
-        setCards(fetchedCards ?? []); // fallback to empty array if undefined
+        setCards(fetchedCards ?? []);
       } catch (err) {
         console.error("Failed to fetch cards:", err);
         setFetchError("Unable to load saved cards.");
@@ -97,7 +97,7 @@ const BankCards: React.FC = () => {
           <div className="mt-4">
             <Link
               to="/add-new-card"
-              className="block w-full bg-blue-700 hover:bg-blue-600 dark:bg-primary/70 dark:hover:bg-primary text-white text-lg font-medium rounded-xl py-3 text-center transition"
+              className="block w-full bg-primary text-white text-lg font-medium rounded-lg py-3 text-center hover:bg-primary/90 transition"
             >
               + Link a New Card
             </Link>
