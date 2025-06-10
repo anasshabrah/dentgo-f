@@ -7,10 +7,10 @@ interface LoaderProps {
 }
 
 const Loader: React.FC<LoaderProps> = ({ fullscreen = false }) => {
-  // If fullscreen, use h-screen w-screen; otherwise h-full w-full
+  // If fullscreen, use fixed positioning to center on the screen
   const containerClasses = fullscreen
-    ? "flex items-center justify-center h-screen w-screen"
-    : "flex items-center justify-center h-full w-full";
+    ? "fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-white bg-opacity-50 z-50"
+    : "flex items-center justify-center w-full h-full";
 
   return (
     <div className={containerClasses}>
