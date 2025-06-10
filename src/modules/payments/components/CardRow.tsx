@@ -1,6 +1,6 @@
 // src/modules/payments/components/CardRow.tsx
 import React from 'react';
-import type { CardData } from '@/types';
+import type { CardData } from '@/modules/payments/types';
 import visaLogo from '@/assets/cards/visa.svg';
 import mcLogo from '@/assets/cards/mastercard.svg';
 import amexLogo from '@/assets/cards/amex.svg';

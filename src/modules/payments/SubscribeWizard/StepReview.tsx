@@ -10,58 +10,61 @@ export interface StepReviewProps {
   onBack: () => void;
 }
 
-// 🔧 Stripe Price ID mapping (real IDs)
 const PLAN_TO_PRICE: Record<string, string | null> = {
   basic: null,
   plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
 };
 
 const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) => {
-  const { addToast } = useToast();
+  const toast = useToast();
   const stripe = useStripe();
   const { cards, subscribe } = useStripeData();
   const [loading, setLoading] = useState(false);
 
   const planName = planId === 'plus' ? 'Plus' : 'Basic';
   const priceLabel = planId === 'plus' ? '$25.00' : 'Free';
+  const priceId = PLAN_TO_PRICE[planId];
 
-  // Select the first card
+  // Pick first card if available
   const card = cards && cards.length > 0 ? cards[0] : null;
   const paymentMethodId = card?.paymentMethodId;
-  const hasCard = Boolean(paymentMethodId);
 
   const handleConfirm = async () => {
-    if (!stripe || !hasCard || !paymentMethodId) {
-      addToast('Missing payment information. Please check your card details.', 'error');
+    if (!stripe) {
+      toast.addToast('Stripe has not loaded yet. Please try again.', 'error');
+      return;
+    }
+    if (!paymentMethodId) {
+      toast.addToast('Please add a payment card before subscribing.', 'error');
       return;
     }
 
     setLoading(true);
-
     try {
-      const priceId = PLAN_TO_PRICE[planId];
-
-      // Short-circuit for free plans
+      // Free plan shortcut
       if (!priceId) {
-        addToast('Free plan selected. No payment required.', 'success');
+        toast.addToast('Free plan selected. No payment required.', 'success');
         onSuccess();
         return;
       }
 
-      // 1. Create the subscription intent on your backend
+      // 1) Create subscription on backend
       const { clientSecret, status } = await subscribe(priceId, paymentMethodId);
 
-      // 2. If Stripe tells us further action is required, handle it
+      // 2) If additional action needed, confirm payment
       if (status === 'requires_action' && clientSecret) {
-        const result = await stripe.confirmPayment({ clientSecret });
+        const result = await stripe.confirmPayment({
+          clientSecret,
+          confirmParams: { return_url: window.location.href },
+        });
         if (result.error) throw result.error;
       }
 
-      // 3. All done!
-      addToast('Subscription completed successfully!', 'success');
+      // 3) Success
+      toast.addToast('Subscription completed successfully!', 'success');
       onSuccess();
     } catch (err: any) {
-      addToast(err.message || 'Subscription failed. Please try again.', 'error');
+      toast.addToast(err.message || 'Subscription failed. Please try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -80,15 +83,9 @@ const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =>
         </div>
         <div>
           <span className="font-medium">Payment Method:</span><br />
-          {hasCard
-            ? (
-              <>
-                **** {card.last4} ({card.network})
-              </>
-            )
-            : (
-              <em>No card found</em>
-            )
+          {card
+            ? <>**** {card.last4} ({card.network})</>
+            : <em>No card found</em>
           }
         </div>
       </div>
@@ -102,22 +99,14 @@ const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =>
         </button>
         <button
           onClick={handleConfirm}
-          disabled={!hasCard || loading}
-          className={`flex-1 py-2 bg-primary text-white rounded transition 
-            ${(!hasCard || loading)
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-primary/90'}
-          `}
+          disabled={loading}
+          className={`flex-1 py-2 bg-primary text-white rounded transition ${
+            loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'
+          }`}
         >
           {loading ? 'Processing…' : 'Confirm & Subscribe'}
         </button>
       </div>
-
-      {!hasCard && (
-        <p className="text-red-600 text-sm">
-          Please add a payment card before subscribing.
-        </p>
-      )}
     </div>
   );
 };

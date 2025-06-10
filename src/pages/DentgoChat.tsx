@@ -1,5 +1,4 @@
 // src/pages/DentgoChat.tsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -71,7 +70,7 @@ const DentgoChat: React.FC = () => {
         .then((session) => {
           const msgs = session.messages.map((m: any) => ({
             text: m.content,
-            type: m.role === "USER" ? "personal" as const : "bot" as const,
+            type: m.role === "USER" ? ("personal" as const) : ("bot" as const),
           }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
@@ -86,7 +85,7 @@ const DentgoChat: React.FC = () => {
     }
   }, [search]);
 
-  // Scroll to bottom
+  // Scroll to bottom on new messages
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTo({
@@ -143,7 +142,7 @@ const DentgoChat: React.FC = () => {
   // End session handler
   const handleEndSession = async () => {
     if (sessionId) {
-      await endChatSession(sessionId, chatName || undefined);
+      await endChatSession(sessionId);
     }
     navigate("/dentgo-gpt-home");
   };
@@ -190,7 +189,6 @@ const DentgoChat: React.FC = () => {
                 {messages.map((m, idx) => (
                   <MessageBubble key={idx} {...m} />
                 ))}
-
                 {isThinking && (
                   <div
                     className="italic text-gray-500 mt-2 bg-primary/10 text-primary rounded-2xl p-3 my-3 max-w-[80%] float-left"
@@ -204,21 +202,19 @@ const DentgoChat: React.FC = () => {
 
             {/* Input Area */}
             <div className="flex gap-3 mt-2 pb-4">
-              <div className="flex-1">
-                <textarea
-                  className="w-full h-12 p-2 rounded-lg border border-transparent bg-gray-100 text-base text-gray-500 resize-none focus:border-primary focus:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  placeholder="Write here…"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      send();
-                    }
-                  }}
-                  aria-label="Type your message"
-                />
-              </div>
+              <textarea
+                className="flex-1 h-12 p-2 rounded-lg border-transparent bg-gray-100 text-base text-gray-500 resize-none focus:border-primary focus:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                placeholder="Write here…"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    send();
+                  }
+                }}
+                aria-label="Type your message"
+              />
               <button
                 className="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                 onClick={send}

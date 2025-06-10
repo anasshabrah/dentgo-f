@@ -1,30 +1,21 @@
 // src/lib/stripeClient.tsx
 import React from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, ElementsProps } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import type { StripeElementsOptions } from '@stripe/stripe-js';
 import { STRIPE_PK } from '@/config';
 
 const stripePromise = loadStripe(STRIPE_PK);
 
-interface StripeElementsProps extends ElementsProps {
-  /** shortcut for dark/light theme */
-  theme?: 'stripe' | 'night' | 'flat';
+interface StripeElementsProps {
+  /** Stripe Elements options (must include clientSecret, appearance, etc.) */
+  options: StripeElementsOptions;
+  children: React.ReactNode;
 }
 
-export const StripeElements: React.FC<StripeElementsProps> = ({
-  children,
-  theme,
-  appearance,
-  ...opts
-}) => {
-  // merge any passed appearance with theme override
-  const mergedAppearance = {
-    ...(appearance ?? {}),
-    theme: theme ?? (appearance?.theme ?? 'stripe'),
-  };
-
+const StripeElements: React.FC<StripeElementsProps> = ({ options, children }) => {
   return (
-    <Elements stripe={stripePromise} {...opts} appearance={mergedAppearance}>
+    <Elements stripe={stripePromise} options={options}>
       {children}
     </Elements>
   );

@@ -1,9 +1,10 @@
+// src/modules/payments/Wallet.tsx
 import React, { useState, useEffect } from 'react';
 import { useStripeData } from '@/context/StripeContext';
 import { CardRow } from '@/modules/payments/components/CardRow';
 import { PaymentMethodSelector } from '@/modules/payments/components/PaymentMethodSelector';
 import { PlanCard } from '@/modules/payments/components/PlanCard';
-import { StripeElements } from '@/lib/stripeClient';
+import StripeElements from '@/lib/stripeClient';
 import { createSetupIntent } from '@/modules/payments/paymentsClient';
 import { useToast } from '@components/ui/ToastProvider';
 
@@ -18,7 +19,7 @@ const Wallet: React.FC = () => {
 
   useEffect(() => {
     if (active === 'Add Card') {
-      const initSetupIntent = async () => {
+      const init = async () => {
         try {
           const secret = await createSetupIntent();
           setClientSecret(secret);
@@ -26,7 +27,7 @@ const Wallet: React.FC = () => {
           addToast(err?.message || 'Failed to initialize payment form', 'error');
         }
       };
-      initSetupIntent();
+      init();
     }
   }, [active, addToast]);
 
@@ -68,7 +69,10 @@ const Wallet: React.FC = () => {
             )
           ) : (
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded" />
+              <div
+                key={i}
+                className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded"
+              />
             ))
           )}
         </div>

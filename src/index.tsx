@@ -9,8 +9,8 @@ import { AuthProvider } from '@context/AuthContext';
 import { StripeProvider } from '@context/StripeContext';
 import { ToastProvider } from '@components/ui/ToastProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundary from '@components/ErrorBoundary';
 
-// Create a single QueryClient instance for the app
 const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(
@@ -19,18 +19,19 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    {/* Provide the react-query client to the entire app */}
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <StripeProvider>
-          <DarkModeProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </DarkModeProvider>
-        </StripeProvider>
-      </ToastProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <StripeProvider>
+            <DarkModeProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </DarkModeProvider>
+          </StripeProvider>
+        </ToastProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

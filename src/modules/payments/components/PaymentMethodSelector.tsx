@@ -33,10 +33,11 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     setLoading(true);
 
     try {
-      const result = await stripe.confirmSetup({
+      const result = (await stripe.confirmSetup({
         elements,
         confirmParams: { return_url: window.location.href },
-      });
+      })) as any;
+
       if (result.error) throw result.error;
 
       const pm = result.setupIntent?.payment_method as string;
@@ -54,39 +55,8 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded"
-    >
-      <div>
-        <label className="block text-gray-700 dark:text-gray-300 mb-1">
-          Card Nickname (optional)
-        </label>
-        <input
-          type="text"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-          placeholder="e.g. My Visa"
-        />
-      </div>
-
-      <div className="p-2 border rounded bg-gray-50 dark:bg-gray-700">
-        <PaymentElement />
-      </div>
-
-      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 gap-1">
-        <LockClosedIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
-        <span>Card details handled by Stripe. We never see your number.</span>
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition disabled:opacity-50"
-      >
-        {loading ? 'Adding…' : 'Add Card'}
-      </button>
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded">
+      {/* ... */}
     </form>
   );
 };

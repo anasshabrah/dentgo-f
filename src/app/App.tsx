@@ -1,17 +1,20 @@
 // src/app/App.tsx
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ModalProvider } from '@context/ModalContext';
 import RoutesConfig from './routes';
 import Loader from '@components/ui/Loader';
+import ErrorBoundary from '@components/ErrorBoundary';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ModalProvider>
-        <React.Suspense fallback={<Loader fullscreen />}>
-          <RoutesConfig />
-        </React.Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<Loader fullscreen />}>
+            <RoutesConfig />
+          </Suspense>
+        </ErrorBoundary>
       </ModalProvider>
     </BrowserRouter>
   );
