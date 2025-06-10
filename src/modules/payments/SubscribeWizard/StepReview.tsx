@@ -1,7 +1,7 @@
 // src/modules/payments/SubscribeWizard/StepReview.tsx
 import React, { useState } from 'react';
 import { useStripe } from '@stripe/react-stripe-js';
-import { useStripeData } from '../../../context/StripeContext';
+import { useStripeData } from '../../../@context/StripeContext';
 import { useToast } from '@components/ui/ToastProvider';
 
 export interface StepReviewProps {

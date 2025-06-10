@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Loader from "@components/ui/Loader";
 import { useNavigate } from "react-router-dom";
 import { deleteAccount } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../@context/AuthContext";
 import { useToast } from "@components/ui/ToastProvider";
 
 const Delete: React.FC = () => {

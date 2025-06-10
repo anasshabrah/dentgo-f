@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useStripeData } from '../../context/StripeContext';
+import { useStripeData } from '../../@context/StripeContext';
 import { CardRow } from './components/CardRow';
 import { PaymentMethodSelector } from './components/PaymentMethodSelector';
 import { PlanCard } from './components/PlanCard';

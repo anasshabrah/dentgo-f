@@ -2,8 +2,8 @@
 import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
-import { useModal } from "../context/ModalContext";
-import { useAuth } from "../context/AuthContext";
+import { useModal } from "../@context/ModalContext";
+import { useAuth } from "../@context/AuthContext";
 
 export default function SideMenu() {
   const { isOpen, close } = useModal();

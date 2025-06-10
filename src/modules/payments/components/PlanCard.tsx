@@ -1,6 +1,6 @@
 // src/modules/payments/components/PlanCard.tsx
 import React from 'react';
-import { useStripeData } from '../../../context/StripeContext';
+import { useStripeData } from '../../../@context/StripeContext';
 
 export const PlanCard: React.FC = () => {
   const { subscription, openCustomerPortal } = useStripeData();
