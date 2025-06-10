@@ -3,6 +3,7 @@ import React, {
   createContext,
   useContext,
   useState,
+  useEffect,
   ReactNode,
 } from "react";
 import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
@@ -78,6 +79,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setInitializing(false);
     }
   };
+
+  // Automatically fetch user on mount
+  useEffect(() => {
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = (userData: User) => {
     setUser(userData);
