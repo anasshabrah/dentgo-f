@@ -13,7 +13,7 @@ type Tab = typeof tabs[number];
 
 const Wallet: React.FC = () => {
   const [active, setActive] = useState<Tab>('Saved Cards');
-  const { cards } = useStripeData();
+  const { cards, isLoadingCards } = useStripeData();
   const { addToast } = useToast();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
@@ -24,7 +24,7 @@ const Wallet: React.FC = () => {
           const secret = await createSetupIntent();
           setClientSecret(secret);
         } catch (err: any) {
-          addToast(err?.message || 'Failed to initialize payment form', 'error');
+          addToast(err.message || 'Failed to initialize payment form', 'error');
         }
       };
       init();
@@ -37,7 +37,7 @@ const Wallet: React.FC = () => {
   };
 
   const handleCardError = (err: any) => {
-    addToast(err?.message || 'Failed to add card', 'error');
+    addToast(err.message || 'Failed to add card', 'error');
   };
 
   return (
@@ -61,19 +61,19 @@ const Wallet: React.FC = () => {
 
       {active === 'Saved Cards' && (
         <div className="bg-gray-50 dark:bg-gray-900 rounded">
-          {cards ? (
-            cards.length > 0 ? (
-              cards.map(c => <CardRow key={c.id} card={c} />)
-            ) : (
-              <div className="p-4 text-gray-500">No saved cards.</div>
-            )
-          ) : (
+          {isLoadingCards ? (
             Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
                 className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded"
               />
             ))
+          ) : cards && cards.length > 0 ? (
+            cards.map(c => <CardRow key={c.id} card={c} />)
+          ) : (
+            <div className="p-4 text-gray-500 dark:text-gray-400">
+              No saved cards.
+            </div>
           )}
         </div>
       )}
