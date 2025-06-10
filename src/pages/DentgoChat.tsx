@@ -5,8 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
-import { askDentgo } from "../api/chat";
-import { fetchChatSession, endChatSession } from "../api/chats";
+import { askDentgo } from "@/api/chat";
+import { fetchChatSession, endChatSession } from "@/api/chats";
 import Loader from "@components/ui/Loader";
 
 // Detect Arabic characters for RTL support

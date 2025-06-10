@@ -1,6 +1,6 @@
 // src/pages/Alert.tsx
 import React, { useEffect, useState } from "react";
-import alertImg from "../assets/images/alert-img.png";
+import alertImg from "@/assets/images/alert-img.png";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "@components/ui/Loader";
 

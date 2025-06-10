@@ -7,7 +7,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import * as paymentsClient from '../modules/payments/paymentsClient';
+import * as paymentsClient from '@/modules/payments/paymentsClient';
 
 interface StripeContextValue {
   cards: paymentsClient.CardData[] | undefined;

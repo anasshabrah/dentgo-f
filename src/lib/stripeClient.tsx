@@ -2,7 +2,7 @@
 import React from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, ElementsProps } from '@stripe/react-stripe-js';
-import { STRIPE_PK } from '../config';
+import { STRIPE_PK } from '@/config';
 
 const stripePromise = loadStripe(STRIPE_PK);
 

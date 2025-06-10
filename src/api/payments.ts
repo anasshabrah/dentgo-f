@@ -1,6 +1,6 @@
 // src/api/payments.ts
 
-import { API_BASE } from '../config';
+import { API_BASE } from '@/config';
 
 /**
  * Create (or retrieve) a Stripe Customer for the current user

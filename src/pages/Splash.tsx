@@ -1,12 +1,12 @@
 // src/pages/Splash.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/images/logo.png";
-import dotsPattern from "../assets/images/dots_pattern.png";
-import dotsPatternBottom from "../assets/images/dots_pattern_bottom.png";
-import imageUnscreen from "../assets/images/Image.png";
-import robotSlider from "../assets/images/robot-slider-img2.png";
-import robotSlider3 from "../assets/images/robot-slider-img3.png";
+import logo from "@/assets/images/logo.png";
+import dotsPattern from "@/assets/images/dots_pattern.png";
+import dotsPatternBottom from "@/assets/images/dots_pattern_bottom.png";
+import imageUnscreen from "@/assets/images/Image.png";
+import robotSlider from "@/assets/images/robot-slider-img2.png";
+import robotSlider3 from "@/assets/images/robot-slider-img3.png";
 
 const Splash: React.FC = () => {
   const navigate = useNavigate();

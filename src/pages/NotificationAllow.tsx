@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "@components/ui/Loader";
-import notificationImg from "../assets/images/notification-img.png";
+import notificationImg from "@/assets/images/notification-img.png";
 
 const NotificationAllow: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);

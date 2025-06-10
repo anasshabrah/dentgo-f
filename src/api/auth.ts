@@ -1,6 +1,6 @@
 // src/api/auth.ts
 
-import { API_BASE } from "../config";
+import { API_BASE } from "@/config";
 
 export interface User {
   id: number;

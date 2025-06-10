@@ -1,6 +1,6 @@
 // src/api/subscriptions.ts
 
-import { API_BASE } from '../config';
+import { API_BASE } from '@/config';
 
 /**
  * Create a subscription intent.  Returns clientSecret, subscriptionId & status.

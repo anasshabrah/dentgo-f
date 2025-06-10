@@ -1,7 +1,7 @@
 // src/modules/payments/SubscribeWizard/StepPayment.tsx
 import React, { useEffect, useState } from 'react';
-import { PaymentMethodSelector } from '../@components/PaymentMethodSelector';
-import { createSetupIntent } from '../paymentsClient';
+import { PaymentMethodSelector } from '@/@components/PaymentMethodSelector';
+import { createSetupIntent } from '@/paymentsClient';
 import { StripeElements } from '@/lib/stripeClient';
 import { useToast } from '@components/ui/ToastProvider';
 

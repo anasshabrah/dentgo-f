@@ -2,14 +2,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "@components/ui/Loader";
-import logo from "../assets/images/logo-w.png";
-import AppleIcon from "../assets/images/Icon-apple.png";
-import GoogleIcon from "../assets/images/Icon-google.png";
-import dentaiBottom from "../assets/images/dentaiBottom.png";
+import logo from "@/assets/images/logo-w.png";
+import AppleIcon from "@/assets/images/Icon-apple.png";
+import GoogleIcon from "@/assets/images/Icon-google.png";
+import dentaiBottom from "@/assets/images/dentaiBottom.png";
 
 import useGoogleIdentity from "@hooks/useGoogleIdentity";
 import { useAuth } from "@context/AuthContext";
-import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "@/api/auth";
 import { useToast } from "@components/ui/ToastProvider";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;

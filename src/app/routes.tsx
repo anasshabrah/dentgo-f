@@ -4,7 +4,7 @@ import RootLayout from "./layouts/RootLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "@components/RequireAuth";
-import paymentRoutes from "../modules/payments/routes";
+import paymentRoutes from "@/modules/payments/routes";
 
 const Splash = lazy(() => import("../pages/Splash"));
 const Login = lazy(() => import("../pages/Login"));

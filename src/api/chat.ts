@@ -1,5 +1,5 @@
 // src/api/chat.ts
-import { API_BASE } from "../config";
+import { API_BASE } from "@/config";
 
 async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
   const text = await res.text().catch(() => "");

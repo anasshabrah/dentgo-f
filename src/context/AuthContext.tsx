@@ -6,8 +6,8 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { loginWithGoogle as loginWithGoogleAPI } from "../api/auth";
-import { API_BASE } from "../config";
+import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
+import { API_BASE } from "@/config";
 
 interface User {
   id: number;

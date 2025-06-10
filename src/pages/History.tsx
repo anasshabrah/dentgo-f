@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "@components/ui/Loader";
-import chatMenuImg from "../assets/images/chat-menu-img.png";
-import { fetchChatSessions } from "../api/chats";
+import chatMenuImg from "@/assets/images/chat-menu-img.png";
+import { fetchChatSessions } from "@/api/chats";
 
 interface ChatSession {
   id: number;

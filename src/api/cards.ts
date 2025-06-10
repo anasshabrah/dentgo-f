@@ -1,7 +1,7 @@
 // src/api/cards.ts
 
-import { API_BASE } from '../config';
-import type { CardData } from '../modules/payments/types';
+import { API_BASE } from '@/config';
+import type { CardData } from '@/modules/payments/types';
 
 /**
  * Fetch saved cards for the current user

@@ -1,8 +1,8 @@
 // src/pages/DentgoGptHome.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import logo from "../assets/images/logo.png";
-import plusRobot from "../assets/images/plus-robort.png";
+import logo from "@/assets/images/logo.png";
+import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
 import Loader from "@components/ui/Loader";
 import SideMenu from "@components/SideMenu";
