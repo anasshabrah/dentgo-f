@@ -1,38 +1,31 @@
 // src/layouts/PublicLayout.tsx
-import React from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import AppHeader from "@components/AppHeader";
+import React from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import AppHeader from '@components/AppHeader';
 
-const PUBLIC_NO_HEADER = ["/", "/login", "/allow-push"];
+const NO_HEADER_PATHS = ['/', '/login'];
 
 const PublicLayout: React.FC = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  // Treat any query or hash as the same route
-  const basePath = pathname.split(/[?#]/)[0];
-
-  const isFullScreen = PUBLIC_NO_HEADER.includes(basePath);
+  if (NO_HEADER_PATHS.includes(pathname)) {
+    return <main><Outlet /></main>;
+  }
 
   const titleMap: Record<string, string> = {
-    "/": "Dentgo",
-    "/login": "Login",
-    "/allow-push": "Enable Notifications",
+    '/allow-push': 'Enable Notifications',
   };
-
-  const title = titleMap[basePath] ?? "Dentgo";
-  const showBack = !isFullScreen;
+  const title = titleMap[pathname] ?? 'Dentgo';
 
   return (
     <>
       <AppHeader
         title={title}
-        showBack={showBack}
+        showBack
         onBack={() => navigate(-1)}
       />
-      <main className={isFullScreen ? "h-full" : ""}>
-        <Outlet />
-      </main>
+      <main><Outlet /></main>
     </>
   );
 };
