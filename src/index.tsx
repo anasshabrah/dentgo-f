@@ -21,15 +21,16 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <StripeProvider>
-            <DarkModeProvider>
-              <AuthProvider>
+        {/* AuthProvider must wrap everything that uses useAuth */}
+        <AuthProvider>
+          <ToastProvider>
+            <StripeProvider>
+              <DarkModeProvider>
                 <App />
-              </AuthProvider>
-            </DarkModeProvider>
-          </StripeProvider>
-        </ToastProvider>
+              </DarkModeProvider>
+            </StripeProvider>
+          </ToastProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   </React.StrictMode>
