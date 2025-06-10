@@ -1,139 +1,120 @@
 // src/pages/Splash.tsx
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import logo from "@/assets/images/logo.png";
-import dotsPattern from "@/assets/images/dots_pattern.png";
-import dotsPatternBottom from "@/assets/images/dots_pattern_bottom.png";
-import imageUnscreen from "@/assets/images/Image.png";
-import robotSlider from "@/assets/images/robot-slider-img2.png";
-import robotSlider3 from "@/assets/images/robot-slider-img3.png";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import logo from '@/assets/images/logo.png';
+import dotsPattern from '@/assets/images/dots_pattern.png';
+import dotsPatternBottom from '@/assets/images/dots_pattern_bottom.png';
+import imageUnscreen from '@/assets/images/Image.png';
+import robotSlider from '@/assets/images/robot-slider-img2.png';
+import robotSlider3 from '@/assets/images/robot-slider-img3.png';
+
+const slides = [
+  {
+    id: 0,
+    img: imageUnscreen,
+    title: 'Welcome to Dentgo, Your Smart Dental Assistant',
+    text:
+      'Diagnose cases accurately, build precise treatment plans, and get a tailored list of required materials with trusted suppliers — all in one place.',
+  },
+  {
+    id: 1,
+    img: robotSlider,
+    title: 'AI-Powered Treatment Planning in Seconds',
+    text:
+      'Let Dentgo analyze your cases and suggest complete, customized treatment plans backed by dental AI — helping you deliver better care, faster.',
+  },
+  {
+    id: 2,
+    img: robotSlider3,
+    title: 'Get What You Need — Delivered to Your Clinic',
+    text:
+      'Easily source the supplies and tools you need from top suppliers and have them delivered right to your door — saving you time and effort.',
+  },
+];
 
 const Splash: React.FC = () => {
   const navigate = useNavigate();
-  const [showInitialSplash, setShowInitialSplash] = useState(true);
-  const [activeSlide, setActiveSlide] = useState(0);
+  const [initial, setInitial] = useState(true);
+  const [index, setIndex] = useState(0);
 
-  const slides = [
-    {
-      id: 0,
-      imgSrc: imageUnscreen,
-      title: "Welcome to Dentgo, Your Smart Dental Assistant",
-      content:
-        "Diagnose cases accurately, build precise treatment plans, and get a tailored list of required materials with trusted suppliers — all in one place.",
-    },
-    {
-      id: 1,
-      imgSrc: robotSlider,
-      title: "AI-Powered Treatment Planning in Seconds",
-      content:
-        "Let Dentgo analyze your cases and suggest complete, customized treatment plans backed by dental AI — helping you deliver better care, faster.",
-    },
-    {
-      id: 2,
-      imgSrc: robotSlider3,
-      title: "Get What You Need — Delivered to Your Clinic",
-      content:
-        "Easily source the supplies and tools you need from top suppliers and have them delivered right to your door — saving you time and effort.",
-    },
-  ];
-
+  // hide initial splash after 1.5s
   useEffect(() => {
-    // Show the “initial splash” for 1.5s, then reveal first slide
-    const timer = setTimeout(() => {
-      setShowInitialSplash(false);
-    }, 1500);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setInitial(false), 1500);
+    return () => clearTimeout(t);
   }, []);
 
   const handleNext = () => {
-    if (activeSlide < slides.length - 1) {
-      setActiveSlide((prev) => prev + 1);
+    if (index < slides.length - 1) {
+      setIndex((i) => i + 1);
     } else {
-      // When on last slide, navigate to /login
-      navigate("/login");
+      navigate('/login');
     }
   };
 
+  if (initial) {
+    return (
+      <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <img
+          src={dotsPattern}
+          alt=""
+          className="absolute top-0 left-0 w-48"
+          aria-hidden="true"
+        />
+        <div className="flex flex-col items-center space-y-4">
+          <img src={logo} alt="Dentgo logo" className="w-48" />
+          <h1 className="text-3xl font-bold text-gray-800">Dentgo</h1>
+          <p className="text-center text-gray-500">
+            Smarter Dentistry Starts Here
+          </p>
+        </div>
+        <img
+          src={dotsPatternBottom}
+          alt=""
+          className="absolute bottom-0 left-0 w-48"
+          aria-hidden="true"
+        />
+      </div>
+    );
+  }
+
+  const { img, title, text } = slides[index];
+
   return (
-    <div className="bg-white h-screen w-full overflow-hidden">
-      {showInitialSplash ? (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-          <div className="absolute top-0 left-0">
-            <img
-              className="w-48 object-contain"
-              src={dotsPattern}
-              alt="Decorative pattern top"
-              aria-hidden="true"
-            />
-          </div>
-          <div className="flex flex-col items-center">
-            <img className="w-48 h-auto" src={logo} alt="Dentgo logo" />
-            <h1 className="text-3xl font-bold mt-4 text-gray-800">Dentgo</h1>
-            <p className="text-gray-500 text-center text-lg font-medium leading-6 mt-2">
-              Smarter Dentistry Starts Here
-            </p>
-          </div>
-          <div className="absolute bottom-0 left-0">
-            <img
-              className="w-48 object-contain"
-              src={dotsPatternBottom}
-              alt="Decorative pattern bottom"
-              aria-hidden="true"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col h-full w-full">
-          <div className="flex-1 flex flex-col">
-            {slides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`${
-                  activeSlide === index ? "flex" : "hidden"
-                } flex-1 flex-col items-center justify-between w-full h-full`}
-              >
-                <div className="flex flex-col items-center px-4 pt-8">
-                  <img
-                    className="w-full max-w-xs mb-4"
-                    src={slide.imgSrc}
-                    alt={slide.title}
-                  />
-                  <h2 className="text-center text-2xl font-bold text-gray-800 mb-2">
-                    {slide.title}
-                  </h2>
-                  <p className="text-center text-base text-gray-500">
-                    {slide.content}
-                  </p>
-                </div>
+    <div className="flex flex-col h-screen w-screen">
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <img
+          src={img}
+          alt={title}
+          className="w-full max-w-xs mb-6"
+        />
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+          {title}
+        </h2>
+        <p className="text-center text-gray-500 max-w-md">{text}</p>
+      </div>
 
-                <div className="w-full px-4 pb-8">
-                  <button
-                    className="bg-primary text-white text-base font-medium py-3 w-full rounded transition hover:opacity-90"
-                    onClick={handleNext}
-                  >
-                    {index < slides.length - 1 ? "Next" : "Get Started"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleNext}
+          className="w-full bg-primary text-white py-3 rounded-lg hover:opacity-90 transition"
+        >
+          {index < slides.length - 1 ? 'Next' : 'Get Started'}
+        </button>
+      </div>
 
-          <div className="flex justify-center gap-2 mb-4">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`rounded-full transition-all ${
-                  activeSlide === index
-                    ? "bg-gray-800 w-8 h-2"
-                    : "bg-gray-200 w-2 h-2"
-                }`}
-                onClick={() => setActiveSlide(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex justify-center space-x-2 pb-6">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`rounded-full transition-all ${
+              i === index ? 'bg-gray-800 w-8 h-2' : 'bg-gray-200 w-2 h-2'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 };
