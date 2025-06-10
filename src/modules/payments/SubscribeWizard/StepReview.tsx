@@ -1,8 +1,10 @@
 // src/modules/payments/SubscribeWizard/StepReview.tsx
 import React, { useState } from 'react';
-import { useStripe } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, useStripe } from '@stripe/react-stripe-js';
 import { useStripeData } from '@/context/StripeContext';
 import { useToast } from '@components/ui/ToastProvider';
+import { STRIPE_PK } from '@/config';
 
 export interface StepReviewProps {
   planId: string;
@@ -15,7 +17,7 @@ const PLAN_TO_PRICE: Record<string, string | null> = {
   plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
 };
 
-const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) => {
+const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) => {
   const toast = useToast();
   const stripe = useStripe();
   const { cards, subscribe } = useStripeData();
@@ -30,6 +32,13 @@ const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =>
   const paymentMethodId = card?.paymentMethodId;
 
   const handleConfirm = async () => {
+    // Free plan shortcut
+    if (!priceId) {
+      toast.addToast('Free plan selected. No payment required.', 'success');
+      onSuccess();
+      return;
+    }
+
     if (!stripe) {
       toast.addToast('Stripe has not loaded yet. Please try again.', 'error');
       return;
@@ -41,13 +50,6 @@ const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =>
 
     setLoading(true);
     try {
-      // Free plan shortcut
-      if (!priceId) {
-        toast.addToast('Free plan selected. No payment required.', 'success');
-        onSuccess();
-        return;
-      }
-
       // 1) Create subscription on backend
       const { clientSecret, status } = await subscribe(priceId, paymentMethodId);
 
@@ -111,4 +113,12 @@ const StepReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =>
   );
 };
 
-export default StepReview;
+export default function StepReview(props: StepReviewProps) {
+  const stripePromise = loadStripe(STRIPE_PK);
+
+  return (
+    <Elements stripe={stripePromise}>
+      <InnerReview {...props} />
+    </Elements>
+  );
+}
