@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useStripeData } from '@/context/StripeContext';
-import { CardRow } from './components/CardRow';
-import { PaymentMethodSelector } from './components/PaymentMethodSelector';
-import { PlanCard } from './components/PlanCard';
+import { CardRow } from '@/modules/payments/components/CardRow';
+import { PaymentMethodSelector } from '@/modules/payments/components/PaymentMethodSelector';
+import { PlanCard } from '@/modules/payments/components/PlanCard';
 import { StripeElements } from '@/lib/stripeClient';
-import { createSetupIntent } from './paymentsClient';
+import { createSetupIntent } from '@/modules/payments/paymentsClient';
 import { useToast } from '@components/ui/ToastProvider';
 
 const tabs = ['Saved Cards', 'Add Card', 'Plan & Billing'] as const;
