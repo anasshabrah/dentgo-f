@@ -38,7 +38,6 @@ const Splash: React.FC = () => {
   const [initial, setInitial] = useState(true);
   const [index, setIndex] = useState(0);
 
-  // hide initial splash after 1.5s
   useEffect(() => {
     const t = setTimeout(() => setInitial(false), 1500);
     return () => clearTimeout(t);
@@ -46,7 +45,7 @@ const Splash: React.FC = () => {
 
   const handleNext = () => {
     if (index < slides.length - 1) {
-      setIndex((i) => i + 1);
+      setIndex(i => i + 1);
     } else {
       navigate('/login');
     }
