@@ -3,7 +3,6 @@ import React, {
   createContext,
   useContext,
   useState,
-  useEffect,
   ReactNode,
 } from "react";
 import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
@@ -20,14 +19,9 @@ interface User {
 interface AuthContextValue {
   user: User | null;
   login: (userData: User) => void;
-  /**
-   * Can be called as either:
-   *   loginWithGoogle("credential-string")
-   * or
-   *   loginWithGoogle({ credential: "string", ... })
-   */
   loginWithGoogle: (arg: string | { credential: string }) => Promise<void>;
   logout: () => Promise<void>;
+  fetchUser: () => Promise<void>;
   isAuthenticated: boolean;
   initializing: boolean;
   error: string | null;
@@ -45,8 +39,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1) Try to fetch the current user; if 401, attempt refresh
+  // fetchUser is now explicit
   const fetchUser = async () => {
+    setInitializing(true);
     try {
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: "include",
@@ -71,13 +66,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (response.ok) {
-        const text = await response.text();
-        try {
-          const parsed = JSON.parse(text) as { user: User };
-          setUser(parsed.user || null);
-        } catch {
-          setUser(null);
-        }
+        const { user: fetched } = (await response.json()) as { user: User };
+        setUser(fetched || null);
       } else {
         setUser(null);
       }
@@ -89,18 +79,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const login = (userData: User) => {
     setUser(userData);
   };
 
   const loginWithGoogle = async (arg: string | { credential: string }) => {
     setError(null);
-    // extract credential from either the raw string or the response object
     const credential =
       typeof arg === "string" ? arg : arg.credential;
 
@@ -140,6 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         loginWithGoogle,
         logout,
+        fetchUser,
         isAuthenticated,
         initializing,
         error,
