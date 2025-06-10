@@ -1,11 +1,6 @@
 // src/context/StripeContext.tsx
 import React, { createContext, useContext, useEffect } from 'react';
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-  useMutation,
-} from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as paymentsClient from '@/modules/payments/paymentsClient';
 import type { CardData } from '@/modules/payments/types';
 
@@ -25,9 +20,10 @@ interface StripeContextValue {
 }
 
 const StripeContext = createContext<StripeContextValue | undefined>(undefined);
-const queryClient = new QueryClient();
 
 export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient();
+
   // Fetch saved cards
   const {
     data: cards,
@@ -35,9 +31,7 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   } = useQuery(['cards'], paymentsClient.fetchCards);
 
   // Fetch active subscription
-  const { data: subscription } = useQuery([
-    'subscription',
-  ], paymentsClient.fetchActiveSubscription);
+  const { data: subscription } = useQuery(['subscription'], paymentsClient.fetchActiveSubscription);
 
   // Mutation: add card
   const addCardMutation = useMutation<
@@ -46,7 +40,11 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     { paymentMethodId: string; nickName: string | null }
   >(
     (args) => paymentsClient.addCard(args),
-    { onSuccess: () => queryClient.invalidateQueries(['cards']) }
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['cards']);
+      },
+    }
   );
 
   // Mutation: create subscription intent
@@ -56,7 +54,11 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     { priceId: string; paymentMethodId: string }
   >(
     (args) => paymentsClient.createSubscriptionIntent(args.priceId, args.paymentMethodId),
-    { onSuccess: () => queryClient.invalidateQueries(['subscription']) }
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['subscription']);
+      },
+    }
   );
 
   // Mutation: open customer portal
@@ -66,7 +68,11 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     void
   >(
     () => paymentsClient.createPortalSession(),
-    { onSuccess: () => queryClient.invalidateQueries(['subscription']) }
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['subscription']);
+      },
+    }
   );
 
   const contextValue: StripeContextValue = {
@@ -77,7 +83,8 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       addCardMutation.mutateAsync({ paymentMethodId, nickName }),
     subscribe: (priceId, paymentMethodId) =>
       subscribeMutation.mutateAsync({ priceId, paymentMethodId }),
-    openCustomerPortal: () => portalSessionMutation.mutateAsync().then(res => res.url),
+    openCustomerPortal: () =>
+      portalSessionMutation.mutateAsync().then((res) => res.url),
     refresh: () => {
       queryClient.invalidateQueries(['cards']);
       queryClient.invalidateQueries(['subscription']);
@@ -87,18 +94,13 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Prefetch on mount
   useEffect(() => {
     queryClient.prefetchQuery(['cards'], paymentsClient.fetchCards);
-    queryClient.prefetchQuery(
-      ['subscription'],
-      paymentsClient.fetchActiveSubscription
-    );
-  }, []);
+    queryClient.prefetchQuery(['subscription'], paymentsClient.fetchActiveSubscription);
+  }, [queryClient]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <StripeContext.Provider value={contextValue}>
-        {children}
-      </StripeContext.Provider>
-    </QueryClientProvider>
+    <StripeContext.Provider value={contextValue}>
+      {children}
+    </StripeContext.Provider>
   );
 };
 
