@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { StepChoosePlan } from './StepChoosePlan';
 import { StepPayment } from './StepPayment';
-import { StepReview } from './StepReview';
+import StepReview from './StepReview';
 import { StepSuccess } from './StepSuccess';
 
 const steps = ['choose', 'payment', 'review', 'success'] as const;
