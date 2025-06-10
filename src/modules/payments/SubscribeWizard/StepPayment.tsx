@@ -15,27 +15,41 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
   const planName = planId === 'plus' ? 'Plus' : 'Basic';
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
+  // If user chose the free plan, skip payment immediately
   useEffect(() => {
-    const init = async () => {
-      try {
-        const secret = await createSetupIntent();
-        setClientSecret(secret);
-      } catch (err: any) {
-        addToast(
-          err instanceof Error
-            ? err.message
-            : 'Failed to initialize payment form.',
-          'error'
-        );
-      }
-    };
-    init();
-  }, [addToast]);
+    if (planId === 'basic') {
+      addToast('Free plan selected. No payment required.', 'success');
+      onNext();
+    }
+  }, [planId, onNext, addToast]);
 
-  if (!clientSecret) {
+  // Only initialize Stripe for paid plan
+  useEffect(() => {
+    if (planId === 'plus') {
+      const init = async () => {
+        try {
+          const secret = await createSetupIntent();
+          setClientSecret(secret);
+        } catch (err: any) {
+          addToast(
+            err instanceof Error
+              ? err.message
+              : 'Failed to initialize payment form.',
+            'error'
+          );
+        }
+      };
+      init();
+    }
+  }, [planId, addToast]);
+
+  // While loading clientSecret for plus plan, show loader
+  if (planId === 'plus' && !clientSecret) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded">
-        <p className="text-gray-500 dark:text-gray-400">Loading payment form...</p>
+        <p className="text-gray-500 dark:text-gray-400">
+          Loading payment form...
+        </p>
       </div>
     );
   }
@@ -43,14 +57,16 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
   return (
     <div className="space-y-6 p-4">
       <h2 className="text-xl font-semibold">Enter payment for {planName} plan</h2>
-      <StripeElements options={{ clientSecret }}>
-        <PaymentMethodSelector
-          onSuccess={() => {
-            addToast('Payment method added successfully!', 'success');
-            onNext();
-          }}
-        />
-      </StripeElements>
+      {planId === 'plus' && clientSecret && (
+        <StripeElements options={{ clientSecret }}>
+          <PaymentMethodSelector
+            onSuccess={() => {
+              addToast('Payment method added successfully!', 'success');
+              onNext();
+            }}
+          />
+        </StripeElements>
+      )}
     </div>
   );
 };
