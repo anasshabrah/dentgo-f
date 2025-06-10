@@ -37,7 +37,7 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
       <p className="text-gray-600">{message}</p>
       <button
         onClick={handleStart}
-        className="mt-4 py-2 bg-primary text-white rounded hover:bg-primary/90"
+        className="mt-4 px-6 py-3 bg-primary text-white text-lg font-semibold rounded shadow hover:bg-primary/90 transition"
       >
         Start Now
       </button>
