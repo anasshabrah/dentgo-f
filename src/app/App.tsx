@@ -11,7 +11,8 @@ const App: React.FC = () => {
     <BrowserRouter>
       <ModalProvider>
         <ErrorBoundary>
-          <Suspense fallback={<Loader />}>
+          {/* Use fullscreen loader here to cover the entire viewport */}
+          <Suspense fallback={<Loader fullscreen />}>
             <RoutesConfig />
           </Suspense>
         </ErrorBoundary>
