@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StepChoosePlan } from './StepChoosePlan';
 import { StepPayment } from './StepPayment';
 import StepReview from './StepReview';
-import { StepSuccess } from './StepSuccess';
+import StepSuccess from './StepSuccess';
 
 const steps = ['choose', 'payment', 'review', 'success'] as const;
 type Step = typeof steps[number];
@@ -16,7 +16,7 @@ const SubscribeWizard: React.FC = () => {
     <div className="max-w-md mx-auto my-8 bg-white dark:bg-gray-800 rounded shadow">
       {current === 'choose' && (
         <StepChoosePlan
-          onNext={(p) => {
+          onNext={p => {
             setPlanId(p);
             setCurrent('payment');
           }}
@@ -38,7 +38,9 @@ const SubscribeWizard: React.FC = () => {
         />
       )}
 
-      {current === 'success' && <StepSuccess />}
+      {current === 'success' && (
+        <StepSuccess planId={planId} />
+      )}
     </div>
   );
 };
