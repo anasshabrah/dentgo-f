@@ -25,6 +25,7 @@ export default function SideMenu() {
   return (
     <Transition.Root appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" open={isOpen} onClose={close}>
+        {/* Overlay */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -164,9 +165,9 @@ export default function SideMenu() {
                     </svg>
                   </Link>
 
-                  {/* Banks & Cards */}
+                  {/* Wallet */}
                   <Link
-                    to="/bank-cards"
+                    to="/wallet"
                     onClick={close}
                     className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   >
@@ -186,49 +187,13 @@ export default function SideMenu() {
                         />
                         <g>
                           <path
-                            d="M15 33H33"
+                            d="M15 18H33V30H15V18Z"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                           <path
-                            d="M15 22H33"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M17 18L24 15L31 18"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M16 22V33"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M32 22V33"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M20 26V29"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M24 26V29"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M28 26V29"
+                            d="M33 22H27C26.4696 22 26 22.4696 26 23C26 23.5304 26.4696 24 27 24H33"
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -236,141 +201,7 @@ export default function SideMenu() {
                         </g>
                       </svg>
                       <span className="text-gray-800 font-medium text-base">
-                        Banks & Cards
-                      </span>
-                    </div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-gray-800"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </Link>
-
-                  {/* Payment Methods */}
-                  <Link
-                    to="/payment-method"
-                    onClick={close}
-                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-primary stroke-current"
-                        viewBox="0 0 48 48"
-                        fill="none"
-                      >
-                        <rect
-                          opacity="0.08"
-                          width="48"
-                          height="48"
-                          rx="8"
-                          fill="currentColor"
-                        />
-                        <g>
-                          <path
-                            d="M29 20V17C29 16.7348 28.8946 16.4804 28.7071 16.2929C28.5196 16.1054 28.2652 16 28 16H18C17.4696 16 16.9609 16.2107 16.5858 16.5858C16.2107 16.9609 16 17.4696 16 18M16 18C16 18.5304 16.2107 19.0391 16.5858 19.4142C16.9609 19.7893 17.4696 20 18 20H30C30.2652 20 30.5196 20.1054 30.7071 20.2929C30.8946 20.4804 31 20.7348 31 21V24M16 18V30C16 30.5304 16.2107 31.0391 16.5858 31.4142C16.9609 31.7893 17.4696 32 18 32H30C30.2652 32 30.5196 31.8946 30.7071 31.7071C30.8946 31.5196 31 31.2652 31 31V28"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M32 24V28H28C27.4696 28 26.9609 27.7893 26.5858 27.4142C26.2107 27.0391 26 26.5304 26 26C26 25.4696 26.2107 24.9609 26.5858 24.5858C26.9609 24.2107 27.4696 24 28 24H32Z"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </g>
-                      </svg>
-                      <span className="text-gray-800 font-medium text-base">
-                        Payment Methods
-                      </span>
-                    </div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-gray-800"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </Link>
-
-                  {/* Subscriptions */}
-                  <Link
-                    to="/cancel-subscription"
-                    onClick={close}
-                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  >
-                    <div className="flex items-center gap-4">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-primary stroke-current"
-                        viewBox="0 0 48 48"
-                        fill="none"
-                      >
-                        <rect
-                          opacity="0.08"
-                          width="48"
-                          height="48"
-                          rx="8"
-                          fill="currentColor"
-                        />
-                        <g>
-                          <path
-                            d="M23 18C23 18.7956 23.5268 19.5587 24.4645 20.1213C25.4021 20.6839 26.6739 21 28 21C29.3261 21 30.5979 20.6839 31.5355 20.1213C32.4732 19.5587 33 18.7956 33 18C33 17.2044 32.4732 16.4413 31.5355 15.8787C30.5979 15.3161 29.3261 15 28 15C26.6739 15 25.4021 15.3161 24.4645 15.8787C23.5268 16.4413 23 17.2044 23 18Z"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M23 18V22C23 23.657 25.239 25 28 25C30.761 25 33 23.657 33 22V18"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M23 22V26C23 27.657 25.239 29 28 29C30.761 29 33 27.657 33 26V22"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M23 26V30C23 31.657 25.239 33 28 33C30.761 33 33 31.657 33 30V26"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M19 21H16.5C16.1022 21 15.7206 21.158 15.4393 21.4393C15.158 21.7206 15 22.1022 15 22.5C15 22.8978 15.158 23.2794 15.4393 23.5607C15.7206 23.842 16.1022 24 16.5 24H17.5C17.8978 24 18.2794 24.158 18.5607 24.4393C18.842 24.7206 19 25.1022 19 25.5C19 25.8978 18.842 26.2794 18.5607 26.5607C18.2794 26.842 17.8978 27 17.5 27H15"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M17 27V28M17 20V21"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </g>
-                      </svg>
-                      <span className="text-gray-800 font-medium text-base">
-                        Subscriptions
+                        Wallet
                       </span>
                     </div>
                     <svg

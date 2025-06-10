@@ -1,30 +1,39 @@
 // src/pages/Delete.tsx
-
 import React, { useState } from "react";
 import Loader from "@components/ui/Loader";
 import { useNavigate } from "react-router-dom";
 import { deleteAccount } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "@components/ui/ToastProvider";
 
 const Delete: React.FC = () => {
+  const { addToast } = useToast();
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const handleDelete = async () => {
-    if (!window.confirm("This will permanently delete your account. Proceed?")) {
+    const confirmed = window.confirm(
+      "This will permanently delete your account. Proceed?"
+    );
+    if (!confirmed) {
       return;
     }
+
     setLoading(true);
+
     try {
       await deleteAccount();
       await logout();
+      addToast("Your account has been deleted successfully.", "success");
       navigate("/login", { replace: true });
     } catch (err: any) {
       console.error("Delete failed", err);
-      const errorMsg =
-        err?.message || "Could not delete account. Please try again.";
-      alert(errorMsg);
+      addToast(
+        err?.message || "Could not delete account. Please try again.",
+        "error"
+      );
+    } finally {
       setLoading(false);
     }
   };

@@ -22,7 +22,6 @@ const DeleteAccount = lazy(() => import("../pages/Delete"));
 
 const Alert = lazy(() => import("../pages/Alert"));
 const Confirmation = lazy(() => import("../pages/Confirmation"));
-const ConfirmPaymentPin = lazy(() => import("../pages/ConfirmPaymentPin"));
 
 export default function RoutesConfig() {
   useEffect(() => {
@@ -80,7 +79,6 @@ export default function RoutesConfig() {
     // STANDALONE (accessible without menu)
     { path: "alert", element: <Alert /> },
     { path: "confirmation", element: <Confirmation /> },
-    { path: "confirm-payment-pin", element: <ConfirmPaymentPin /> },
   ];
 
   return <Routes>{renderRoutes(routes)}</Routes>;

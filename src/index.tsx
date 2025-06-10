@@ -1,33 +1,27 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./app/App";
-import reportWebVitals from "./reportWebVitals";
-import { DarkModeProvider } from "@components/DarkModeContext";
-import { AuthProvider } from "@context/AuthContext";
+// src/index.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './app/App';
+import reportWebVitals from './reportWebVitals';
+import { DarkModeProvider } from '@components/DarkModeContext';
+import { AuthProvider } from '@context/AuthContext';
+import { StripeProvider } from '@context/StripeContext';
+import { ToastProvider } from '@components/ui/ToastProvider';
 
-declare global {
-  interface Window {
-    // add any global types you need here later
-  }
-}
-
-console.log("[Startup] index.tsx → about to create root and render <App />");
-
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
-
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <DarkModeProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </DarkModeProvider>
+    <ToastProvider>
+      <StripeProvider>
+        <DarkModeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </DarkModeProvider>
+      </StripeProvider>
+    </ToastProvider>
   </React.StrictMode>
 );
 
-console.log("[Startup] index.tsx → <App /> render call done");
-
-reportWebVitals(() => {});
+reportWebVitals();

@@ -1,101 +1,51 @@
 // src/api/subscriptions.ts
-import { API_BASE } from "../config";
 
-export interface Subscription {
-  id: number;
-  plan: string;
-  status: string;
-  beganAt: string | null;
-  renewsAt: string | null;
-  cancelsAt: string | null;
-  userId: number;
-}
+import { API_BASE } from '../config';
 
-async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
-  const text = await res.text().catch(() => "");
-  let errorMsg = defaultMessage;
-  try {
-    const body = JSON.parse(text);
-    errorMsg = body.error || errorMsg;
-  } catch {
-    errorMsg = text || errorMsg;
-  }
-  throw new Error(errorMsg);
-}
-
-export async function fetchSubscriptions(): Promise<Subscription[]> {
-  const res = await fetch(`${API_BASE}/api/subscriptions`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to fetch subscriptions");
-  }
-  return res.json();
-}
-
-export async function fetchSubscription(id: number): Promise<Subscription> {
-  const res = await fetch(`${API_BASE}/api/subscriptions/${id}`, {
-    method: "GET",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to fetch subscription");
-  }
-  return res.json();
-}
-
-export interface CreateSubscriptionPayload {
-  plan: string;
-  status: string;
-  beganAt?: string;
-  renewsAt?: string;
-  cancelsAt?: string;
-}
-
+/**
+ * Create a subscription intent.  Returns clientSecret, subscriptionId & status.
+ */
 export async function createSubscription(
-  data: CreateSubscriptionPayload
-): Promise<Subscription> {
+  priceId: string,
+  paymentMethodId: string
+): Promise<{ clientSecret: string; subscriptionId: string; status: string }> {
+  const res = await fetch(`${API_BASE}/api/payments/create-subscription`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId, paymentMethodId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create subscription');
+  }
+  return (await res.json()) as {
+    clientSecret: string;
+    subscriptionId: string;
+    status: string;
+  };
+}
+
+/**
+ * Fetch the active subscription for the current user
+ */
+export async function fetchActiveSubscription(): Promise<{
+  subscriptionId: string;
+  status: string;
+  currentPeriodEnd: number;
+}> {
   const res = await fetch(`${API_BASE}/api/subscriptions`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
   });
   if (!res.ok) {
-    await handleErrorResponse(res, "Failed to create subscription");
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to fetch subscription');
   }
-  return res.json();
-}
-
-export interface UpdateSubscriptionPayload {
-  status?: string;
-  renewsAt?: string;
-  cancelsAt?: string;
-}
-
-export async function updateSubscription(
-  id: number,
-  updates: UpdateSubscriptionPayload
-): Promise<Subscription> {
-  const res = await fetch(`${API_BASE}/api/subscriptions/${id}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(updates),
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to update subscription");
-  }
-  return res.json();
-}
-
-export async function deleteSubscription(id: number): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/subscriptions/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to delete subscription");
-  }
+  return (await res.json()) as {
+    subscriptionId: string;
+    status: string;
+    currentPeriodEnd: number;
+  };
 }

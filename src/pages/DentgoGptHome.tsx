@@ -1,5 +1,4 @@
 // src/pages/DentgoGptHome.tsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
@@ -13,17 +12,14 @@ const DentgoGptHome: React.FC = () => {
   const { isAuthenticated, initializing } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
 
-  // 1) While auth is initializing, show a loader
   if (initializing) {
     return <Loader />;
   }
 
-  // 2) If not authenticated, redirect to login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // 3) Remove any lingering Bootstrap backdrops (cleanup)
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -32,32 +28,23 @@ const DentgoGptHome: React.FC = () => {
     }
   }, []);
 
-  // Handlers
   const handlePlusSubscription = () => {
-    navigate("/plus-subscription");
+    navigate("/subscribe");
   };
 
   const handleStartChat = () => {
     navigate("/dentgo-chat");
   };
 
-  const hidePopup = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsVisible(false);
-  };
-
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
-      {/* ===== MAIN CONTENT ===== */}
       <main className="flex-1 bg-gray-100">
         <div className="mx-auto max-w-lg px-4">
-          {/* Dentgo Plus Card */}
           <section
             className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
             aria-labelledby="dentgo-plus-title"
           >
             <div className="flex flex-col sm:flex-row">
-              {/* Text Content */}
               <div className="flex-1 p-6 space-y-2">
                 <h2
                   id="dentgo-plus-title"
@@ -76,8 +63,6 @@ const DentgoGptHome: React.FC = () => {
                   Upgrade
                 </button>
               </div>
-
-              {/* Illustration */}
               <div className="flex-1">
                 <img
                   src={plusRobot}
@@ -87,8 +72,6 @@ const DentgoGptHome: React.FC = () => {
               </div>
             </div>
           </section>
-
-          {/* Start Chat Button */}
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleStartChat}
@@ -100,24 +83,17 @@ const DentgoGptHome: React.FC = () => {
           </div>
         </div>
       </main>
-
-      {/* ===== SIDE MENU ===== */}
       <SideMenu />
-
-      {/* ===== HOME SCREEN PROMO POPUP ===== */}
       {isVisible && (
         <>
-          {/* Dimmed Backdrop */}
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-50"
-            onClick={hidePopup}
+            onClick={() => setIsVisible(false)}
             aria-hidden="true"
-          ></div>
-
-          {/* Popup Panel */}
+          />
           <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white rounded-t-3xl z-60 p-6 shadow-lg">
             <button
-              onClick={hidePopup}
+              onClick={() => setIsVisible(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
               aria-label="Close popup"
             >

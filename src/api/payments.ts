@@ -1,51 +1,71 @@
 // src/api/payments.ts
-import axios from "axios";
-import { API_BASE } from "../config";
 
-export interface StripeCustomerResponse {
-  customerId: string;
-}
+import { API_BASE } from '../config';
 
-export async function createStripeCustomer(): Promise<StripeCustomerResponse> {
-  const resp = await axios.post(
-    `${API_BASE}/api/payments/create-customer`,
-    {},
-    {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
-  return resp.data;
-}
-
-export interface SubscriptionResponse {
-  subscriptionId: string;
-  clientSecret: string;
-  status: string;
-}
-
-export async function createSubscription(
-  priceId: string,
-  paymentMethodId: string
-): Promise<SubscriptionResponse> {
-  const resp = await axios.post(
-    `${API_BASE}/api/payments/create-subscription`,
-    { priceId, paymentMethodId },
-    {
-      withCredentials: true,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
-  return resp.data;
-}
-
-export async function fetchActiveSubscription(): Promise<{
-  subscriptionId: string;
-  status: string;
-  currentPeriodEnd: number;
-}> {
-  const resp = await axios.get(`${API_BASE}/api/subscriptions`, {
-    withCredentials: true,
+/**
+ * Create (or retrieve) a Stripe Customer for the current user
+ */
+export async function createCustomer(): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-customer`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
   });
-  return resp.data;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create customer');
+  }
+  const { customerId } = (await res.json()) as { customerId: string };
+  return customerId;
+}
+
+/**
+ * Create a SetupIntent, returning its clientSecret
+ */
+export async function createSetupIntent(): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-setup-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create setup intent');
+  }
+  const { clientSecret } = (await res.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a one-off PaymentIntent for the given amount (in cents)
+ */
+export async function createPaymentIntent(amount: number): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-payment-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create payment intent');
+  }
+  const { clientSecret } = (await res.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a Stripe Customer Portal session and return its URL
+ */
+export async function createPortalSession(): Promise<{ url: string }> {
+  const res = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create portal session');
+  }
+  return (await res.json()) as { url: string };
 }

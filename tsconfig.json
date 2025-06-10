@@ -5,12 +5,12 @@
     "moduleResolution": "Node",
     "strict": true,
     "jsx": "react-jsx",
-    "baseUrl": "src",
+    "baseUrl": ".",
     "paths": {
-      "@components/*": ["components/*"],
-      "@context/*": ["context/*"],
-      "@utils/*": ["utils/*"],
-      "@hooks/*": ["hooks/*"]
+      "@components/*": ["src/components/*"],
+      "@context/*":    ["src/context/*"],
+      "@utils/*":      ["src/utils/*"],
+      "@hooks/*":      ["src/hooks/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

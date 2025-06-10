@@ -1,5 +1,4 @@
 // src/pages/Login.tsx
-
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import Loader from "@components/ui/Loader";
@@ -11,12 +10,14 @@ import dentaiBottom from "../assets/images/dentaiBottom.png";
 import useGoogleIdentity from "@hooks/useGoogleIdentity";
 import { useAuth } from "@context/AuthContext";
 import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "../api/auth";
+import { useToast } from "@components/ui/ToastProvider";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login: React.FC = () => {
+  const { addToast } = useToast();
   const navigate = useNavigate();
-  const { login, isAuthenticated, initializing, error, setError } = useAuth();
+  const { login, isAuthenticated, initializing } = useAuth();
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
@@ -35,7 +36,7 @@ const Login: React.FC = () => {
     async (response: any) => {
       const { credential } = response;
       if (!credential) {
-        setError("No credentials returned. Please try again.");
+        addToast("No credentials returned. Please try again.", "error");
         return;
       }
       try {
@@ -44,13 +45,14 @@ const Login: React.FC = () => {
         navigate("/dentgo-gpt-home", { replace: true });
       } catch (err: any) {
         console.error("Google login error:", err);
-        setError(
+        addToast(
           err?.message ||
-            "Authentication failed. Please try again or use a different browser mode."
+            "Authentication failed. Please try again or use a different browser mode.",
+          "error"
         );
       }
     },
-    [login, navigate, setError]
+    [login, navigate, addToast]
   );
 
   // Initialize Google One-Tap
@@ -61,7 +63,7 @@ const Login: React.FC = () => {
       if (window.google?.accounts?.id) {
         if (!CLIENT_ID) {
           console.error("Missing VITE_GOOGLE_CLIENT_ID!");
-          alert("Google Login misconfigured: missing client ID.");
+          addToast("Google Login misconfigured: missing client ID.", "error");
           setLoading(false);
           return;
         }
@@ -83,7 +85,7 @@ const Login: React.FC = () => {
     return () => {
       if (retryTimeout) clearTimeout(retryTimeout);
     };
-  }, [handleCredentialResponse]);
+  }, [handleCredentialResponse, addToast]);
 
   if (initializing || loading) {
     return <Loader />;
@@ -110,22 +112,6 @@ const Login: React.FC = () => {
             Welcome
           </h2>
 
-          {error && (
-            <div
-              role="alert"
-              className="bg-yellow-100 text-yellow-700 p-3 mb-4 rounded cursor-pointer"
-              onClick={() => setError(null)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setError(null);
-                }
-              }}
-              tabIndex={0}
-            >
-              {error}
-            </div>
-          )}
-
           <div className="flex flex-col gap-4 w-full">
             {/* Google Login */}
             <button
@@ -141,13 +127,14 @@ const Login: React.FC = () => {
                   } catch (err: any) {
                     if (err.name !== "AbortError") {
                       console.error("Google prompt error:", err);
-                      setError(
-                        "Unexpected error when opening Google login. Please try again."
+                      addToast(
+                        "Unexpected error when opening Google login. Please try again.",
+                        "error"
                       );
                     }
                   }
                 } else {
-                  alert("Google login is not ready yet.");
+                  addToast("Google login is not ready yet.", "error");
                 }
               }}
             >
@@ -164,9 +151,10 @@ const Login: React.FC = () => {
                   await loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);
-                  setError(
+                  addToast(
                     err?.message ||
-                      "Apple authentication failed. Please try again."
+                      "Apple authentication failed. Please try again.",
+                    "error"
                   );
                 }
               }}

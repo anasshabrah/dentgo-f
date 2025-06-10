@@ -1,56 +1,39 @@
 // src/api/cards.ts
-import { API_BASE } from "../config";
 
-export interface CardData {
-  id: number;
-  network: string | null;
-  last4: string;
-  isActive: boolean;
-}
+import { API_BASE } from '../config';
+import type { CardData } from '../modules/payments/types';
 
 /**
- * Utility: Parses error responses consistently.
- */
-async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
-  const text = await res.text().catch(() => "");
-  let errorMsg = defaultMessage;
-  try {
-    const body = JSON.parse(text);
-    errorMsg = body.error || errorMsg;
-  } catch {
-    errorMsg = text || errorMsg;
-  }
-  throw new Error(errorMsg);
-}
-
-/**
- * Fetches saved cards for the current user.
+ * Fetch saved cards for the current user
  */
 export async function fetchCards(): Promise<CardData[]> {
   const res = await fetch(`${API_BASE}/api/cards`, {
-    credentials: "include",
+    method: 'GET',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
   });
   if (!res.ok) {
-    await handleErrorResponse(res, "Failed to fetch cards");
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to fetch cards');
   }
-  const data = (await res.json()) as { cards: CardData[] };
-  return data.cards;
+  return (await res.json()) as CardData[];
 }
 
 /**
- * Creates a new saved card for the current user.
+ * Add a new card (via SetupIntent) for the current user
  */
-export async function createCard(payload: {
+export async function createCard(args: {
   paymentMethodId: string;
   nickName: string | null;
 }): Promise<void> {
   const res = await fetch(`${API_BASE}/api/cards`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(args),
   });
   if (!res.ok) {
-    await handleErrorResponse(res, "Failed to create card");
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create card');
   }
 }

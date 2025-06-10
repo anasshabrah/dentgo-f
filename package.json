@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^7.3.0",
+    "@tanstack/react-query": "^4.34.8",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.3",
     "react": "^18.2.0",

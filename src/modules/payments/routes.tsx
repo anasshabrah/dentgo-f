@@ -1,32 +1,29 @@
-import React, { lazy, Suspense } from "react";
+// src/modules/payments/routes.tsx
+import React, { lazy, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
 
-const PaymentMethod = lazy(() => import("../../pages/PaymentMethod"));
-const AddNewCard = lazy(() => import("../../pages/AddNewCard"));
-const SelectPayment = lazy(() => import("../../pages/SelectPaymentMethod"));
-const CancelSubscription = lazy(() => import("../../pages/CancelSubscription"));
-const SubscriptionPayment = lazy(() => import("../../pages/SubscriptionPayment"));
-const BankCards = lazy(() => import("../../pages/BankCards"));
-const PlusSubscription = lazy(() => import("../../pages/PlusSubscription"));
+const Wallet = lazy(() => import('./Wallet'));
+const SubscribeWizard = lazy(() => import('./SubscribeWizard'));
 
-// Proper functional wrapper component:
-const withSuspense = (
-  Component: React.LazyExoticComponent<React.ComponentType<any>>
-) => {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Component />
-    </Suspense>
-  );
-};
+const withSuspense = (Component: React.LazyExoticComponent<React.ComponentType<any>>) => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Component />
+  </Suspense>
+);
 
 const paymentRoutes = [
-  { path: "payment-method", element: withSuspense(PaymentMethod) },
-  { path: "add-new-card", element: withSuspense(AddNewCard) },
-  { path: "select-payment-method", element: withSuspense(SelectPayment) },
-  { path: "cancel-subscription", element: withSuspense(CancelSubscription) },
-  { path: "subscription-payment", element: withSuspense(SubscriptionPayment) },
-  { path: "bank-cards", element: withSuspense(BankCards) },
-  { path: "plus-subscription", element: withSuspense(PlusSubscription) },
+  {
+    path: 'wallet',
+    element: withSuspense(Wallet),
+  },
+  {
+    path: 'subscribe',
+    element: withSuspense(SubscribeWizard),
+  },
+  // Redirects from legacy paths
+  { path: 'payment-method', element: <Navigate to="wallet" replace /> },
+  { path: 'bank-cards', element: <Navigate to="wallet" replace /> },
+  { path: 'add-new-card', element: <Navigate to="wallet" replace /> },
 ];
 
 export default paymentRoutes;

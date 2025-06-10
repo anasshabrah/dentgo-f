@@ -1,3 +1,4 @@
+// src/pages/Alert.tsx
 import React, { useEffect, useState } from "react";
 import alertImg from "../assets/images/alert-img.png";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,9 +7,6 @@ import Loader from "@components/ui/Loader";
 const Alert: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-
-  const goToLogin = () => navigate("/login");
-  const goToHome = () => navigate("/dentgo-gpt-home");
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
@@ -20,7 +18,11 @@ const Alert: React.FC = () => {
   return (
     <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
       <div className="mx-auto max-w-lg px-4">
-        <div className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto">
+        <div
+          className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto"
+          role="alert"
+          aria-live="assertive"
+        >
           <div className="flex items-center justify-center">
             <img className="max-w-full pb-4" src={alertImg} alt="Alert" />
           </div>
@@ -31,21 +33,21 @@ const Alert: React.FC = () => {
             Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
           </p>
 
-          <button
-            onClick={goToLogin}
-            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10"
+          <Link
+            to="/login"
+            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10 text-blue-700 dark:text-primary hover:bg-blue-200 transition"
+            role="button"
           >
-            <Link to="/login" className="text-blue-700 dark:text-primary">
-              Try Again
-            </Link>
-          </button>
+            Try Again
+          </Link>
 
-          <button
-            onClick={goToHome}
-            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10"
+          <Link
+            to="/dentgo-gpt-home"
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10 hover:bg-blue-800 transition"
+            role="button"
           >
-            <Link to="/dentgo-gpt-home">Go to Home</Link>
-          </button>
+            Go to Home
+          </Link>
         </div>
       </div>
     </div>
