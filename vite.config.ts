@@ -10,8 +10,7 @@ export default defineConfig({
     Checker({
       typescript: true,
       eslint: {
-        files: ['./src'],
-        extensions: ['.ts', '.tsx'],
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
       },
     }),
   ],
