@@ -1,6 +1,6 @@
 // src/modules/payments/paymentsClient.ts
-import { API_BASE } from '../../config';
-import { fetchCards as apiFetchCards, createCard as apiCreateCard } from '../../api/cards';
+import { API_BASE } from '@/config';
+import { fetchCards as apiFetchCards, createCard as apiCreateCard } from '@/api/cards';
 import type { CardData } from './types';
 import axios from 'axios';
 

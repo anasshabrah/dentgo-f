@@ -1,10 +1,10 @@
 // src/modules/payments/components/CardRow.tsx
 import React from 'react';
 import type { CardData } from '../types';
-import visaLogo from '../../../assets/cards/visa.svg';
-import mcLogo from '../../../assets/cards/mastercard.svg';
-import amexLogo from '../../../assets/cards/amex.svg';
-import cardIcon from '../../../assets/cards/card.svg';
+import visaLogo from '@/assets/cards/visa.svg';
+import mcLogo from '@/assets/cards/mastercard.svg';
+import amexLogo from '@/assets/cards/amex.svg';
+import cardIcon from '@/assets/cards/card.svg';
 
 const logos: Record<string, string> = {
   visa: visaLogo,

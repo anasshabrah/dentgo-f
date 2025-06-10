@@ -10,6 +10,7 @@ export default defineConfig({
       '@context': path.resolve(__dirname, 'src/context'),
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@hooks': path.resolve(__dirname, 'src/hooks'),
+	  '@lib': path.resolve(__dirname, 'src/lib'),
     }
   },
   build: {

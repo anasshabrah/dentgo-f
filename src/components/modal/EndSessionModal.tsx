@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { endChatSession } from "../../api/chats";
+import { endChatSession } from "@/api/chats";
 import { useModal } from "@context/ModalContext";
 
 export default function EndSessionModal({ sessionId }: { sessionId: number | null }) {
