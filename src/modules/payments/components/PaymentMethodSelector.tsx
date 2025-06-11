@@ -1,7 +1,7 @@
 // src/modules/payments/components/PaymentMethodSelector.tsx
 import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import type { StripeSetupIntentResult } from '@stripe/stripe-js';
+import type { SetupIntentResult } from '@stripe/stripe-js';
 import { useStripeData } from '@/context/StripeContext';
 import { useToast } from '@components/ui/ToastProvider';
 
@@ -32,8 +32,8 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
-      // Tell TS that this result may have both error and setupIntent
-      const result: StripeSetupIntentResult = await stripe.confirmSetup({
+      // Use the correct SetupIntentResult type
+      const result: SetupIntentResult = await stripe.confirmSetup({
         elements,
         confirmParams: { return_url: window.location.href },
       });
