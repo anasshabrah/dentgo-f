@@ -79,9 +79,10 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
+          // Cast the type field to the literal union
           const msgs = session.messages.map((m: any) => ({
-            text: m.content,
-            type: m.role === "USER" ? "personal" : "bot",
+            text: m.content as string,
+            type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
           }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
@@ -95,7 +96,7 @@ const DentgoChat: React.FC = () => {
     }
   }, [search]);
 
-  // Auto-scroll
+  // Auto-scroll on new messages or thinking
   useEffect(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current.scrollHeight,
@@ -103,7 +104,7 @@ const DentgoChat: React.FC = () => {
     });
   }, [messages, isThinking]);
 
-  // Greeting if no session
+  // Initial greeting
   useEffect(() => {
     if (!loading && sessionId === null) {
       const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
@@ -180,12 +181,14 @@ const DentgoChat: React.FC = () => {
               ✖
             </button>
           </div>
+
           <div ref={containerRef} className="flex-grow overflow-auto space-y-1">
             {messages.map((m, i) => (
               <MessageBubble key={i} {...m} />
             ))}
             {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
           </div>
+
           <div className="mt-4 flex items-center space-x-2">
             <textarea
               rows={2}
@@ -194,7 +197,9 @@ const DentgoChat: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) =>
-                e.key === "Enter" && !e.shiftKey ? (e.preventDefault(), send()) : undefined
+                e.key === "Enter" && !e.shiftKey
+                  ? (e.preventDefault(), send())
+                  : undefined
               }
             />
             <button
