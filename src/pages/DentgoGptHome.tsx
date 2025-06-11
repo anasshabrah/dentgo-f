@@ -5,14 +5,12 @@ import logo from "@/assets/images/logo.png";
 import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
 import { useStripeData } from "@context/StripeContext";
-import { useToast } from "@components/ui/ToastProvider";
 import Loader from "@components/ui/Loader";
 
 const DentgoGptHome: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, initializing } = useAuth();
   const { subscription } = useStripeData();
-  const { addToast } = useToast();
   const [isVisible, setIsVisible] = useState(false);
 
   // Show loading while auth initializes
@@ -42,10 +40,6 @@ const DentgoGptHome: React.FC = () => {
     if (subscription?.status === "active") {
       navigate("/dentgo-chat");
     } else {
-      addToast({
-        message: "Please subscribe to Dentgo Plus to start chatting.",
-        type: "info",
-      });
       navigate("/subscribe");
     }
   };
