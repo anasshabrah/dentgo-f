@@ -32,16 +32,16 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
-      // Use the correct SetupIntentResult type
-      const result: SetupIntentResult = await stripe.confirmSetup({
+      // Cast the result so TS knows about setupIntent
+      const result = (await stripe.confirmSetup({
         elements,
         confirmParams: { return_url: window.location.href },
-      });
+      })) as SetupIntentResult;
 
       if (result.error) throw result.error;
 
-      const pm = result.setupIntent?.payment_method as string;
-      await addCard(pm, nickname || null);
+      const paymentMethod = result.setupIntent?.payment_method as string;
+      await addCard(paymentMethod, nickname || null);
 
       setNickname('');
       addToast('Card added successfully!', 'success');
