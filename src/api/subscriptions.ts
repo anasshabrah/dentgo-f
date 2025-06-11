@@ -1,4 +1,5 @@
-// File: pages/api/subscriptions.ts
+// pages/api/subscriptions.ts
+
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
@@ -6,11 +7,9 @@ import Stripe from 'stripe';
 const prisma = new PrismaClient();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' });
 
-// Log DATABASE_URL once at cold start
 console.log('📦 Using DATABASE_URL:', process.env.DATABASE_URL);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Disable caching for all methods
   res.setHeader('Cache-Control', 'no-store');
 
   try {
@@ -73,7 +72,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // unsupported
     res.setHeader('Allow', ['GET', 'POST']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (error: any) {

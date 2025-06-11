@@ -1,4 +1,5 @@
 // src/modules/payments/components/PlanCard.tsx
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStripeData } from '@/context/StripeContext';
@@ -19,7 +20,8 @@ export const PlanCard: React.FC = () => {
   }
 
   // No subscription = free plan
-  const isFreePlan = Array.isArray(subscription) && subscription.length === 0;
+  const isFreePlan = subscription === null;
+
   if (isFreePlan) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
@@ -38,8 +40,8 @@ export const PlanCard: React.FC = () => {
   }
 
   // Active paid subscription
-  const sub = Array.isArray(subscription) ? subscription[0] : subscription;
-  if (!sub || sub.status !== 'ACTIVE') {
+  const sub = subscription;
+  if (!sub || sub.status.toLowerCase() !== 'active') {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
         No active paid subscription.
@@ -63,7 +65,6 @@ export const PlanCard: React.FC = () => {
       </div>
       <button
         onClick={async () => {
-          // existing customers manage in Stripe Portal
           const url = await useStripeData().openCustomerPortal();
           window.location.href = url;
         }}

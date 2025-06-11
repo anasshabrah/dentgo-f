@@ -55,6 +55,34 @@ export async function createPaymentIntent(amount: number): Promise<string> {
 }
 
 /**
+ * Create a Stripe subscription and return its clientSecret, subscriptionId & status
+ */
+export async function createSubscriptionIntent(
+  priceId: string,
+  paymentMethodId: string
+): Promise<{
+  clientSecret: string;
+  subscriptionId: string;
+  status: string;
+}> {
+  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId, paymentMethodId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create subscription intent');
+  }
+  return (await res.json()) as {
+    clientSecret: string;
+    subscriptionId: string;
+    status: string;
+  };
+}
+
+/**
  * Create a Stripe Customer Portal session and return its URL
  */
 export async function createPortalSession(): Promise<{ url: string }> {

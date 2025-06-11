@@ -1,0 +1,5038 @@
+--- C:\Users\hanos\cb\frontend\.eslintrc.cjs ---
+// .eslintrc.cjs
+module.exports = {
+  root: true,
+
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2021,
+    sourceType: 'module',
+    ecmaFeatures: { jsx: true },
+    project: './tsconfig.json',
+  },
+
+  env: {
+    browser: true,
+    node: true,
+    es2021: true,
+  },
+
+  settings: {
+    react: { version: 'detect' },
+  },
+
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+
+  plugins: ['react', '@typescript-eslint', 'react-hooks'],
+
+  rules: {
+    // allow explicit any everywhere
+    '@typescript-eslint/no-explicit-any': 'off',
+
+    // turn off unused vars (TypeScript already warns)
+    '@typescript-eslint/no-unused-vars': 'off',
+    'no-unused-vars': 'off',
+
+    // disable the react-hooks plugin missing rule error
+    'react-hooks/exhaustive-deps': 'off',
+
+    // your other overrides here...
+  },
+};
+
+
+--- C:\Users\hanos\cb\frontend\package.json ---
+{
+  "name": "dentgo-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.3.0",
+    "@tanstack/react-query": "^4.34.8",
+    "axios": "^1.9.0",
+    "bootstrap": "^5.3.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.23.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "vite": "^6.3.5",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.23",
+    "@types/react": "^18.2.63",
+    "@types/react-dom": "^18.2.19",
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.28.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.4.5",
+    "vite-plugin-checker": "^0.9.3"
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\postcss.config.cjs ---
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {}
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\tsconfig.json ---
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@context/*": ["src/context/*"],
+      "@utils/*": ["src/utils/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@lib/*": ["src/lib/*"]
+    },
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true
+  },
+  "include": ["src"],
+  "exclude": [
+    "src/api"  
+  ]
+}
+
+--- C:\Users\hanos\cb\frontend\vercel.json ---
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://api.dentgo.io/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+
+
+--- C:\Users\hanos\cb\frontend\vite.config.ts ---
+// vite.config.ts
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import Checker from 'vite-plugin-checker';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    Checker({
+      typescript: true,
+      eslint: {
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      },
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@context': path.resolve(__dirname, 'src/context'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@hooks': path.resolve(__dirname, 'src/hooks'),
+      '@lib': path.resolve(__dirname, 'src/lib'),
+    },
+  },
+  build: {
+    sourcemap: true,
+  },
+  server: {
+    hmr: {
+      overlay: true,
+    },
+  },
+});
+
+
+--- C:\Users\hanos\cb\frontend\public\manifest.json ---
+{
+  "short_name": "Dentgo",
+  "name": "Dentgo AI Chatbot",
+  "icons": [
+    {
+      "src": "icons/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#375066",
+  "background_color": "#ffffff"
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\config.ts ---
+// src/config.ts
+
+// 1. Detect whether we’re running in dev mode
+export const DEV = import.meta.env.DEV;
+
+/**
+ * 2. Backend base URL
+ *    - Development: http://localhost:4000
+ *    - Production: VITE_SERVER_URL
+ */
+export const API_BASE: string = DEV
+  ? 'http://localhost:4000'
+  : (import.meta.env.VITE_SERVER_URL as string);
+
+/**
+ * 3. Google Client ID (used in Login.tsx)
+ */
+export const GOOGLE_CLIENT_ID: string =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+
+/**
+ * 4. Stripe Publishable Key
+ */
+export const STRIPE_PK: string =
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string;
+
+/**
+ * 5. Free messages per day for Basic plan
+ */
+const FREE_MESSAGES_RAW = import.meta.env.VITE_FREE_MESSAGES_PER_DAY;
+export const FREE_MESSAGES_PER_DAY: number = Number.isNaN(Number(FREE_MESSAGES_RAW))
+  ? 1
+  : parseInt(FREE_MESSAGES_RAW as string, 10);
+
+/**
+ * 6. Frontend allowed origins (for CORS or embed checks)
+ */
+const PROD_DOMAINS = import.meta.env.VITE_FRONTEND_PROD_DOMAINS
+  ? (import.meta.env.VITE_FRONTEND_PROD_DOMAINS as string).split(',')
+  : [];
+
+export const ALLOWED_ORIGINS: Array<string | RegExp> = [
+  // Dev host
+  'http://localhost:5173',
+  // Primary prod frontend
+  (import.meta.env.VITE_SERVER_URL as string),
+  // Additional domains
+  ...PROD_DOMAINS.map(
+    (d) =>
+      new RegExp(
+        `^https?://[\\w-]+\\.${d.replace(/^\.*|\.*$/g, '')}$`
+      )
+  ),
+];
+
+
+--- C:\Users\hanos\cb\frontend\src\index.tsx ---
+// src/index.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './app/App';
+import reportWebVitals from './reportWebVitals';
+import { DarkModeProvider } from '@components/DarkModeContext';
+import { AuthProvider } from '@context/AuthContext';
+import { StripeProvider } from '@context/StripeContext';
+import { ToastProvider } from '@components/ui/ToastProvider';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundary from '@components/ErrorBoundary';
+
+const queryClient = new QueryClient();
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+
+root.render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        {/* AuthProvider must wrap everything that uses useAuth */}
+        <AuthProvider>
+          <ToastProvider>
+            <StripeProvider>
+              <DarkModeProvider>
+                <App />
+              </DarkModeProvider>
+            </StripeProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  </React.StrictMode>
+);
+
+reportWebVitals();
+
+
+--- C:\Users\hanos\cb\frontend\src\reportWebVitals.ts ---
+// src/reportWebVitals.js
+import { ReportHandler } from 'web-vitals';
+
+const reportWebVitals = (onPerfEntry?: ReportHandler) => {
+  if (onPerfEntry && onPerfEntry instanceof Function) {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(onPerfEntry);
+      getFID(onPerfEntry);
+      getFCP(onPerfEntry);
+      getLCP(onPerfEntry);
+      getTTFB(onPerfEntry);
+    });
+  }
+};
+
+export default reportWebVitals;
+
+
+--- C:\Users\hanos\cb\frontend\src\vite-env.d.ts ---
+/// <reference types="vite/client" />
+
+
+--- C:\Users\hanos\cb\frontend\src\api\auth.ts ---
+// src/api/auth.ts
+
+import { API_BASE } from "@/config";
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  picture?: string;
+}
+
+/**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(
+  res: Response,
+  defaultMessage: string
+): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
+/* Google login */
+export async function loginWithGoogle(credential: string): Promise<User> {
+  const res = await fetch(`${API_BASE}/api/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ credential }),
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Google login failed");
+  }
+  const { user } = (await res.json()) as { user: User };
+  return user;
+}
+
+/* Apple login (redirect) */
+export function loginWithApple(): void {
+  window.location.href = `${API_BASE}/api/auth/apple`;
+}
+
+/* Logout */
+export async function logout(): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/logout`, {
+    method: "POST",
+    credentials: "include",
+    mode: "cors",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Logout failed");
+  }
+}
+
+/**
+ * Permanently deletes the current user’s account (and revokes all sessions).
+ * NOTE: we remove any custom headers here so the DELETE remains a “simple” request
+ * and the browser will correctly include cookies.
+ */
+export async function deleteAccount(): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/auth/delete`, {
+    method: "DELETE",
+    credentials: "include",
+    mode: "cors",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to delete account");
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\cards.ts ---
+// File: pages/api/cards.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// Log DATABASE_URL once at cold start
+console.log('📦 Using DATABASE_URL:', process.env.DATABASE_URL);
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Disable caching for all methods
+  res.setHeader('Cache-Control', 'no-store');
+
+  try {
+    if (req.method === 'GET') {
+      const cards = await prisma.card.findMany({
+        where: { userId: req.cookies.userId || undefined },
+      });
+      return res.status(200).json(cards);
+    }
+
+    if (req.method === 'POST') {
+      const { paymentMethodId, nickName } = req.body;
+      if (!paymentMethodId) {
+        return res.status(400).json({ error: 'paymentMethodId is required' });
+      }
+
+      const card = await prisma.card.create({
+        data: {
+          userId: req.cookies.userId,
+          paymentMethodId,
+          nickName: nickName || null,
+        },
+      });
+
+      return res.status(201).json(card);
+    }
+
+    // unsupported
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  } catch (error: any) {
+    console.error('❌ /api/cards error:', error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\chat.ts ---
+// src/api/chat.ts
+import { API_BASE } from "@/config";
+
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
+export async function askDentgo(
+  prompt: string,
+  history: Array<{ role: string; text: string }> = [],
+  sessionId: number | null = null,
+  signal?: AbortSignal
+): Promise<{ sessionId: number; answer: string }> {
+  const res = await fetch(`${API_BASE}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ prompt, history, sessionId }),
+    signal,
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Chat failed");
+  }
+  return res.json();
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\chats.ts ---
+// src/api/chats.ts
+import { API_BASE } from "@/config";
+
+export interface ChatSession {
+  id: number;
+  title?: string;
+  startedAt: string;
+  endedAt: string | null;
+  messages: Array<{ role: "USER" | "ASSISTANT"; content: string }>;
+}
+
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
+export async function fetchChatSessions(): Promise<ChatSession[]> {
+  const res = await fetch(`${API_BASE}/api/chats`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to fetch chat sessions");
+  }
+  return res.json();
+}
+
+export async function fetchChatSession(id: number): Promise<ChatSession> {
+  const res = await fetch(`${API_BASE}/api/chats/${id}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to fetch chat session");
+  }
+  return res.json();
+}
+
+export async function endChatSession(sessionId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/chats/${sessionId}/end`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to end chat session");
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\notifications.ts ---
+// src/api/notifications.ts
+import { API_BASE } from "@/config";
+
+export interface Notification {
+  id: number;
+  title: string;
+  body: string;
+  seen: boolean;
+  createdAt: string;
+}
+
+async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
+export async function fetchNotifications(): Promise<Notification[]> {
+  const res = await fetch(`${API_BASE}/api/notifications`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to fetch notifications");
+  }
+  return res.json();
+}
+
+export async function markNotificationSeen(id: number): Promise<{ status: string }> {
+  const res = await fetch(`${API_BASE}/api/notifications/${id}/seen`, {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to mark notification as seen");
+  }
+  return res.json();
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\payments.ts ---
+// src/api/payments.ts
+
+import { API_BASE } from '@/config';
+
+/**
+ * Create (or retrieve) a Stripe Customer for the current user
+ */
+export async function createCustomer(): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-customer`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create customer');
+  }
+  const { customerId } = (await res.json()) as { customerId: string };
+  return customerId;
+}
+
+/**
+ * Create a SetupIntent, returning its clientSecret
+ */
+export async function createSetupIntent(): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-setup-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create setup intent');
+  }
+  const { clientSecret } = (await res.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a one-off PaymentIntent for the given amount (in cents)
+ */
+export async function createPaymentIntent(amount: number): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/payments/create-payment-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create payment intent');
+  }
+  const { clientSecret } = (await res.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a Stripe subscription and return its clientSecret, subscriptionId & status
+ */
+export async function createSubscriptionIntent(
+  priceId: string,
+  paymentMethodId: string
+): Promise<{
+  clientSecret: string;
+  subscriptionId: string;
+  status: string;
+}> {
+  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId, paymentMethodId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create subscription intent');
+  }
+  return (await res.json()) as {
+    clientSecret: string;
+    subscriptionId: string;
+    status: string;
+  };
+}
+
+/**
+ * Create a Stripe Customer Portal session and return its URL
+ */
+export async function createPortalSession(): Promise<{ url: string }> {
+  const res = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({} as any));
+    throw new Error(err.error || 'Failed to create portal session');
+  }
+  return (await res.json()) as { url: string };
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\api\subscriptions.ts ---
+// pages/api/subscriptions.ts
+
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { PrismaClient } from '@prisma/client';
+import Stripe from 'stripe';
+
+const prisma = new PrismaClient();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' });
+
+console.log('📦 Using DATABASE_URL:', process.env.DATABASE_URL);
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader('Cache-Control', 'no-store');
+
+  try {
+    if (req.method === 'GET') {
+      const active = await prisma.subscription.findFirst({
+        where: { userId: req.cookies.userId, status: 'active' },
+      });
+      return res.status(200).json(active || null);
+    }
+
+    if (req.method === 'POST') {
+      const { priceId, paymentMethodId } = req.body;
+      if (!priceId || !paymentMethodId) {
+        return res
+          .status(400)
+          .json({ error: 'Both priceId and paymentMethodId are required' });
+      }
+
+      // Create or retrieve Stripe customer
+      const customerRecord = await prisma.user.findUnique({
+        where: { id: req.cookies.userId },
+        select: { stripeCustomerId: true },
+      });
+
+      let stripeCustomerId = customerRecord?.stripeCustomerId;
+      if (!stripeCustomerId) {
+        const customer = await stripe.customers.create();
+        stripeCustomerId = customer.id;
+        await prisma.user.update({
+          where: { id: req.cookies.userId },
+          data: { stripeCustomerId },
+        });
+      }
+
+      // Create the subscription in Stripe
+      const subscription = await stripe.subscriptions.create({
+        customer: stripeCustomerId,
+        items: [{ price: priceId }],
+        default_payment_method: paymentMethodId,
+        expand: ['latest_invoice.payment_intent'],
+      });
+
+      // Persist subscription record
+      await prisma.subscription.create({
+        data: {
+          userId: req.cookies.userId,
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          currentPeriodEnd: subscription.current_period_end,
+        },
+      });
+
+      const clientSecret = (subscription.latest_invoice as Stripe.Invoice)
+        .payment_intent!.client_secret!;
+
+      return res.status(201).json({
+        clientSecret,
+        subscriptionId: subscription.id,
+        status: subscription.status,
+      });
+    }
+
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
+  } catch (error: any) {
+    console.error('❌ /api/subscriptions error:', error);
+    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\app\App.tsx ---
+// src/app/App.tsx
+import React, { Suspense } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { ModalProvider } from '@context/ModalContext';
+import RoutesConfig from './routes';
+import Loader from '@components/ui/Loader';
+import ErrorBoundary from '@components/ErrorBoundary';
+
+const App: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <ModalProvider>
+        <ErrorBoundary>
+          <Suspense fallback={<Loader fullscreen />}>
+            <RoutesConfig />
+          </Suspense>
+        </ErrorBoundary>
+      </ModalProvider>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+
+
+--- C:\Users\hanos\cb\frontend\src\app\routes.tsx ---
+import React, { lazy, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import RootLayout from "./layouts/RootLayout";
+import PublicLayout from "./layouts/PublicLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import RequireAuth from "@components/RequireAuth";
+import paymentRoutes from "@/modules/payments/routes";
+
+const Splash = lazy(() => import("../pages/Splash"));
+const Login = lazy(() => import("../pages/Login"));
+const NotificationAllow = lazy(() => import("../pages/NotificationAllow"));
+
+const DentgoGptHome = lazy(() => import("../pages/DentgoGptHome"));
+const DentgoChat = lazy(() => import("../pages/DentgoChat"));
+const History = lazy(() => import("../pages/History"));
+const Notification = lazy(() => import("../pages/Notification"));
+const NotificationSetting = lazy(() => import("../pages/NotificationSetting"));
+const Currency = lazy(() => import("../pages/Currency"));
+const TermsAndPrivacy = lazy(() => import("../pages/TermsAndPrivacy"));
+const ContactUs = lazy(() => import("../pages/ContactUs"));
+const DeleteAccount = lazy(() => import("../pages/Delete"));
+
+const Alert = lazy(() => import("../pages/Alert"));
+const Confirmation = lazy(() => import("../pages/Confirmation"));
+
+export default function RoutesConfig() {
+  useEffect(() => {
+    console.log("[Lifecycle] routes.tsx → RoutesConfig rendered");
+  }, []);
+
+  const renderRoutes = (list: any[]) =>
+    list.map(({ path, element, children, index }, i) =>
+      // The comma operator here logs first, then returns the <Route> element:
+      (console.log(`[Routing] Adding route #${i}: path="${path ?? "(index)"}"`),
+      <Route key={i} path={path} element={element} index={index}>
+        {children ? renderRoutes(children) : null}
+      </Route>)
+    );
+
+  const routes = [
+    // PUBLIC
+    {
+      element: <PublicLayout />,
+      children: [
+        { index: true, element: <Splash /> },
+        { path: "login", element: <Login /> },
+        { path: "allow-push", element: <NotificationAllow /> },
+      ],
+    },
+
+    // AUTHENTICATED
+    {
+      element: (
+        <RequireAuth>
+          <RootLayout />
+        </RequireAuth>
+      ),
+      children: [
+        {
+          element: <DashboardLayout />, // adds SideMenu + padding
+          children: [
+            // core app
+            { path: "dentgo-gpt-home", element: <DentgoGptHome /> },
+            { path: "dentgo-chat", element: <DentgoChat /> },
+            { path: "history", element: <History /> },
+            { path: "notification", element: <Notification /> },
+            { path: "notification-setting", element: <NotificationSetting /> },
+            { path: "currency", element: <Currency /> },
+            { path: "terms-and-privacy", element: <TermsAndPrivacy /> },
+            { path: "contact-us", element: <ContactUs /> },
+            { path: "delete", element: <DeleteAccount /> },
+            // feature modules (payment routes live under src/modules/payments)
+            ...paymentRoutes,
+          ],
+        },
+      ],
+    },
+
+    // STANDALONE (accessible without menu)
+    { path: "alert", element: <Alert /> },
+    { path: "confirmation", element: <Confirmation /> },
+  ];
+
+  return <Routes>{renderRoutes(routes)}</Routes>;
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\app\layouts\DashboardLayout.tsx ---
+// src/app/layouts/DashboardLayout.tsx
+import React from "react";
+import { Outlet } from "react-router-dom";
+import { useModal } from "@context/ModalContext";
+import SideMenu from "@components/SideMenu";
+import AppHeader from "@components/AppHeader";
+
+const DashboardLayout: React.FC = () => {
+  const { open } = useModal();
+
+  return (
+    <>
+      {/* Shared header with burger and notifications */}
+      <AppHeader
+        title="Dentgo"
+        showMenu
+        showNotifications
+        onMenuClick={() => open(<SideMenu />)}
+      />
+
+      {/* Page content */}
+      <div className="mx-auto max-w-lg px-4 pb-8">
+        <Outlet />
+      </div>
+    </>
+  );
+};
+
+export default DashboardLayout;
+
+
+--- C:\Users\hanos\cb\frontend\src\app\layouts\PublicLayout.tsx ---
+// src/layouts/PublicLayout.tsx
+import React from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import AppHeader from '@components/AppHeader';
+
+const NO_HEADER_PATHS = ['/', '/login'];
+
+const PublicLayout: React.FC = () => {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  if (NO_HEADER_PATHS.includes(pathname)) {
+    return <main><Outlet /></main>;
+  }
+
+  const titleMap: Record<string, string> = {
+    '/allow-push': 'Enable Notifications',
+  };
+  const title = titleMap[pathname] ?? 'Dentgo';
+
+  return (
+    <>
+      <AppHeader
+        title={title}
+        showBack
+        onBack={() => navigate(-1)}
+      />
+      <main><Outlet /></main>
+    </>
+  );
+};
+
+export default PublicLayout;
+
+
+--- C:\Users\hanos\cb\frontend\src\app\layouts\RootLayout.tsx ---
+// src/app/layouts/RootLayout.tsx
+import React from "react";
+import { Outlet } from "react-router-dom";
+import GlobalModals from "@components/modal/GlobalModals";
+
+const RootLayout: React.FC = () => (
+  <div className="flex flex-col min-h-screen bg-gray-100 font-sans">
+    <main className="flex-1">
+      <Outlet />
+    </main>
+    <GlobalModals />
+  </div>
+);
+
+export default RootLayout;
+
+--- C:\Users\hanos\cb\frontend\src\components\AppHeader.tsx ---
+// src/components/AppHeader.tsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "@/context/ModalContext";
+import SideMenu from "./SideMenu";
+
+interface Props {
+  title: string;
+  showMenu?: boolean;
+  showBack?: boolean;
+  showNotifications?: boolean;
+  onMenuClick?: () => void;
+  onBack?: () => void;
+}
+
+const AppHeader: React.FC<Props> = ({
+  title,
+  showMenu = false,
+  showBack = false,
+  showNotifications = false,
+  onMenuClick,
+  onBack,
+}) => {
+  const navigate = useNavigate();
+  const { open } = useModal();
+
+  const handleMenuClick = () => {
+    if (onMenuClick) {
+      onMenuClick();
+    } else {
+      open(<SideMenu />);
+    }
+  };
+
+  const handleBackClick = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const handleTitleClick = () => {
+    navigate("/dentgo-gpt-home");
+  };
+
+  return (
+    <header className="bg-primary text-white p-4 flex items-center gap-3">
+      {showBack && (
+        <button
+          aria-label="Go back"
+          onClick={handleBackClick}
+          className="p-1 rounded hover:bg-primary/80"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+      )}
+
+      {showMenu && (
+        <button
+          aria-label="Open menu"
+          onClick={handleMenuClick}
+          className="p-1 rounded hover:bg-primary/80"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      )}
+
+      <h1
+        onClick={handleTitleClick}
+        className="text-lg font-medium flex-1 cursor-pointer select-none"
+      >
+        {title}
+      </h1>
+
+      {showNotifications && (
+        <button
+          aria-label="Notifications"
+          onClick={() => navigate("/notification")}
+          className="p-1 rounded hover:bg-primary/80 relative"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 5a2 2 0 014 0c4 1 6 4 6 8v3l2 2H4l2-2v-3c0-4 2-7 6-8zm1 13h2a2 2 0 11-4 0"
+            />
+          </svg>
+        </button>
+      )}
+    </header>
+  );
+};
+
+export default AppHeader;
+
+
+--- C:\Users\hanos\cb\frontend\src\components\DarkModeContext.tsx ---
+// src/context/DarkModeContext.tsx
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+
+interface DarkModeContextValue {
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const defaultValue: DarkModeContextValue = {
+  isDarkMode: false,
+  toggleDarkMode: () => {}
+};
+
+const DarkModeContext = createContext<DarkModeContextValue>(defaultValue);
+
+interface DarkModeProviderProps {
+  children: ReactNode;
+}
+
+export const DarkModeProvider: React.FC<DarkModeProviderProps> = ({ children }) => {
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('darkMode') === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const htmlElement = document.documentElement;
+    if (isDarkMode) {
+      htmlElement.classList.add('dark');
+      localStorage.setItem('darkMode', 'true');
+    } else {
+      htmlElement.classList.remove('dark');
+      localStorage.setItem('darkMode', 'false');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => !prev);
+  };
+
+  return (
+    <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
+      {children}
+    </DarkModeContext.Provider>
+  );
+};
+
+export const useDarkMode = () => useContext(DarkModeContext);
+
+
+--- C:\Users\hanos\cb\frontend\src\components\ErrorBoundary.tsx ---
+import React from "react";
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+export default class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(_: Error) {
+    // Update state so the next render shows fallback UI
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[ErrorBoundary] Caught error:", error);
+    console.error("[ErrorBoundary] Component stack:", info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // You can render any fallback UI here
+      return (
+        <div
+          style={{
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#fefefe",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <h1 style={{ color: "#c00", marginBottom: "0.5rem" }}>
+              Something went wrong.
+            </h1>
+            <p style={{ color: "#666" }}>
+              An unexpected error occurred. Check the console for details.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\components\ProtectedRoute.tsx ---
+// src/components/ProtectedRoute.tsx
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@context/AuthContext";
+import Loader from "@components/ui/Loader";
+
+interface ProtectedRouteProps {
+  children: React.ReactElement;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { isAuthenticated, initializing } = useAuth();
+
+  // While auth is initializing, show a full-screen spinner
+  if (initializing) return <Loader fullscreen />;
+
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+export default ProtectedRoute;
+
+
+--- C:\Users\hanos\cb\frontend\src\components\RequireAuth.tsx ---
+// src/components/RequireAuth.tsx
+import React, { useEffect, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import Loader from "@/components/ui/Loader";
+
+const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { isAuthenticated, initializing, fetchUser } = useAuth();
+  const [triedFetch, setTriedFetch] = useState(false);
+  const location = useLocation();
+
+  // Trigger session check once
+  useEffect(() => {
+    if (!triedFetch) {
+      fetchUser().finally(() => setTriedFetch(true));
+    }
+  }, [triedFetch, fetchUser]);
+
+  if (!triedFetch || initializing) {
+    return <Loader fullscreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  return children;
+};
+
+export default RequireAuth;
+
+
+--- C:\Users\hanos\cb\frontend\src\components\SideMenu.tsx ---
+// src/components/SideMenu.tsx
+import React, { Fragment } from "react";
+import { Dialog, Transition } from "@headlessui/react";
+import { Link, useNavigate } from "react-router-dom";
+import { useModal } from "@/context/ModalContext";
+import { useAuth } from "@/context/AuthContext";
+
+export default function SideMenu() {
+  const { isOpen, close } = useModal();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  // Navigate to the Delete page (which handles actual account deletion)
+  const goToDeletePage = () => {
+    close();
+    navigate("/delete");
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/", { replace: true });
+    close();
+  };
+
+  return (
+    <Transition.Root appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" open={isOpen} onClose={close}>
+        {/* Overlay */}
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black/30" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden">
+            <Transition.Child
+              as={Fragment}
+              enter="transform transition ease-in-out duration-300"
+              enterFrom="-translate-x-full"
+              enterTo="translate-x-0"
+              leave="transform transition ease-in-out duration-300"
+              leaveFrom="translate-x-0"
+              leaveTo="-translate-x-full"
+            >
+              <Dialog.Panel className="relative w-80 max-w-full h-full bg-white dark:bg-gray-900 shadow-xl p-6 flex flex-col">
+                <Dialog.Title className="text-lg font-medium mb-4">
+                  Menu
+                </Dialog.Title>
+
+                <nav className="flex-1 space-y-2 overflow-y-auto">
+                  {/* New Chat */}
+                  <Link
+                    to="/dentgo-chat"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M24 17V31"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M17 24H31"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        New Chat
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* History */}
+                  <Link
+                    to="/history"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M24 20V24L26 26"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M15.0498 23.0001C15.2739 20.8001 16.3001 18.7597 17.9325 17.268C19.565 15.7764 21.6895 14.938 23.9007 14.9127C26.1119 14.8874 28.255 15.6771 29.9211 17.1311C31.5872 18.5851 32.6597 20.6015 32.934 22.7958C33.2083 24.99 32.6651 27.2085 31.4082 29.0278C30.1512 30.8472 28.2684 32.1401 26.1191 32.6599C23.9697 33.1797 21.7042 32.89 19.7548 31.8461C17.8054 30.8022 16.3082 29.0772 15.5498 27.0001M15.0498 32.0001V27.0001H20.0498"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        History
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Wallet */}
+                  <Link
+                    to="/wallet"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M15 18H33V30H15V18Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M33 22H27C26.4696 22 26 22.4696 26 23C26 23.5304 26.4696 24 27 24H33"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Wallet
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Notification Settings */}
+                  <Link
+                    to="/notification-setting"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M22 17C22 16.4696 22.2107 15.9609 22.5858 15.5858C22.9609 15.2107 23.4696 15 24 15C24.5304 15 25.0391 15.2107 25.4142 15.5858C25.7893 15.9609 26 16.4696 26 17C27.1484 17.543 28.1274 18.3883 28.8321 19.4453C29.5367 20.5023 29.9404 21.7311 30 23V26C30.0753 26.6217 30.2954 27.2171 30.6428 27.7381C30.9902 28.2592 31.4551 28.6914 32 29H16C16.5449 28.6914 17.0098 28.2592 17.3572 27.7381C17.7046 27.2171 17.9247 26.6217 18 26V23C18.0596 21.7311 18.4633 20.5023 19.1679 19.4453C19.8726 18.3883 20.8516 17.543 22 17"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M21 29V30C21 30.7956 21.3161 31.5587 21.8787 32.1213C22.4413 32.6839 23.2044 33 24 33C24.7956 33 25.5587 32.6839 26.1213 32.1213C26.6839 31.5587 27 30.7956 27 30V29"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Notification Settings
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Currency */}
+                  <Link
+                    to="/currency"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M28.7 20C28.501 19.4352 28.1374 18.943 27.6563 18.5865C27.1751 18.2301 26.5983 18.0258 26 18H22C21.2044 18 20.4413 18.3161 19.8787 18.8787C19.3161 19.4413 19 20.2044 19 21C19 21.7956 19.3161 22.5587 19.8787 23.1213C20.4413 23.6839 21.2044 24 22 24H26C26.7956 24 27.5587 24.3161 28.1213 24.8787C28.6839 25.4413 29 26.2044 29 27C29 27.7956 28.6839 28.5587 28.1213 29.1213C27.5587 29.6839 26.7956 30 26 30H22C21.4017 29.9742 20.8249 29.7699 20.3437 29.4135C19.8626 29.057 19.499 28.5648 19.3 28"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M24 15V18M24 30V33"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Currency
+                      </span>
+                    </div>
+                    <span className="text-gray-500 font-medium">USD</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Terms & Privacy */}
+                  <Link
+                    to="/terms-and-privacy"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M24 33C28.9706 33 33 28.9706 33 24C33 19.0294 28.9706 15 24 15C19.0294 15 15 19.0294 15 24C15 28.9706 19.0294 33 24 33Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M24 20H24.01"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M23 24H24V28H25"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Terms & Privacy
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Contact Us */}
+                  <Link
+                    to="/contact-us"
+                    onClick={close}
+                    className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-primary stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M16 15H18C18.2652 15 18.5196 15.1054 18.7071 15.2929C18.8946 15.4804 19 15.7348 19 16V18C19 18.2652 18.8946 18.5196 18.7071 18.7071C18.5196 18.8946 18.2652 19 18 19H16C15.7348 19 15.4804 18.8946 15.2929 18.7071C15.1054 18.5196 15 18.2652 15 18V16C15 15.7348 15.1054 15.4804 15.2929 15.2929C15.4804 15.1054 15.7348 15 16 15Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M30 15H32C32.2652 15 32.5196 15.1054 32.7071 15.2929C32.8946 15.4804 33 15.7348 33 16V18C33 18.2652 32.8946 18.5196 32.7071 18.7071C32.5196 18.8946 32.2652 19 32 19H30C29.7348 19 29.4804 18.8946 29.2929 18.7071C29.1054 18.5196 29 18.2652 29 18V16C29 15.7348 29.1054 15.4804 29 15.2929C29.4804 15.1054 29.7348 15 30 15Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M23 15H25C25.2652 15 25.5196 15.1054 25.7071 15.2929C25.8946 15.4804 26 15.7348 26 16V18C26 18.2652 25.8946 18.5196 25.7071 18.7071C25.5196 18.8946 25.2652 19 25 19H23C22.7348 19 22.4804 18.8946 22.2929 18.7071C22.1054 18.5196 22 18.2652 22 18V16C22 15.7348 22.1054 15.4804 22 15.2929C22.4804 15.1054 22.7348 15 23 15Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M16 22H18C18.2652 22 18.5196 22.1054 18.7071 22.2929C18.8946 22.4804 19 22.7348 19 23V25C19 25.2652 18.8946 25.5196 18.7071 25.7071C18.5196 25.8946 18.2652 26 18 26H16C15.7348 26 15.4804 25.8946 15.2929 25.7071C15.1054 25.5196 15 25.2652 15 25V23C15 22.7348 15.1054 22.4804 15 22.2929C15.4804 22.1054 15.7348 22 16 22Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Contact Us
+                      </span>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-gray-800"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+
+                  {/* Delete Account */}
+                  <button
+                    onClick={goToDeletePage}
+                    className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-red-600 stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M22 22L26 26M26 22L22 26"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M24 15C31.2 15 33 16.8 33 24C33 31.2 31.2 33 24 33C16.8 33 15 31.2 15 24C15 16.8 16.8 15 24 15Z"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Delete Account
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Logout */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition"
+                  >
+                    <div className="flex items-center gap-4">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-red-600 stroke-current"
+                        viewBox="0 0 48 48"
+                        fill="none"
+                      >
+                        <rect
+                          opacity="0.08"
+                          width="48"
+                          height="48"
+                          rx="8"
+                          fill="currentColor"
+                        />
+                        <g>
+                          <path
+                            d="M26 20V18C26 17.4696 25.7893 16.9609 25.4142 16.5858C25.0391 16.2107 24.5304 16 24 16H17C16.4696 16 15.9609 16.2107 15.5858 16.5858C15.2107 16.9609 15 17.4696 15 18M16 18C16 18.5304 16.2107 19.0391 16.5858 19.4142C16.9609 19.7893 17.4696 20 18 20H30C30.2652 20 30.5196 20.1054 30.7071 20.2929C30.8946 20.4804 31 20.7348 31 21V24M16 18V30C16 30.5304 16.2107 31.0391 16.5858 31.4142C16.9609 31.7893 17.4696 32 18 32H30C30.2652 32 30.5196 31.8946 30.7071 31.7071C30.8946 31.5196 31 31.2652 31 31V28"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M21 24H33L30 21"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M30 27L33 24"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </g>
+                      </svg>
+                      <span className="text-gray-800 font-medium text-base">
+                        Logout
+                      </span>
+                    </div>
+                  </button>
+                </nav>
+
+                <button
+                  onClick={close}
+                  className="mt-4 text-sm text-primary underline"
+                >
+                  Close
+                </button>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\components\modal\EndSessionModal.tsx ---
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { endChatSession } from "@/api/chats";
+import { useModal } from "@context/ModalContext";
+
+export default function EndSessionModal({ sessionId }: { sessionId: number | null }) {
+  const navigate = useNavigate();
+  const { close } = useModal();
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
+      <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">End Session</h2>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">This chat will be saved in your history.</p>
+      <div className="flex justify-end gap-3">
+        <button
+          className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+          onClick={close}
+        >Cancel</button>
+        <button
+          className="px-4 py-2 rounded bg-primary text-white"
+          onClick={async () => {
+            if (sessionId) await endChatSession(sessionId);
+            close();
+            navigate("/dentgo-gpt-home");
+          }}
+        >Yes, End</button>
+      </div>
+    </div>
+  );
+}
+
+--- C:\Users\hanos\cb\frontend\src\components\modal\GlobalModals.tsx ---
+import React from "react";
+
+export default function GlobalModals() {
+  // Placeholder component for global modals if needed in the future
+  return null;
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\components\ui\Loader.tsx ---
+// src/components/ui/Loader.tsx
+import React from "react";
+
+interface LoaderProps {
+  /** When true, force the loader to cover the entire viewport */
+  fullscreen?: boolean;
+}
+
+const Loader: React.FC<LoaderProps> = ({ fullscreen = false }) => {
+  // If fullscreen, use fixed positioning to center on the screen
+  const containerClasses = fullscreen
+    ? "fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-white bg-opacity-50 z-50"
+    : "flex items-center justify-center w-full h-full";
+
+  return (
+    <div className={containerClasses}>
+      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+};
+
+export default Loader;
+
+
+--- C:\Users\hanos\cb\frontend\src\components\ui\ToastProvider.tsx ---
+// src/components/ui/ToastProvider.tsx
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
+import { Transition } from '@headlessui/react';
+
+interface Toast {
+  id: number;
+  message: string;
+  type: 'error' | 'success' | 'info';
+}
+
+interface ToastContextValue {
+  addToast: (message: string, type?: Toast['type']) => void;
+}
+
+const ToastContext = createContext<ToastContextValue | undefined>(undefined);
+
+export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const isMounted = useRef(true);
+  const timeouts = useRef<Record<number, number>>({});
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      Object.values(timeouts.current).forEach(clearTimeout);
+    };
+  }, []);
+
+  const addToast = useCallback((message: string, type: Toast['type'] = 'info') => {
+    const id = Date.now();
+    if (!isMounted.current) return;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    const timer = window.setTimeout(() => {
+      if (isMounted.current) {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }
+      delete timeouts.current[id];
+    }, 4000);
+    timeouts.current[id] = timer;
+  }, []);
+
+  return (
+    <ToastContext.Provider value={{ addToast }}>
+      {children}
+      <div className="fixed bottom-4 right-4 space-y-2 z-50">
+        {toasts.map(({ id, message, type }) => (
+          <Transition
+            key={id}
+            appear
+            show
+            as={React.Fragment}
+            enter="transform transition duration-200"
+            enterFrom="opacity-0 translate-y-2"
+            enterTo="opacity-100 translate-y-0"
+            leave="transform transition duration-200"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-2"
+          >
+            <div
+              className={`px-4 py-2 rounded shadow text-white bg-${
+                type === 'error'
+                  ? 'red-600'
+                  : type === 'success'
+                  ? 'green-600'
+                  : 'gray-700'
+              }`}
+            >
+              {message}
+            </div>
+          </Transition>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+};
+
+export const useToast = (): ToastContextValue => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\context\AuthContext.tsx ---
+// src/context/AuthContext.tsx
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
+import { API_BASE } from "@/config";
+
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  picture?: string;
+  role?: string;
+}
+
+interface AuthContextValue {
+  user: User | null;
+  login: (userData: User) => void;
+  loginWithGoogle: (arg: string | { credential: string }) => Promise<void>;
+  logout: () => Promise<void>;
+  fetchUser: () => Promise<void>;
+  isAuthenticated: boolean;
+  initializing: boolean;
+  error: string | null;
+  setError: (err: string | null) => void;
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [initializing, setInitializing] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // fetchUser is now explicit
+  const fetchUser = async () => {
+    setInitializing(true);
+    try {
+      let response = await fetch(`${API_BASE}/api/users/me`, {
+        credentials: "include",
+        mode: "cors",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.status === 401) {
+        const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
+          method: "POST",
+          credentials: "include",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (refreshResp.ok) {
+          response = await fetch(`${API_BASE}/api/users/me`, {
+            credentials: "include",
+            mode: "cors",
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      if (response.ok) {
+        const { user: fetched } = (await response.json()) as { user: User };
+        setUser(fetched || null);
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      console.error("AuthContext: Error fetching user:", err);
+      setUser(null);
+    } finally {
+      setInitializing(false);
+    }
+  };
+
+  // Automatically fetch user on mount
+  useEffect(() => {
+    fetchUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const login = (userData: User) => {
+    setUser(userData);
+  };
+
+  const loginWithGoogle = async (arg: string | { credential: string }) => {
+    setError(null);
+    const credential =
+      typeof arg === "string" ? arg : arg.credential;
+
+    try {
+      const userData = await loginWithGoogleAPI(credential);
+      setUser(userData);
+    } catch (err: any) {
+      console.error("AuthContext: Google login error:", err);
+      const msg = err.message || "Google login failed. Please try again.";
+      if (msg.includes("AbortError") || msg.includes("NetworkError")) {
+        setError(
+          "Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies."
+        );
+      } else {
+        setError(msg);
+      }
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const { logout: apiLogout } = await import("../api/auth");
+      await apiLogout();
+      setUser(null);
+    } catch (err) {
+      console.error("AuthContext: Error logging out:", err);
+      setUser(null);
+    }
+  };
+
+  const isAuthenticated = Boolean(user);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        loginWithGoogle,
+        logout,
+        fetchUser,
+        isAuthenticated,
+        initializing,
+        error,
+        setError,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextValue => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+--- C:\Users\hanos\cb\frontend\src\context\ModalContext.tsx ---
+// src/context/ModalContext.tsx
+import React, { createContext, useContext, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
+
+interface ModalCtx {
+  isOpen: boolean;
+  open: (content: React.ReactNode) => void;
+  close: () => void;
+}
+
+const Ctx = createContext<ModalCtx | null>(null);
+
+export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [node, setNode] = useState<React.ReactNode>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback((content: React.ReactNode) => {
+    setNode(content);
+    setIsOpen(true);
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    // Optionally, delay clearing node until animation completes
+    setTimeout(() => setNode(null), 300);
+  }, []);
+
+  return (
+    <Ctx.Provider value={{ isOpen, open, close }}>
+      {children}
+      {isOpen && node &&
+        createPortal(
+          // Only render the modal content. Backdrop is handled by HeadlessUI Dialog.
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className="pointer-events-auto">
+              {node}
+            </div>
+          </div>,
+          document.body
+        )}
+    </Ctx.Provider>
+  );
+};
+
+export const useModal = () => {
+  const ctx = useContext(Ctx);
+  if (!ctx) throw new Error("useModal must be used within ModalProvider");
+  return ctx;
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\context\StripeContext.tsx ---
+// src/context/StripeContext.tsx
+import React, { createContext, useContext, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import * as paymentsClient from '@/modules/payments/paymentsClient';
+import type { CardData } from '@/modules/payments/types';
+import { useAuth } from '@/context/AuthContext';
+
+interface StripeContextValue {
+  cards: CardData[] | undefined;
+  isLoadingCards: boolean;
+  subscription:
+    | { subscriptionId: string; status: string; currentPeriodEnd: number }
+    | undefined;
+  addCard: (paymentMethodId: string, nickName: string | null) => Promise<void>;
+  subscribe: (
+    priceId: string,
+    paymentMethodId: string
+  ) => Promise<{ clientSecret: string; subscriptionId: string; status: string }>;
+  openCustomerPortal: () => Promise<string>;
+  refresh: () => void;
+}
+
+const StripeContext = createContext<StripeContextValue | undefined>(undefined);
+
+export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const queryClient = useQueryClient();
+  const { isAuthenticated } = useAuth();
+
+  // Only fetch when authenticated
+  const {
+    data: cards,
+    isLoading: isLoadingCards,
+  } = useQuery(['cards'], paymentsClient.fetchCards, {
+    enabled: isAuthenticated,
+  });
+
+  const { data: subscription } = useQuery(['subscription'], paymentsClient.fetchActiveSubscription, {
+    enabled: isAuthenticated,
+  });
+
+  const addCardMutation = useMutation<void, Error, { paymentMethodId: string; nickName: string | null }>(
+    (args) => paymentsClient.addCard(args),
+    {
+      onSuccess: () => queryClient.invalidateQueries(['cards']),
+    }
+  );
+
+  const subscribeMutation = useMutation<
+    { clientSecret: string; subscriptionId: string; status: string },
+    Error,
+    { priceId: string; paymentMethodId: string }
+  >(
+    (args) => paymentsClient.createSubscriptionIntent(args.priceId, args.paymentMethodId),
+    {
+      onSuccess: () => queryClient.invalidateQueries(['subscription']),
+    }
+  );
+
+  const portalSessionMutation = useMutation<{ url: string }, Error, void>(
+    () => paymentsClient.createPortalSession(),
+    {
+      onSuccess: () => queryClient.invalidateQueries(['subscription']),
+    }
+  );
+
+  const contextValue: StripeContextValue = {
+    cards,
+    isLoadingCards,
+    subscription,
+    addCard: (paymentMethodId, nickName) =>
+      addCardMutation.mutateAsync({ paymentMethodId, nickName }),
+    subscribe: (priceId, paymentMethodId) =>
+      subscribeMutation.mutateAsync({ priceId, paymentMethodId }),
+    openCustomerPortal: () =>
+      portalSessionMutation.mutateAsync().then((res) => res.url),
+    refresh: () => {
+      queryClient.invalidateQueries(['cards']);
+      queryClient.invalidateQueries(['subscription']);
+    },
+  };
+
+  // Prefetch once authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      queryClient.prefetchQuery(['cards'], paymentsClient.fetchCards);
+      queryClient.prefetchQuery(['subscription'], paymentsClient.fetchActiveSubscription);
+    }
+  }, [isAuthenticated, queryClient]);
+
+  return (
+    <StripeContext.Provider value={contextValue}>
+      {children}
+    </StripeContext.Provider>
+  );
+};
+
+export const useStripeData = (): StripeContextValue => {
+  const context = useContext(StripeContext);
+  if (!context) {
+    throw new Error('useStripeData must be used within a StripeProvider');
+  }
+  return context;
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\hooks\useGoogleIdentity.ts ---
+// src/hooks/useGoogleIdentity.ts
+import { useEffect } from "react";
+
+type Callback = () => void;
+
+export default function useGoogleIdentity(callback?: Callback): void {
+  useEffect(() => {
+    const id = "google-identity-script";
+    if (document.getElementById(id)) {
+      callback?.();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = id;
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      callback?.();
+    };
+    document.body.appendChild(script);
+  }, [callback]);
+}
+
+--- C:\Users\hanos\cb\frontend\src\lib\apple.ts ---
+export const appleLogin = (apiBase: string) => {
+  window.location.href = `${apiBase}/api/auth/apple`;
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\lib\google.ts ---
+// src/lib/google.ts
+let loading = false;
+type Callback = () => void;
+
+export const loadGoogle = (cb: Callback): void => {
+  if ((window as any).google?.accounts?.id) {
+    cb();
+    return;
+  }
+  if (loading) return;
+  loading = true;
+  const s = document.createElement("script");
+  s.src = "https://accounts.google.com/gsi/client";
+  s.async = true;
+  s.defer = true;
+  s.onload = cb;
+  document.body.appendChild(s);
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\lib\stripeClient.tsx ---
+// src/lib/stripeClient.tsx
+import React from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import type { StripeElementsOptions } from '@stripe/stripe-js';
+import { STRIPE_PK } from '@/config';
+
+const stripePromise = loadStripe(STRIPE_PK);
+
+interface StripeElementsProps {
+  /** Stripe Elements options (must include clientSecret, appearance, etc.) */
+  options: StripeElementsOptions;
+  children: React.ReactNode;
+}
+
+const StripeElements: React.FC<StripeElementsProps> = ({ options, children }) => {
+  return (
+    <Elements stripe={stripePromise} options={options}>
+      {children}
+    </Elements>
+  );
+};
+
+export default StripeElements;
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\api.ts ---
+export * from "../../api/cards";
+export * from "../../api/payments";
+export { createSubscription } from "../../api/subscriptions";
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\paymentsClient.ts ---
+// src/modules/payments/paymentsClient.ts
+
+import { API_BASE } from '@/config';
+import { fetchCards as apiFetchCards, createCard as apiCreateCard } from '@/api/cards';
+import type { CardData } from './types';
+import axios from 'axios';
+
+// Cards
+export async function fetchCards(): Promise<CardData[]> {
+  return apiFetchCards();
+}
+
+export async function addCard(payload: {
+  paymentMethodId: string;
+  nickName: string | null;
+}): Promise<void> {
+  return apiCreateCard(payload);
+}
+
+// Stripe Customer & Intents
+
+/**
+ * Create (or retrieve) a Stripe Customer for the current user
+ */
+export async function createCustomer(): Promise<string> {
+  const resp = await axios.post(
+    `${API_BASE}/api/payments/create-customer`,
+    {},
+    {
+      withCredentials: true,
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+  return resp.data.customerId;
+}
+
+/**
+ * Create a SetupIntent, returning its clientSecret
+ */
+export async function createSetupIntent(): Promise<string> {
+  const resp = await fetch(`${API_BASE}/api/payments/create-setup-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create SetupIntent.');
+  }
+  const { clientSecret } = (await resp.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a one-off PaymentIntent for the given amount (in cents)
+ */
+export async function createPaymentIntent(amount: number): Promise<string> {
+  const resp = await fetch(`${API_BASE}/api/payments/create-payment-intent`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create PaymentIntent.');
+  }
+  const { clientSecret } = (await resp.json()) as { clientSecret: string };
+  return clientSecret;
+}
+
+/**
+ * Create a Stripe subscription and return the clientSecret, subscriptionId, and status.
+ */
+export async function createSubscriptionIntent(
+  priceId: string,
+  paymentMethodId: string
+): Promise<{ clientSecret: string; subscriptionId: string; status: string }> {
+  const resp = await fetch(`${API_BASE}/api/subscriptions`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId, paymentMethodId }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create subscription intent.');
+  }
+  return (await resp.json()) as {
+    clientSecret: string;
+    subscriptionId: string;
+    status: string;
+  };
+}
+
+// Active Subscription
+
+/**
+ * Fetch the current active subscription record from your backend
+ */
+export async function fetchActiveSubscription(): Promise<{
+  subscriptionId: string;
+  status: string;
+  currentPeriodEnd: number;
+}> {
+  const resp = await axios.get(`${API_BASE}/api/subscriptions`, {
+    withCredentials: true,
+  });
+  return resp.data;
+}
+
+// Customer Portal Session
+
+/**
+ * Create a Stripe Customer Portal session and return its URL
+ */
+export async function createPortalSession(
+  args?: { return_url: string }
+): Promise<{ url: string }> {
+  const body = args ? JSON.stringify({ return_url: args.return_url }) : undefined;
+  const resp = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to create portal session.');
+  }
+  return (await resp.json()) as { url: string };
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\routes.tsx ---
+// src/modules/payments/routes.tsx
+import React, { lazy, Suspense } from 'react';
+import { Navigate } from 'react-router-dom';
+
+const Wallet = lazy(() => import('./Wallet'));
+const SubscribeWizard = lazy(() => import('./SubscribeWizard'));
+
+const withSuspense = (Component: React.LazyExoticComponent<React.ComponentType<any>>) => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Component />
+  </Suspense>
+);
+
+const paymentRoutes = [
+  {
+    path: 'wallet',
+    element: withSuspense(Wallet),
+  },
+  {
+    path: 'subscribe',
+    element: withSuspense(SubscribeWizard),
+  },
+  // Redirects from legacy paths
+  { path: 'payment-method', element: <Navigate to="wallet" replace /> },
+  { path: 'bank-cards', element: <Navigate to="wallet" replace /> },
+  { path: 'add-new-card', element: <Navigate to="wallet" replace /> },
+];
+
+export default paymentRoutes;
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\types.ts ---
+// src/modules/payments/types.ts
+export interface CardData {
+  id: string;
+  last4: string;
+  network: string;
+  paymentMethodId: string;
+  isActive: boolean;
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\Wallet.tsx ---
+// src/modules/payments/Wallet.tsx
+import React, { useState, useEffect } from 'react';
+import { useStripeData } from '@/context/StripeContext';
+import { CardRow } from '@/modules/payments/components/CardRow';
+import { PaymentMethodSelector } from '@/modules/payments/components/PaymentMethodSelector';
+import { PlanCard } from '@/modules/payments/components/PlanCard';
+import StripeElements from '@/lib/stripeClient';
+import { createSetupIntent } from '@/modules/payments/paymentsClient';
+import { useToast } from '@components/ui/ToastProvider';
+
+const tabs = ['Saved Cards', 'Add Card', 'Plan & Billing'] as const;
+type Tab = typeof tabs[number];
+
+const Wallet: React.FC = () => {
+  const [active, setActive] = useState<Tab>('Saved Cards');
+  const { cards, isLoadingCards } = useStripeData();
+  const { addToast } = useToast();
+
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loadingSecret, setLoadingSecret] = useState(false);
+
+  // Whenever user switches to "Add Card", fetch the SetupIntent
+  useEffect(() => {
+    if (active === 'Add Card') {
+      setLoadingSecret(true);
+      createSetupIntent()
+        .then(secret => setClientSecret(secret))
+        .catch(err => addToast(err.message || 'Failed to initialize payment form', 'error'))
+        .finally(() => setLoadingSecret(false));
+    }
+  }, [active, addToast]);
+
+  const handleCardAdded = () => {
+    addToast('Card linked successfully', 'success');
+    setActive('Saved Cards');
+  };
+
+  const handleCardError = (err: any) => {
+    addToast(err.message || 'Failed to add card', 'error');
+  };
+
+  return (
+    <div className="max-w-lg mx-auto my-8 p-4">
+      {/* Tabs */}
+      <div className="flex border-b mb-4">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActive(tab)}
+            className={`flex-1 py-2 text-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background
+              ${
+                active === tab
+                  ? 'border-b-2 border-primary font-semibold text-primary'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Saved Cards */}
+      {active === 'Saved Cards' && (
+        <div className="bg-gray-50 dark:bg-gray-900 rounded">
+          {isLoadingCards ? (
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded"
+              />
+            ))
+          ) : cards && cards.length > 0 ? (
+            cards.map(c => <CardRow key={c.id} card={c} />)
+          ) : (
+            <div className="p-4 text-gray-500 dark:text-gray-400">
+              No saved cards.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Add Card */}
+      {active === 'Add Card' && (
+        <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
+          {loadingSecret ? (
+            <div className="text-center text-gray-500">Loading payment form…</div>
+          ) : clientSecret ? (
+            <StripeElements options={{ clientSecret }}>
+              <PaymentMethodSelector
+                onSuccess={handleCardAdded}
+                onError={handleCardError}
+              />
+            </StripeElements>
+          ) : null}
+        </div>
+      )}
+
+      {/* Plan & Billing */}
+      {active === 'Plan & Billing' && (
+        <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
+          <PlanCard />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Wallet;
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\components\CardRow.tsx ---
+// src/modules/payments/components/CardRow.tsx
+import React from 'react';
+import type { CardData } from '@/modules/payments/types';
+import visaLogo from '@/assets/cards/visa.svg';
+import mcLogo from '@/assets/cards/mastercard.svg';
+import amexLogo from '@/assets/cards/amex.svg';
+import cardIcon from '@/assets/cards/card.svg';
+
+const logos: Record<string, string> = {
+  visa: visaLogo,
+  mastercard: mcLogo,
+  amex: amexLogo,
+};
+
+export const CardRow: React.FC<{ card: CardData }> = ({ card }) => {
+  const key = card.network?.toLowerCase() || '';
+  const logoSrc = logos[key] || cardIcon;
+
+  return (
+    <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-800">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded">
+          <img src={logoSrc} alt={card.network || 'Card'} className="w-8 h-8 object-contain" />
+        </div>
+        <div>
+          <div className="font-semibold text-gray-900 dark:text-gray-100">
+            **** {card.last4}
+          </div>
+          <span
+            className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${
+              card.isActive
+                ? 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900'
+                : 'bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900'
+            }`}
+          >
+            {card.isActive ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\components\PaymentMethodSelector.tsx ---
+// src/modules/payments/components/PaymentMethodSelector.tsx
+import React, { useState } from 'react';
+import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { SetupIntentResult } from '@stripe/stripe-js';
+import { useStripeData } from '@/context/StripeContext';
+import { useToast } from '@components/ui/ToastProvider';
+
+interface PaymentMethodSelectorProps {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+
+export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
+  onSuccess,
+  onError,
+}) => {
+  const { addToast } = useToast();
+  const stripe = useStripe();
+  const elements = useElements();
+  const { addCard } = useStripeData();
+  const [nickname, setNickname] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) {
+      const error = new Error('Payment form not ready. Please try again.');
+      addToast(error.message, 'error');
+      onError?.(error);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Cast the result so TS knows about setupIntent
+      const result = (await stripe.confirmSetup({
+        elements,
+        confirmParams: { return_url: window.location.href },
+      })) as SetupIntentResult;
+
+      if (result.error) throw result.error;
+
+      const paymentMethod = result.setupIntent?.payment_method as string;
+      await addCard(paymentMethod, nickname || null);
+
+      setNickname('');
+      addToast('Card added successfully!', 'success');
+      onSuccess?.();
+    } catch (err: any) {
+      const error = new Error(err?.message || 'Failed to add card. Please try again.');
+      addToast(error.message, 'error');
+      onError?.(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded">
+      <PaymentElement />
+      <input
+        type="text"
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        placeholder="Card nickname (optional)"
+        className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-800 transition"
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className={`w-full py-2 rounded text-white ${
+          loading
+            ? 'bg-gray-400 cursor-not-allowed'
+            : 'bg-primary hover:bg-primary/90 transition'
+        }`}
+      >
+        {loading ? 'Saving…' : 'Add Card'}
+      </button>
+    </form>
+  );
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\components\PlanCard.tsx ---
+// src/modules/payments/components/PlanCard.tsx
+
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useStripeData } from '@/context/StripeContext';
+import { FREE_MESSAGES_PER_DAY } from '@/config';
+
+export const PlanCard: React.FC = () => {
+  const { subscription } = useStripeData();
+  const navigate = useNavigate();
+
+  // Loading state
+  if (subscription === undefined) {
+    return (
+      <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4" />
+      </div>
+    );
+  }
+
+  // No subscription = free plan
+  const isFreePlan = subscription === null;
+
+  if (isFreePlan) {
+    return (
+      <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
+        <h3 className="text-lg font-semibold">Basic Plan</h3>
+        <p className="text-gray-600">
+          Free, {FREE_MESSAGES_PER_DAY} message{FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day
+        </p>
+        <button
+          onClick={() => navigate('/subscribe')}
+          className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+        >
+          Upgrade to Plus
+        </button>
+      </div>
+    );
+  }
+
+  // Active paid subscription
+  const sub = subscription;
+  if (!sub || sub.status.toLowerCase() !== 'active') {
+    return (
+      <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
+        No active paid subscription.
+      </div>
+    );
+  }
+
+  const renewDate = sub.currentPeriodEnd
+    ? new Date(sub.currentPeriodEnd * 1000).toLocaleDateString()
+    : '—';
+
+  return (
+    <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="inline-block px-3 py-1 text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900 rounded-full">
+          Active Plus
+        </span>
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          Renews: {renewDate}
+        </span>
+      </div>
+      <button
+        onClick={async () => {
+          const url = await useStripeData().openCustomerPortal();
+          window.location.href = url;
+        }}
+        className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+      >
+        Manage in Stripe Portal
+      </button>
+    </div>
+  );
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\SubscribeWizard\index.tsx ---
+// src/modules/payments/SubscribeWizard/index.tsx
+import React, { useState } from 'react';
+import { StepChoosePlan } from './StepChoosePlan';
+import { StepPayment } from './StepPayment';
+import StepReview from './StepReview';
+import StepSuccess from './StepSuccess';
+
+const steps = ['choose', 'payment', 'review', 'success'] as const;
+type Step = typeof steps[number];
+
+const SubscribeWizard: React.FC = () => {
+  const [current, setCurrent] = useState<Step>('choose');
+  const [planId, setPlanId] = useState<string>('plus');
+
+  return (
+    <div className="max-w-md mx-auto my-8 bg-white dark:bg-gray-800 rounded shadow">
+      {current === 'choose' && (
+        <StepChoosePlan
+          onNext={p => {
+            setPlanId(p);
+            // if free, skip straight to review, otherwise go pay
+            setCurrent(p === 'basic' ? 'review' : 'payment');
+          }}
+        />
+      )}
+
+      {current === 'payment' && (
+        <StepPayment
+          planId={planId}
+          onNext={() => setCurrent('review')}
+        />
+      )}
+
+      {current === 'review' && (
+        <StepReview
+          planId={planId}
+          onBack={() => setCurrent(planId === 'basic' ? 'choose' : 'payment')}
+          onSuccess={() => setCurrent('success')}
+          // when no card exists, take them back to the Add Card step
+          onAddCard={() => setCurrent('payment')}
+        />
+      )}
+
+      {current === 'success' && (
+        <StepSuccess planId={planId} />
+      )}
+    </div>
+  );
+};
+
+export default SubscribeWizard;
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\SubscribeWizard\StepChoosePlan.tsx ---
+// src/modules/payments/SubscribeWizard/StepChoosePlan.tsx
+
+import React, { useMemo } from 'react';
+import { FREE_MESSAGES_PER_DAY } from '@/config';
+
+export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
+  onNext,
+}) => {
+  const [selected, setSelected] = React.useState<string>('plus');
+
+  // Ensure it's always treated as a number and memoized
+  const freeCount = useMemo(() => FREE_MESSAGES_PER_DAY, []);
+
+  const plans = useMemo(
+    () => [
+      {
+        id: 'basic',
+        name: 'Basic',
+        price: 0,
+        description: `Free, ${freeCount} message${
+          freeCount > 1 ? 's' : ''
+        }/day`,
+      },
+      {
+        id: 'plus',
+        name: 'Plus',
+        price: 2500,
+        description: '$25/month, unlimited',
+      },
+    ],
+    [freeCount]
+  );
+
+  return (
+    <div className="space-y-6 p-4">
+      <h2 className="text-xl font-semibold">Choose a plan</h2>
+      <div className="grid gap-4">
+        {plans.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => setSelected(p.id)}
+            className={`p-4 border rounded ${
+              selected === p.id ? 'border-primary bg-primary/10' : 'border-gray-300'
+            }`}
+          >
+            <div className="flex justify-between">
+              <span className="font-medium">{p.name}</span>
+              <span className="font-semibold">
+                {p.price === 0
+                  ? 'Free'
+                  : `$${(p.price / 100).toFixed(2)}/mo`}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600">{p.description}</p>
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => onNext(selected)}
+        className="mt-4 w-full py-2 bg-primary text-white rounded hover:bg-primary/90"
+      >
+        Next
+      </button>
+    </div>
+  );
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\SubscribeWizard\StepPayment.tsx ---
+// src/modules/payments/SubscribeWizard/StepPayment.tsx
+import React, { useEffect, useState } from 'react';
+import { PaymentMethodSelector } from '@/modules/payments/components/PaymentMethodSelector';
+import { createSetupIntent } from '@/modules/payments/paymentsClient';
+import StripeElements from '@/lib/stripeClient';
+import { useToast } from '@components/ui/ToastProvider';
+
+export interface StepPaymentProps {
+  planId: string;
+  onNext: () => void;
+}
+
+export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
+  const { addToast } = useToast();
+  const planName = planId === 'plus' ? 'Plus' : 'Basic';
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+  // If user chose the free plan, skip payment immediately
+  useEffect(() => {
+    if (planId === 'basic') {
+      addToast('Free plan selected. No payment required.', 'success');
+      onNext();
+    }
+  }, [planId, onNext, addToast]);
+
+  // Only initialize Stripe for paid plan
+  useEffect(() => {
+    if (planId === 'plus') {
+      const init = async () => {
+        try {
+          const secret = await createSetupIntent();
+          setClientSecret(secret);
+        } catch (err: any) {
+          addToast(
+            err instanceof Error
+              ? err.message
+              : 'Failed to initialize payment form.',
+            'error'
+          );
+        }
+      };
+      init();
+    }
+  }, [planId, addToast]);
+
+  // While loading clientSecret for plus plan, show loader
+  if (planId === 'plus' && !clientSecret) {
+    return (
+      <div className="p-4 bg-white dark:bg-gray-800 rounded">
+        <p className="text-gray-500 dark:text-gray-400">
+          Loading payment form...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-4">
+      <h2 className="text-xl font-semibold">Enter payment for {planName} plan</h2>
+      {planId === 'plus' && clientSecret && (
+        <StripeElements options={{ clientSecret }}>
+          <PaymentMethodSelector
+            onSuccess={() => {
+              addToast('Payment method added successfully!', 'success');
+              onNext();
+            }}
+          />
+        </StripeElements>
+      )}
+    </div>
+  );
+};
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\SubscribeWizard\StepReview.tsx ---
+// src/modules/payments/SubscribeWizard/StepReview.tsx
+import React, { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, useStripe } from '@stripe/react-stripe-js';
+import { useStripeData } from '@/context/StripeContext';
+import { useToast } from '@components/ui/ToastProvider';
+import { STRIPE_PK } from '@/config';
+
+export interface StepReviewProps {
+  planId: string;
+  onSuccess: () => void;
+  onBack: () => void;
+  onAddCard: () => void;
+}
+
+const PLAN_TO_PRICE: Record<string, string | null> = {
+  basic: null,
+  plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
+};
+
+const InnerReview: React.FC<StepReviewProps> = ({
+  planId,
+  onSuccess,
+  onBack,
+  onAddCard,
+}) => {
+  const toast = useToast();
+  const stripe = useStripe();
+  const { cards, subscribe } = useStripeData();
+  const [loading, setLoading] = useState(false);
+
+  const isFree = planId === 'basic';
+  const planName = isFree ? 'Basic' : 'Plus';
+  const priceLabel = isFree ? 'Free' : '$25.00';
+  const priceId = PLAN_TO_PRICE[planId];
+
+  const card = cards && cards.length > 0 ? cards[0] : null;
+  const paymentMethodId = card?.paymentMethodId;
+
+  const handleConfirm = async () => {
+    if (isFree) {
+      toast.addToast('Free plan selected. No payment required.', 'success');
+      onSuccess();
+      return;
+    }
+
+    if (!stripe) {
+      toast.addToast('Stripe not loaded yet, please try again.', 'error');
+      return;
+    }
+
+    if (!paymentMethodId) {
+      toast.addToast('Let’s add your first card!', 'info');
+      onAddCard();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { clientSecret, status } = await subscribe(priceId!, paymentMethodId);
+      if (status === 'requires_action' && clientSecret) {
+        const result = await stripe.confirmPayment({
+          clientSecret,
+          confirmParams: { return_url: window.location.href },
+        });
+        if (result.error) throw result.error;
+      }
+      toast.addToast('Subscription successful!', 'success');
+      onSuccess();
+    } catch (err: any) {
+      toast.addToast(err.message || 'Subscription failed. Please try again.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4 space-y-6">
+      <h2 className="text-xl font-semibold">Review your subscription</h2>
+
+      <div className="space-y-2">
+        <div>
+          <span className="font-medium">Plan:</span> {planName}
+        </div>
+        <div>
+          <span className="font-medium">Price:</span> {priceLabel}/month
+        </div>
+        <div>
+          <span className="font-medium">Payment Method:</span><br />
+          {card
+            ? <>**** {card.last4} ({card.network})</>
+            : <em>No card found</em>
+          }
+        </div>
+      </div>
+
+      <div className="flex gap-4">
+        <button
+          onClick={onBack}
+          className="flex-1 py-2 border rounded hover:bg-gray-100 transition"
+        >
+          Back
+        </button>
+        <button
+          onClick={handleConfirm}
+          disabled={loading}
+          className={`flex-1 py-2 bg-primary text-white rounded transition ${
+            loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'
+          }`}
+        >
+          {loading ? 'Processing…' : 'Confirm & Subscribe'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function StepReview(props: StepReviewProps) {
+  const stripePromise = loadStripe(STRIPE_PK);
+  return (
+    <Elements stripe={stripePromise}>
+      <InnerReview {...props} />
+    </Elements>
+  );
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\modules\payments\SubscribeWizard\StepSuccess.tsx ---
+// src/modules/payments/SubscribeWizard/StepSuccess.tsx
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { FREE_MESSAGES_PER_DAY } from '@/config';
+
+export interface StepSuccessProps {
+  planId: string;
+}
+
+const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Refresh cards & subscription data
+    queryClient.invalidateQueries(['cards']);
+    queryClient.invalidateQueries(['subscription']);
+  }, [queryClient]);
+
+  const isFree = planId === 'basic';
+  const title = isFree
+    ? 'Free Plan Activated!'
+    : 'Subscription Successful!';
+  const message = isFree
+    ? `You're on the Basic plan with ${FREE_MESSAGES_PER_DAY} free message${FREE_MESSAGES_PER_DAY > 1 ? 's' : ''} per day. Enjoy your Dentgo experience!`
+    : 'Thank you for subscribing. You now have unlimited access.';
+
+  const handleStart = () => {
+    navigate('/dentgo-chat');
+  };
+
+  return (
+    <div className="p-4 text-center space-y-4">
+      <h2 className="text-2xl font-semibold">{title}</h2>
+      <p className="text-gray-600">{message}</p>
+      <button
+        onClick={handleStart}
+        className="mt-4 px-6 py-3 bg-primary text-white text-lg font-semibold rounded shadow hover:bg-primary/90 transition"
+      >
+        Start Now
+      </button>
+    </div>
+  );
+};
+
+export default StepSuccess;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Alert.tsx ---
+// src/pages/Alert.tsx
+import React, { useEffect, useState } from "react";
+import alertImg from "@/assets/images/alert-img.png";
+import { Link, useNavigate } from "react-router-dom";
+import Loader from "@components/ui/Loader";
+
+const Alert: React.FC = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (loading) return <Loader />;
+
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4">
+      <div className="mx-auto max-w-lg px-4">
+        <div
+          className="bg-primary pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-screen overflow-y-auto"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="flex items-center justify-center">
+            <img className="max-w-full pb-4" src={alertImg} alt="Alert" />
+          </div>
+          <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
+            Sorry! Your Order Has Failed!
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 text-center text-lg leading-6 pb-5 my-4">
+            Venenatis praesent lorem tincidunt morbi ultrices quis dolor. Pellentesque nulla.
+          </p>
+
+          <Link
+            to="/login"
+            className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-100 dark:bg-gray-700 text-center text-lg font-medium leading-6 rounded-lg py-4 z-10 text-blue-700 dark:text-primary hover:bg-blue-200 transition"
+            role="button"
+          >
+            Try Again
+          </Link>
+
+          <Link
+            to="/dentgo-gpt-home"
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-xs bg-blue-700 text-white text-lg font-medium leading-6 rounded-lg py-4 z-10 hover:bg-blue-800 transition"
+            role="button"
+          >
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Alert;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Confirmation.tsx ---
+// src/pages/Confirmation.tsx
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Loader from "@components/ui/Loader";
+import confirmationImg from "@/assets/images/confirmation-img.png";
+
+const Confirmation: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader fullscreen />;
+
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 pt-4 px-4 flex flex-col items-center mt-5 rounded-t-3xl h-[calc(100vh-90px)] overflow-y-auto">
+          {/* Confirmation Image */}
+          <div className="flex items-center justify-center">
+            <img
+              src={confirmationImg}
+              alt="Confirmation"
+              className="max-w-full pb-4"
+            />
+          </div>
+
+          {/* Confirmation Text */}
+          <h2 className="text-gray-800 dark:text-gray-200 text-center text-2xl font-semibold leading-8 pb-3">
+            Success!
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center text-lg leading-6 my-4">
+            Your action has been confirmed. Thank you for choosing Dentgo!
+          </p>
+
+          {/* CTA Button */}
+          <Link
+            to="/alert"
+            className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 text-blue-600 text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-700 hover:text-white transition"
+          >
+            Go To Home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Confirmation;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\ContactUs.tsx ---
+// src/pages/ContactUs.tsx
+
+import React, { useEffect, useState } from "react";
+import Loader from "@components/ui/Loader";
+
+const ContactUs: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <Loader fullscreen />;
+
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col">
+      <div className="mx-auto w-full max-w-xl px-4 py-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
+          {/* Contact Header */}
+          <h2 className="text-gray-800 dark:text-gray-100 text-2xl font-semibold text-center mb-4">
+            Contact Us
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-6">
+            If you run into any trouble or have questions, please reach out below.
+          </p>
+
+          {/* Email */}
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            {/* Envelope icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-blue-500 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8H3m18-8V6a2 2 0 00-2-2H5a2 2 0 00-2 2v2"
+              />
+            </svg>
+            <a
+              href="mailto:cs@dentgo.ai"
+              className="text-blue-600 dark:text-blue-400 underline text-lg"
+            >
+              cs@dentgo.ai
+            </a>
+          </div>
+
+          {/* About Us */}
+          <div>
+            <h3 className="text-gray-800 dark:text-gray-100 text-xl font-semibold mb-2">
+              About Us
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              DentGo is your intelligent dental assistant—designed to save you time and enhance patient care.
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              We help you quickly diagnose cases, build customized treatment plans, and identify the materials needed.
+            </p>
+            <p className="text-gray-600 dark:text-gray-400">
+              Powered by AI, DentGo turns complex decisions into clear, actionable steps—so you can focus more on patients and less on logistics.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ContactUs;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Currency.tsx ---
+// src/pages/Currency.tsx
+
+import React, { useEffect, useState } from "react";
+import Loader from "@components/ui/Loader";
+
+type CurrencyCode = "USD" | "SAR" | "AED" | "QAR" | "EGP";
+
+interface RateMap {
+  [key: string]: number;
+}
+
+// Simulated API call to fetch conversion rate from USD to selected currency
+const fetchRate = async (currency: CurrencyCode): Promise<number> => {
+  return new Promise<number>((resolve) =>
+    setTimeout(() => {
+      // Fake rates for demonstration purposes
+      const rates: RateMap = {
+        USD: 1,       // USD → USD
+        SAR: 3.75,    // USD → SAR
+        AED: 3.67,    // USD → AED
+        QAR: 3.64,    // USD → QAR
+        EGP: 30.90,   // USD → EGP
+      };
+      resolve(rates[currency] ?? 1);
+    }, 700)
+  );
+};
+
+const Currency: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>("USD");
+  const [rate, setRate] = useState<number | null>(null);
+  const [fetchError, setFetchError] = useState<string>("");
+
+  // Fetch the rate whenever selectedCurrency changes
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setFetchError("");
+    fetchRate(selectedCurrency)
+      .then((data) => {
+        if (isMounted) {
+          setRate(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch rate:", err);
+        if (isMounted) {
+          setFetchError("Unable to load conversion rate.");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCurrency]);
+
+  // Initial delay loader if needed (for mounting)
+  useEffect(() => {
+    // No-op: main loader is tied to fetching the rate
+  }, []);
+
+  if (loading) {
+    return <Loader fullscreen />;
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-blue-700 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch h-[calc(100vh-90px)] overflow-y-auto">
+          {/* Currency Selection */}
+          {(
+            [
+              { code: "USD", label: "USD" },
+              { code: "SAR", label: "SAR" },
+              { code: "AED", label: "AED" },
+              { code: "QAR", label: "QAR" },
+              { code: "EGP", label: "EGP" },
+            ] as { code: CurrencyCode; label: string }[]
+          ).map(({ code, label }) => (
+            <div
+              key={code}
+              className="peer flex items-center gap-3 rounded border border-gray-200 dark:border-gray-700 p-3 mb-4"
+            >
+              <input
+                type="radio"
+                name="currency"
+                id={`currency-${code.toLowerCase()}`}
+                className="peer sr-only"
+                checked={selectedCurrency === code}
+                onChange={() => setSelectedCurrency(code)}
+              />
+              <label
+                htmlFor={`currency-${code.toLowerCase()}`}
+                className="flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 text-base font-medium peer-checked:bg-gray-900 dark:peer-checked:bg-gray-100 peer-checked:text-white dark:peer-checked:text-gray-900 peer-checked:rounded p-2 w-full"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="stroke-current"
+                >
+                  <path
+                    d="M8.5 14.6667C8.5 15.9553 9.54467 17 10.8333 17H13C14.3807 17 15.5 15.8807 15.5 14.5C15.5 13.1193 14.3807 12 13 12H11C9.61929 12 8.5 10.8807 8.5 9.5C8.5 8.11929 9.61929 7 11 7H13.1667C14.4553 7 15.5 8.04467 15.5 9.33333M12 5.5V7M12 17V18.5M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                {label}
+              </label>
+            </div>
+          ))}
+
+          {/* Conversion Rate Display */}
+          <div className="mt-4 px-2">
+            <h2 className="text-gray-200 dark:text-gray-300 text-xl font-semibold mb-2">
+              USD → {selectedCurrency} Rate
+            </h2>
+            {fetchError ? (
+              <p className="text-red-400 text-sm">{fetchError}</p>
+            ) : (
+              <p className="text-gray-100 dark:text-gray-100 text-lg">
+                {rate !== null ? rate.toFixed(2) : "N/A"}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Currency;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Delete.tsx ---
+// src/pages/Delete.tsx
+import React, { useState } from "react";
+import Loader from "@components/ui/Loader";
+import { useNavigate } from "react-router-dom";
+import { deleteAccount } from "@/api/auth";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@components/ui/ToastProvider";
+
+const Delete: React.FC = () => {
+  const { addToast } = useToast();
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "This will permanently delete your account. Proceed?"
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await deleteAccount();
+      await logout();
+      addToast("Your account has been deleted successfully.", "success");
+      navigate("/login", { replace: true });
+    } catch (err: any) {
+      console.error("Delete failed", err);
+      addToast(
+        err?.message || "Could not delete account. Please try again.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {loading && <Loader fullscreen />}
+      <div className="bg-white dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+        <div className="mx-auto max-w-lg px-4">
+          <div className="bg-gray-100 dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col items-stretch overflow-y-auto">
+            <h2 className="text-gray-900 dark:text-gray-100 text-lg font-semibold leading-6 pt-6">
+              Confirm Deletion of Your Dentgo Account
+            </h2>
+
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+              We’re sorry to see you go! All your data will be permanently removed.
+            </p>
+
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+              This includes your chats, cards, and any other data associated with your account.
+            </p>
+
+            <p className="text-gray-600 dark:text-gray-400 text-sm font-medium leading-5 pb-6">
+              Confirm below to delete your account and all associated data forever.
+            </p>
+
+            <div className="flex flex-col items-center justify-center pb-6">
+              <button
+                onClick={handleDelete}
+                className="w-full py-4 bg-red-600 dark:bg-red-700 text-white text-lg font-medium rounded-xl flex justify-center items-center hover:bg-red-700 dark:hover:bg-red-600 transition"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Delete;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\DentgoChat.tsx ---
+// src/pages/DentgoChat.tsx
+
+import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
+import { askDentgo } from "@/api/chat";
+import { fetchChatSession, endChatSession } from "@/api/chats";
+import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
+import { useStripeData } from "@context/StripeContext";
+import { useToast } from "@components/ui/ToastProvider";
+import Loader from "@components/ui/Loader";
+
+// RTL detection for Arabic
+function isRTL(text: string) {
+  return /[\u0600-\u06FF]/.test(text);
+}
+
+function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" }) {
+  const rtl = isRTL(text);
+  return (
+    <div
+      className={`mb-4 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words ${
+        type === "personal"
+          ? `self-end bg-primary text-white ${rtl ? "text-right" : "text-left"} rounded-br-lg`
+          : `self-start bg-primary/10 text-primary ${rtl ? "text-right" : "text-left"} rounded-bl-lg`
+      }`}
+      style={{ direction: rtl ? "rtl" : "ltr" }}
+      aria-label={type === "personal" ? "Your message" : "Bot response"}
+    >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+        {text}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+const DentgoChat: React.FC = () => {
+  const navigate = useNavigate();
+  const { search } = useLocation();
+  const { subscription } = useStripeData();
+  const { addToast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState<{ text: string; type: "personal" | "bot" }[]>([]);
+  const [input, setInput] = useState("");
+  const [usedToday, setUsedToday] = useState(0);
+  const [isThinking, setThinking] = useState(false);
+  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
+  const [chatName, setChatName] = useState("");
+
+  const isBasic = subscription?.status !== "active";
+
+  // Load today’s count and any existing session
+  useEffect(() => {
+    async function loadCount() {
+      const today = new Date().toISOString().slice(0, 10);
+      try {
+        const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const { count } = await res.json();
+          setUsedToday(count);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadCount();
+
+    const params = new URLSearchParams(search);
+    const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
+    if (sid) {
+      setSessionId(sid);
+      fetchChatSession(sid)
+        .then((session) => {
+          // Cast the type field to the literal union
+          const msgs = session.messages.map((m: any) => ({
+            text: m.content as string,
+            type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
+          }));
+          setMessages(msgs);
+          historyRef.current = msgs.map((m) => ({
+            role: m.type === "personal" ? "user" : "assistant",
+            text: m.text,
+          }));
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
+  }, [search]);
+
+  // Auto-scroll on new messages or thinking
+  useEffect(() => {
+    containerRef.current?.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, isThinking]);
+
+  // Initial greeting
+  useEffect(() => {
+    if (!loading && sessionId === null) {
+      const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+      setMessages([{ text: greeting, type: "bot" }]);
+      historyRef.current = [{ role: "assistant", text: greeting }];
+    }
+  }, [loading, sessionId]);
+
+  const send = async () => {
+    const prompt = input.trim();
+    if (!prompt || isThinking) return;
+
+    if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
+      addToast(
+        `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`,
+        "error"
+      );
+      return;
+    }
+
+    setMessages((prev) => [...prev, { text: prompt, type: "personal" }]);
+    historyRef.current.push({ role: "user", text: prompt });
+    setInput("");
+    setThinking(true);
+
+    try {
+      const { sessionId: newSid, answer } = await askDentgo(
+        prompt,
+        historyRef.current.slice(0, -1),
+        sessionId
+      );
+      if (!sessionId) {
+        setSessionId(newSid);
+        navigate(`?sessionId=${newSid}`, { replace: true });
+      }
+      setMessages((prev) => [...prev, { text: answer, type: "bot" }]);
+      historyRef.current.push({ role: "assistant", text: answer });
+      setUsedToday((u) => u + 1);
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
+      ]);
+    } finally {
+      setThinking(false);
+    }
+  };
+
+  const handleEndSession = async () => {
+    if (sessionId) await endChatSession(sessionId);
+    navigate("/dentgo-gpt-home");
+  };
+
+  if (loading) return <Loader fullscreen />;
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-100">
+      <div className="flex-grow overflow-hidden flex flex-col px-4">
+        <div className="flex-grow bg-white rounded-xl shadow-inner p-4 flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex items-center space-x-2">
+              <h1 className="text-lg font-semibold">Dentgo Chat</h1>
+              {isBasic ? (
+                <span className="text-gray-600 text-sm">
+                  Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+                </span>
+              ) : (
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                  PLUS
+                </span>
+              )}
+            </div>
+            <button type="button" onClick={() => setShowEndSessionModal(true)}>
+              ✖
+            </button>
+          </div>
+
+          <div ref={containerRef} className="flex-grow overflow-auto space-y-1">
+            {messages.map((m, i) => (
+              <MessageBubble key={i} {...m} />
+            ))}
+            {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
+          </div>
+
+          <div className="mt-4 flex items-center space-x-2">
+            <textarea
+              rows={2}
+              className="flex-grow p-2 rounded-lg bg-gray-200 focus:bg-white focus:ring-2 focus:ring-primary transition"
+              placeholder="Type your message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey
+                  ? (e.preventDefault(), send())
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              onClick={send}
+              disabled={isThinking}
+              className="p-3 bg-primary rounded-lg text-white"
+            >
+              ➤
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {showEndSessionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-80">
+            <h2 className="text-xl font-semibold mb-2">End Session?</h2>
+            <input
+              type="text"
+              value={chatName}
+              onChange={(e) => setChatName(e.target.value)}
+              placeholder="Chat name (optional)"
+              className="w-full p-2 border rounded mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowEndSessionModal(false)}
+                className="px-4 py-2 rounded bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleEndSession}
+                className="px-4 py-2 rounded bg-primary text-white"
+              >
+                End
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DentgoChat;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\DentgoGptHome.tsx ---
+// src/pages/DentgoGptHome.tsx
+import React, { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import logo from "@/assets/images/logo.png";
+import plusRobot from "@/assets/images/plus-robort.png";
+import { useAuth } from "@context/AuthContext";
+import { useStripeData } from "@context/StripeContext";
+import Loader from "@components/ui/Loader";
+import SideMenu from "@components/SideMenu";
+
+const DentgoGptHome: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, initializing } = useAuth();
+  const { subscription } = useStripeData();
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Show loading while auth initializes
+  if (initializing) {
+    return <Loader />;
+  }
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Clean up any off-canvas backdrops
+  useEffect(() => {
+    const backdrop = document.querySelector(".offcanvas-backdrop.show");
+    if (backdrop) {
+      backdrop.remove();
+      document.body.classList.remove("offcanvas-backdrop", "modal-open");
+    }
+  }, []);
+
+  const handlePlusSubscription = () => {
+    navigate("/subscribe");
+  };
+
+  const handleStartChat = () => {
+    // Check for active subscription
+    if (subscription?.status === "active") {
+      navigate("/dentgo-chat");
+    } else {
+      // Redirect users without an active plan
+      navigate("/subscribe");
+    }
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
+      <main className="flex-1 bg-gray-100">
+        <div className="mx-auto max-w-lg px-4">
+          <section
+            className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
+            aria-labelledby="dentgo-plus-title"
+          >
+            <div className="flex flex-col sm:flex-row">
+              <div className="flex-1 p-6 space-y-2">
+                <h2
+                  id="dentgo-plus-title"
+                  className="text-2xl font-semibold text-gray-800"
+                >
+                  Dentgo Plus
+                </h2>
+                <p className="text-gray-500 text-base">
+                  Unlock Dentgo premium to access all features.
+                </p>
+                <button
+                  onClick={handlePlusSubscription}
+                  className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-lg px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  aria-label="Upgrade to Dentgo Plus"
+                >
+                  Upgrade
+                </button>
+              </div>
+              <div className="flex-1">
+                <img
+                  src={plusRobot}
+                  alt="Dentgo Plus robot illustration"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+            </div>
+          </section>
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleStartChat}
+              className="w-full bg-primary text-white font-medium text-lg rounded-xl py-4 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+              aria-label="Start chat with Dentgo"
+            >
+              Start Chat with Dentgo
+            </button>
+          </div>
+        </div>
+      </main>
+      <SideMenu />
+
+      {isVisible && (
+        <>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            onClick={() => setIsVisible(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-lg bg-white rounded-t-3xl z-60 p-6 shadow-lg">
+            <button
+              onClick={() => setIsVisible(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              aria-label="Close popup"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="text-center pt-4">
+              <img
+                src={logo}
+                alt="Dentgo AI Logo"
+                className="mx-auto w-24 h-24"
+              />
+              <h3 className="text-gray-800 text-2xl font-semibold mt-4">
+                Dentgo AI Chatbot
+              </h3>
+              <p className="mt-2 text-gray-500 text-base leading-6 px-2">
+                Add the Dentgo Dental AI Assistant to your home screen for fast,
+                seamless access—just like a regular app.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <button
+                  className="inline-flex items-center bg-primary text-white text-lg font-medium py-3 px-6 rounded-lg shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  aria-label="Add Home Screen"
+                >
+                  Add Home Screen
+                  <span className="ml-2">➔</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default DentgoGptHome;
+
+--- C:\Users\hanos\cb\frontend\src\pages\History.tsx ---
+// src/pages/History.tsx
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Loader from "@components/ui/Loader";
+import chatMenuImg from "@/assets/images/chat-menu-img.png";
+import { fetchChatSessions } from "@/api/chats";
+
+interface ChatSession {
+  id: number;
+  title?: string;
+  startedAt: string;
+  endedAt?: string | null;
+}
+
+export default function History() {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchChatSessions()
+      .then((data) => setSessions(data))
+      .catch((err) => setError(err.message || "Failed to load history"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return <Loader fullscreen />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+        <div className="mx-auto max-w-3xl px-4">
+          <h2 className="text-red-500 text-base font-medium mt-10">
+            Error: {error}
+          </h2>
+        </div>
+      </div>
+    );
+  }
+
+  const renderList = (items: ChatSession[], isEnded: boolean) =>
+    items.map((s) => (
+      <Link
+        key={s.id}
+        to={`/dentgo-chat?sessionId=${s.id}`}
+        className="flex items-center mb-4"
+      >
+        <img src={chatMenuImg} alt="Chat icon" className="w-6 h-6 mr-3" />
+        <div>
+          <h3 className="text-gray-800 dark:text-gray-200 text-base font-bold leading-6 pb-1">
+            {s.title ?? `Chat #${s.id}`}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm leading-5">
+            {isEnded
+              ? `Ended ${new Date(s.endedAt!).toLocaleString()}`
+              : `Started ${new Date(s.startedAt).toLocaleString()}`}
+          </p>
+        </div>
+      </Link>
+    ));
+
+  const active = sessions.filter((s) => !s.endedAt);
+  const ended = sessions.filter((s) => !!s.endedAt);
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-3xl px-4 w-full">
+        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto w-full">
+          <div className="pt-4">
+            <h2 className="text-gray-800 dark:text-gray-100 text-xl font-semibold leading-7">
+              Active Chats
+            </h2>
+            {active.length > 0 ? (
+              renderList(active, false)
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-5 mb-4">
+                No active chats.
+              </p>
+            )}
+
+            <h2 className="text-gray-800 dark:text-gray-100 text-xl font-semibold leading-7 pt-6">
+              Ended Chats
+            </h2>
+            {ended.length > 0 ? (
+              renderList(ended, true)
+            ) : (
+              <p className="text-gray-500 dark:text-gray-400 text-sm leading-5">
+                No ended chats.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Home.tsx ---
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@context/AuthContext";
+import Loader from "@components/ui/Loader";
+
+const Home: React.FC = () => {
+  const { user, logout, isAuthenticated, initializing } = useAuth();
+
+  if (initializing) {
+    return <Loader />;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <div className="mx-auto max-w-lg px-4">
+        <main className="p-4">
+          <h1 className="text-2xl font-semibold mb-4">
+            Welcome to Your Dashboard
+          </h1>
+          <div className="flex items-center justify-between">
+            {user && (
+              <>
+                <span className="text-gray-800 dark:text-gray-200">
+                  Hello, {user.name}
+                </span>
+                <button
+                  onClick={() => logout()}
+                  className="bg-red-500 text-white px-3 py-1 rounded"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Home;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Login.tsx ---
+// src/pages/Login.tsx
+import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import Loader from "@components/ui/Loader";
+import logo from "@/assets/images/logo-w.png";
+import AppleIcon from "@/assets/images/Icon-apple.png";
+import GoogleIcon from "@/assets/images/Icon-google.png";
+import dentaiBottom from "@/assets/images/dentaiBottom.png";
+
+import useGoogleIdentity from "@hooks/useGoogleIdentity";
+import { useAuth } from "@context/AuthContext";
+import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "@/api/auth";
+import { useToast } from "@components/ui/ToastProvider";
+
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const Login: React.FC = () => {
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+  const { login, isAuthenticated, initializing } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [googleReady, setGoogleReady] = useState(false);
+
+  // Initialize Google Identity script
+  useGoogleIdentity();
+
+  // If authenticated, redirect
+  useEffect(() => {
+    if (!initializing && isAuthenticated) {
+      navigate("/dentgo-gpt-home", { replace: true });
+    }
+  }, [initializing, isAuthenticated, navigate]);
+
+  // Handle Google One-Tap credential
+  const handleCredentialResponse = useCallback(
+    async (response: any) => {
+      const { credential } = response;
+      if (!credential) {
+        addToast("No credentials returned. Please try again.", "error");
+        return;
+      }
+      try {
+        const user = await loginWithGoogleAPI(credential);
+        login(user);
+        navigate("/dentgo-gpt-home", { replace: true });
+      } catch (err: any) {
+        console.error("Google login error:", err);
+        addToast(
+          err?.message ||
+            "Authentication failed. Please try again or use a different browser mode.",
+          "error"
+        );
+      }
+    },
+    [login, navigate, addToast]
+  );
+
+  // Initialize Google One-Tap
+  useEffect(() => {
+    let retryTimeout: number | null = null;
+
+    const tryInitialize = () => {
+      if (window.google?.accounts?.id) {
+        if (!CLIENT_ID) {
+          console.error("Missing VITE_GOOGLE_CLIENT_ID!");
+          addToast("Google Login misconfigured: missing client ID.", "error");
+          setLoading(false);
+          return;
+        }
+
+        window.google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: handleCredentialResponse,
+          ux_mode: "popup",
+        });
+
+        setGoogleReady(true);
+        setLoading(false);
+      } else {
+        retryTimeout = window.setTimeout(tryInitialize, 100);
+      }
+    };
+
+    tryInitialize();
+    return () => {
+      if (retryTimeout) clearTimeout(retryTimeout);
+    };
+  }, [handleCredentialResponse, addToast]);
+
+  if (initializing || loading) {
+    return <Loader />;
+  }
+
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dentgo-gpt-home" replace />;
+  }
+
+  return (
+    <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
+      {/* Header */}
+      <div className="flex flex-col items-center justify-center bg-primary py-6">
+        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
+          DentGo AI
+        </h1>
+      </div>
+
+      {/* Main Login */}
+      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
+        <div className="w-full max-w-md">
+          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
+            Welcome
+          </h2>
+
+          <div className="flex flex-col gap-4 w-full">
+            {/* Google Login */}
+            <button
+              type="button"
+              disabled={!googleReady}
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
+                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+              }`}
+              onClick={() => {
+                if (window.google?.accounts?.id && googleReady) {
+                  try {
+                    window.google.accounts.id.prompt();
+                  } catch (err: any) {
+                    if (err.name !== "AbortError") {
+                      console.error("Google prompt error:", err);
+                      addToast(
+                        "Unexpected error when opening Google login. Please try again.",
+                        "error"
+                      );
+                    }
+                  }
+                } else {
+                  addToast("Google login is not ready yet.", "error");
+                }
+              }}
+            >
+              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
+              <span>Continue with Google</span>
+            </button>
+
+            {/* Apple Login */}
+            <button
+              type="button"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              onClick={async () => {
+                try {
+                  await loginWithApple();
+                } catch (err: any) {
+                  console.error("Apple login error:", err);
+                  addToast(
+                    err?.message ||
+                      "Apple authentication failed. Please try again.",
+                    "error"
+                  );
+                }
+              }}
+            >
+              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
+              <span>Continue with Apple</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Illustration */}
+      <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
+        <img
+          src={dentaiBottom}
+          alt="Dental AI graphic"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Login;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Notification.tsx ---
+// src/pages/Notification.tsx
+
+import React, { useEffect, useState } from "react";
+import Loader from "@components/ui/Loader";
+
+interface NotificationItem {
+  id: number;
+  title: string;
+  timestamp: string;
+  message: string;
+  iconColor: string;
+}
+
+const mockNotifications: NotificationItem[] = [
+  {
+    id: 1,
+    title: "Security Updates!",
+    timestamp: "Today | 09:24 AM",
+    message:
+      "Now Dentgo GPT has Two-Factor Authentication. Try it now to make your account more secure.",
+    iconColor: "#0078D7",
+  },
+  {
+    id: 2,
+    title: "Multiple Card Features!",
+    timestamp: "1 day ago | 14:43 PM",
+    message:
+      "Now you can also connect Dentgo GPT with multiple MasterCard & Visa. Try the service now.",
+    iconColor: "#FFAA01",
+  },
+  {
+    id: 3,
+    title: "New Updates Available!",
+    timestamp: "2 days ago | 10:24 AM",
+    message:
+      "Update Dentgo GPT now to get access to the latest features for easier online payments.",
+    iconColor: "#FF484D",
+  },
+  {
+    id: 4,
+    title: "Account Setup Successful!",
+    timestamp: "10 Dec, 2023 | 14:24 AM",
+    message:
+      "Your account creation is successful. You can now experience our services.",
+    iconColor: "#0078D7",
+  },
+];
+
+export default function Notification() {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+
+  useEffect(() => {
+    // Simulate API call delay
+    const timer = setTimeout(() => {
+      setNotifications(mockNotifications);
+      setLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader fullscreen />;
+  }
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="mt-5 rounded-t-3xl overflow-hidden">
+          {notifications.map((note) => (
+            <div key={note.id} className="bg-white dark:bg-gray-800 mb-4 rounded-lg p-3 flex items-start gap-4">
+              {/* Icon */}
+              <div className="mt-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 64 64"
+                  fill="none"
+                >
+                  <rect
+                    opacity="0.12"
+                    width="64"
+                    height="64"
+                    rx="32"
+                    fill={note.iconColor}
+                  />
+                  <g>
+                    {note.id === 1 && (
+                      <path
+                        d="M32.0003 18.6666C31.7097 18.6666 31.4243 18.6693 31.1443 18.6733L30.323 18.696L29.9243 18.7133L29.1523 18.7586L28.415 18.82C22.035 19.4386 19.439 22.0346 18.8203 28.4146L18.759 29.152L18.7137 29.924C18.707 30.0546 18.7003 30.188 18.6963 30.3226L18.6737 31.144L18.6683 31.568L18.667 32C18.667 32.2906 18.6697 32.576 18.6737 32.856L18.6963 33.6773L18.7137 34.076L18.759 34.848L18.8203 35.5853C19.439 41.9653 22.035 44.5613 28.415 45.18L29.1523 45.2413L29.9243 45.2866C30.055 45.2933 30.1883 45.3 30.323 45.304L31.1443 45.3266L32.0003 45.3333L32.8563 45.3266L33.6777 45.304L34.0763 45.2866L34.8483 45.2413L35.5857 45.18C41.9657 44.5613 44.5617 41.9653 45.1803 35.5853L45.2417 34.848L45.287 34.076C45.2937 33.9453 45.3003 33.812 45.3043 33.6773L45.327 32.856L45.3337 32L45.327 31.144L45.3043 30.3226L45.287 29.924L45.2417 29.152L45.1803 28.4146C44.5617 22.0346 41.9657 19.4386 35.5857 18.82L34.8483 18.7586L34.0763 18.7133C33.9435 18.7068 33.8106 18.701 33.6777 18.696L32.8563 18.6733L32.4323 18.668L32.0003 18.6666ZM35.0577 28.3906C35.2976 28.1515 35.6196 28.0127 35.9582 28.0023C36.2968 27.992 36.6266 28.1109 36.8807 28.335C37.1348 28.559 37.2941 28.8714 37.3262 29.2086C37.3583 29.5458 37.2609 29.8826 37.0537 30.1506L36.943 30.276L31.6097 35.6093C31.3801 35.8389 31.0746 35.9768 30.7506 35.9971C30.4265 36.0175 30.1062 35.919 29.8497 35.72L29.7243 35.6093L27.0577 32.9426C26.8185 32.7027 26.6797 32.3807 26.6694 32.0421C26.659 31.7035 26.7779 31.3737 27.002 31.1196C27.226 30.8655 27.5384 30.7062 27.8756 30.6741C28.2129 30.642 28.5497 30.7394 28.8177 30.9466L28.943 31.0573L30.667 32.78L35.0577 28.3906Z"
+                        fill={note.iconColor}
+                      />
+                    )}
+                    {note.id === 2 && (
+                      <>
+                        <path
+                          d="M40.3333 21C41.7017 21 43.0176 21.5259 44.0091 22.469C45.0005 23.412 45.5916 24.7001 45.66 26.0667L45.6667 26.3333V37C45.6667 38.3683 45.1408 39.6843 44.1977 40.6757C43.2547 41.6672 41.9666 42.2583 40.6 42.3267L40.3333 42.3333H24.3333C22.965 42.3333 21.649 41.8074 20.6576 40.8644C19.6661 39.9213 19.0751 38.6333 19.0067 37.2667L19 37V26.3333C19 24.965 19.5259 23.649 20.469 22.6576C21.412 21.6661 22.7001 21.0751 24.0667 21.0067L24.3333 21H40.3333ZM33.0093 27.6667L32.756 27.672C31.5187 27.7413 30.464 28.4493 29.6667 29.5973C28.92 28.524 27.9493 27.8347 26.8147 27.6933L26.5507 27.6707L26.332 27.6667L26.1187 27.6733C24.412 27.788 23 29.2453 23 31C23 32.6347 24.6293 33.948 26.2707 34.2627L26.484 34.2973L24.724 36.0573L24.6133 36.1827C24.4319 36.4165 24.3334 36.704 24.3334 37C24.3334 37.296 24.4319 37.5835 24.6133 37.8173L24.724 37.9427L24.8493 38.0533C25.0832 38.2348 25.3707 38.3332 25.6667 38.3332C25.9626 38.3332 26.2502 38.2348 26.484 38.0533L26.6093 37.9427L29.6667 34.8867L32.724 37.9427L32.8493 38.0533C33.1059 38.2522 33.4262 38.3506 33.7501 38.3302C34.0741 38.3098 34.3795 38.1718 34.609 37.9423C34.8385 37.7128 34.9764 37.4074 34.9969 37.0835C35.0173 36.7595 34.9189 36.4392 34.72 36.1827L34.6093 36.0573L32.8493 34.2973C34.488 34.072 36.1853 32.8173 36.324 31.2107L36.3333 31L36.3267 30.7827C36.22 29.1973 34.9667 27.9 33.4267 27.6947L33.2147 27.6733L33.0093 27.6667ZM32.976 30.3333L33.112 30.3453C33.3707 30.3987 33.6013 30.6253 33.6547 30.8867L33.6667 31L33.6507 31.0413L33.6053 31.0947C33.432 31.2747 32.9213 31.5867 32.4907 31.6547L32.3333 31.6667H31.5307L31.6 31.5333L31.7173 31.3253C32.0773 30.7333 32.4827 30.3973 32.8533 30.3413L32.976 30.3333ZM26.3573 30.3333L26.4693 30.34L26.5947 30.3667C26.9333 30.4693 27.292 30.7933 27.6147 31.324L27.7347 31.5333L27.8013 31.6667H27L26.8587 31.656C26.328 31.58 25.6667 31.1227 25.6667 31C25.6667 30.6933 25.9253 30.4053 26.2213 30.3453L26.3573 30.332V30.3333Z"
+                        fill={note.iconColor}
+                      />
+                    </>
+                    )}
+                    {note.id === 3 && (
+                      <path
+                        d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046ZM24 38.3333V44H40L40 38.3333C40 36.9188 39.4381 35.5623 38.4379 34.5621C37.4377 33.5619 36.0812 33 34.6667 33H29.3333C27.9188 33 26.5623 33.5619 25.5621 34.5621C24.5619 35.5623 24 36.9188 24 38.3333Z"
+                        fill={note.iconColor}
+                      />
+                    )}
+                    {note.id === 4 && (
+                      <>
+                        <path
+                          d="M28.2291 29.1046C27.2289 28.1044 26.667 26.7478 26.667 25.3333C26.667 23.9188 27.2289 22.5623 28.2291 21.5621C29.2293 20.5619 30.5858 20 32.0003 20C33.4148 20 34.7714 20.5619 35.7716 21.5621C36.7718 22.5623 37.3337 23.9188 37.3337 25.3333C37.3337 26.7478 36.7718 28.1044 35.7716 29.1046C34.7714 30.1048 33.4148 30.6667 32.0003 30.6667C30.5858 30.6667 29.2293 30.1048 28.2291 29.1046ZM24 38.3333V44H40L40 38.3333C40 36.9188 39.4381 35.5623 38.4379 34.5621C37.4377 33.5619 36.0812 33 34.6667 33H29.3333C27.9188 33 26.5623 33.5619 25.5621 34.5621C24.5619 35.5623 24 36.9188 24 38.3333Z"
+                          fill={note.iconColor}
+                        />
+                      </>
+                    )}
+                  </g>
+                </svg>
+              </div>
+              {/* Text Content */}
+              <div className="flex-1">
+                <h2 className="text-gray-800 dark:text-gray-200 font-satoshi text-[16px] font-bold leading-[24px]">
+                  {note.title}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 text-[14px] leading-[18px] mb-2">
+                  {note.timestamp}
+                </p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] leading-[16px]">
+                  {note.message}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\NotificationAllow.tsx ---
+// src/pages/NotificationAllow.tsx
+
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import Loader from "@components/ui/Loader";
+import notificationImg from "@/assets/images/notification-img.png";
+
+const NotificationAllow: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Simulate permission check delay
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader fullscreen />;
+  }
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl pt-6 px-4 flex flex-col items-center">
+          {/* Illustration */}
+          <img
+            src={notificationImg}
+            alt="Enable notifications"
+            className="max-w-full mb-6"
+          />
+
+          {/* Explanatory Text */}
+          <p className="text-gray-500 dark:text-gray-400 text-[18px] leading-[24px] text-center mb-6 px-2">
+            Stay updated on offers, new features, and security alerts. You can
+            manage notifications from settings later.
+          </p>
+
+          {/* Continue Button */}
+          <Link
+            to="/login"
+            className="w-full max-w-[343px] bg-white text-[#0078D7] font-medium text-[18px] leading-[24px] text-center py-4 rounded-[12px] hover:bg-[#0064ba] hover:text-white transition"
+          >
+            Continue with Google or Apple
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NotificationAllow;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\NotificationSetting.tsx ---
+// src/pages/NotificationSetting.tsx
+
+import React, { useEffect, useState } from "react";
+import Loader from "@components/ui/Loader";
+
+interface NotificationSettings {
+  email: boolean;
+  sms: boolean;
+  invoice: boolean;
+  moneyRequest: boolean;
+  moneySent: boolean;
+  moneyReceived: boolean;
+  purchase: boolean;
+  qrPayment: boolean;
+  directPayment: boolean;
+  subscriptionInfo: boolean;
+  announcements: boolean;
+  appUpdates: boolean;
+}
+
+// Simulated API call to fetch notification settings
+const fetchSettings = async (): Promise<NotificationSettings> => {
+  return new Promise<NotificationSettings>((resolve) =>
+    setTimeout(
+      () =>
+        resolve({
+          email: true,
+          sms: false,
+          invoice: true,
+          moneyRequest: false,
+          moneySent: true,
+          moneyReceived: false,
+          purchase: true,
+          qrPayment: false,
+          directPayment: false,
+          subscriptionInfo: true,
+          announcements: false,
+          appUpdates: false,
+        }),
+      700
+    )
+  );
+};
+
+const NotificationSetting: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [settings, setSettings] = useState<NotificationSettings | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchSettings()
+      .then((data) => {
+        if (isMounted) setSettings(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load notification settings:", err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading || !settings) {
+    return <Loader fullscreen />;
+  }
+
+  const toggleSetting = (key: keyof NotificationSettings) => {
+    setSettings((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [key]: !prev[key] };
+    });
+  };
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl pt-6 px-4 flex flex-col space-y-4">
+          <h2 className="text-gray-800 dark:text-gray-100 text-[18px] font-semibold leading-[24px] text-center">
+            Notification Settings
+          </h2>
+
+          {[
+            { label: "Email Notifications", key: "email" },
+            { label: "SMS Notifications", key: "sms" },
+            { label: "Your invoices are paid", key: "invoice" },
+            { label: "Someone requests money from you", key: "moneyRequest" },
+            { label: "You send money to someone", key: "moneySent" },
+            { label: "You receive money from someone", key: "moneyReceived" },
+            { label: "You purchase something", key: "purchase" },
+            { label: "You receive a QR code payment", key: "qrPayment" },
+            { label: "You receive a direct payment", key: "directPayment" },
+            { label: "You receive subscriptions info", key: "subscriptionInfo" },
+            { label: "You receive announcements & offers", key: "announcements" },
+            { label: "You receive app updates info", key: "appUpdates" },
+          ].map(({ label, key }) => (
+            <div
+              key={key}
+              className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 py-4"
+            >
+              <p className="text-gray-800 dark:text-gray-100 text-[16px] font-medium">
+                {label}
+              </p>
+              <input
+                type="checkbox"
+                checked={settings[key as keyof NotificationSettings]}
+                onChange={() => toggleSetting(key as keyof NotificationSettings)}
+                className="h-5 w-5 text-primary focus:ring-2 focus:ring-primary/50 rounded"
+                aria-label={label}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default NotificationSetting;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\Splash.tsx ---
+// src/pages/Splash.tsx
+
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+
+import logo from '@/assets/images/logo.png';
+import dotsPattern from '@/assets/images/dots_pattern.png';
+import dotsPatternBottom from '@/assets/images/dots_pattern_bottom.png';
+import imageUnscreen from '@/assets/images/Image.png';
+import robotSlider from '@/assets/images/robot-slider-img2.png';
+import robotSlider3 from '@/assets/images/robot-slider-img3.png';
+
+const slides = [
+  {
+    id: 0,
+    img: imageUnscreen,
+    title: 'Welcome to Dentgo, Your Smart Dental Assistant',
+    text:
+      'Diagnose cases accurately, build precise treatment plans, and get a tailored list of required materials with trusted suppliers — all in one place.',
+  },
+  {
+    id: 1,
+    img: robotSlider,
+    title: 'AI-Powered Treatment Planning in Seconds',
+    text:
+      'Let Dentgo analyze your cases and suggest complete, customized treatment plans backed by dental AI — helping you deliver better care, faster.',
+  },
+  {
+    id: 2,
+    img: robotSlider3,
+    title: 'Get What You Need — Delivered to Your Clinic',
+    text:
+      'Easily source the supplies and tools you need from top suppliers and have them delivered right to your door — saving you time and effort.',
+  },
+];
+
+const Splash: React.FC = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated, initializing } = useAuth();
+  const [initial, setInitial] = useState(true);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setInitial(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // If user is already logged in, skip splash
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dentgo-gpt-home" replace />;
+  }
+
+  if (initial) {
+    return (
+      <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+        <img src={dotsPattern} alt="" className="absolute top-0 left-0 w-48" aria-hidden="true" />
+        <div className="flex flex-col items-center space-y-4">
+          <img src={logo} alt="Dentgo logo" className="w-48" />
+          <h1 className="text-3xl font-bold text-gray-800">Dentgo</h1>
+          <p className="text-center text-gray-500">Smarter Dentistry Starts Here</p>
+        </div>
+        <img src={dotsPatternBottom} alt="" className="absolute bottom-0 left-0 w-48" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  const { img, title, text } = slides[index];
+
+  const handleNext = () => {
+    if (index < slides.length - 1) {
+      setIndex(i => i + 1);
+    } else {
+      navigate('/login');
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen w-screen">
+      <div className="flex-1 flex flex-col items-center justify-center px-4">
+        <img src={img} alt={title} className="w-full max-w-xs mb-6" />
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">{title}</h2>
+        <p className="text-center text-gray-500 max-w-md">{text}</p>
+      </div>
+
+      <div className="px-4 pb-4">
+        <button
+          onClick={handleNext}
+          className="w-full bg-primary text-white py-3 rounded-lg hover:opacity-90 transition"
+        >
+          {index < slides.length - 1 ? 'Next' : 'Get Started'}
+        </button>
+      </div>
+
+      <div className="flex justify-center space-x-2 pb-6">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setIndex(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`rounded-full transition-all ${
+              i === index ? 'bg-gray-800 w-8 h-2' : 'bg-gray-200 w-2 h-2'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default Splash;
+
+
+--- C:\Users\hanos\cb\frontend\src\pages\TermsAndPrivacy.tsx ---
+// src/pages/TermsAndPrivacy.tsx
+
+import React, { useEffect, useState } from "react";
+import Loader from "@components/ui/Loader";
+
+const TermsAndPrivacy: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <Loader fullscreen />;
+  }
+
+  return (
+    <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
+      <div className="mx-auto max-w-lg px-4">
+        <div className="bg-white dark:bg-gray-800 mt-5 rounded-t-3xl pt-4 px-4 flex flex-col h-[calc(100vh-90px)] overflow-y-auto">
+          {/* Last Updated */}
+          <div className="pt-2 pb-4 border-b border-gray-200 dark:border-gray-700 w-full">
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              <strong>Last updated: 31/05/2025</strong>
+            </p>
+
+            {/* Introduction */}
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              Welcome to DentGo (“we,” “us,” or “our”). This document contains both our Terms of Service and our Privacy Policy. By using DentGo’s web app, you agree to comply with these terms and acknowledge how we handle your data.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              1. Introduction
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              DentGo is a chatbot web application specializing in dental assistance. Our service provides free daily messaging and the option to upgrade to a premium subscription for additional features.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              2. Account Registration
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              Users must create an account using Google or Apple authentication. We do not collect any other login credentials. There is no minimum age requirement, but parents or guardians should supervise minors’ use.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              3. Usage Terms
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              You may use DentGo to chat with our dental chatbot for information and support. Misuse of the service—including but not limited to spamming, harassment, or any illegal activity—is prohibited. We reserve the right to suspend or terminate accounts that violate these terms.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              4. Subscriptions and Payments
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              DentGo offers one free daily message for all users. Additional features, such as unlimited messaging, require a monthly subscription. Subscription fees are clearly stated before purchase and are billed monthly.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              5. Privacy Policy
+            </h2>
+            <h3 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              5.1 Data Collection
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              We only collect your email address via Google or Apple sign-in. We store your chatbot conversations to allow you to access your chat history. No sensitive health information is collected. We do not collect or process any additional personal data.
+            </p>
+
+            <h3 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              5.2 Cookies and Analytics
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              We use cookies solely for Google Analytics 4 (GA4) to understand usage patterns and improve the service.
+            </p>
+
+            <h3 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              5.3 Data Sharing
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              We do <strong>not</strong> share your data with third parties. Your information is used strictly for providing and improving the DentGo service.
+            </p>
+
+            <h3 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              5.4 Data Security
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              We use industry-standard encryption and secure hosting to protect your data.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              6. Jurisdiction
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              DentGo is based in Wyoming, USA. These Terms and Privacy Policy are governed by the laws of Wyoming and the United States.
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              7. Contact Us
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              If you have any questions about these Terms or our Privacy practices, please contact us at:{" "}
+              <a href="mailto:cs@dentgo.ai" className="underline text-blue-600 dark:text-blue-400">
+                cs@dentgo.ai
+              </a>
+              .
+            </p>
+
+            <h2 className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              8. Updates
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-base leading-6 pb-2">
+              We may update these Terms and Privacy Policy from time to time. Changes will be posted on this page with the new effective date.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TermsAndPrivacy;
+
+
+--- C:\Users\hanos\cb\frontend\src\types\bootstrap.d.ts ---
+declare module "bootstrap/dist/js/bootstrap.bundle";
+
+
+--- C:\Users\hanos\cb\frontend\src\types\global.d.ts ---
+// src/types/global.d.ts
+export {};
+
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        id?: {
+          initialize: (options: any) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
+
+
+--- C:\Users\hanos\cb\frontend\src\types\images.d.ts ---
+declare module "*.png" {
+  const value: string;
+  export default value;
+}
+
+declare module "*.jpg" {
+  const value: string;
+  export default value;
+}
+
+declare module "*.jpeg" {
+  const value: string;
+  export default value;
+}
+
+declare module "*.svg" {
+  import * as React from "react";
+  export const ReactComponent: React.FunctionComponent<
+    React.SVGProps<SVGSVGElement> & { title?: string }
+  >;
+  const src: string;
+  export default src;
+}
+

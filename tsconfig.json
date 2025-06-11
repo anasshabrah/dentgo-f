@@ -7,12 +7,12 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*":            ["src/*"],
-      "@components/*":  ["src/components/*"],
-      "@context/*":     ["src/context/*"],
-      "@utils/*":       ["src/utils/*"],
-      "@hooks/*":       ["src/hooks/*"],
-      "@lib/*":         ["src/lib/*"]
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@context/*": ["src/context/*"],
+      "@utils/*": ["src/utils/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@lib/*": ["src/lib/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -20,5 +20,8 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/api"  
+  ]
 }
