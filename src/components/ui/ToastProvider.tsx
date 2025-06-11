@@ -17,7 +17,7 @@ interface Toast {
 }
 
 interface ToastContextValue {
-  addToast: (message: string, type?: Toast['type']) => void;
+  addToast: (toast: { message: string; type?: Toast['type'] }) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
@@ -25,17 +25,17 @@ const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const isMounted = useRef(true);
-
   const timeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     return () => {
       isMounted.current = false;
-      Object.values(timeouts.current).forEach(clearTimeout);
+      const snapshot = timeouts.current;
+      Object.values(snapshot).forEach(clearTimeout);
     };
   }, []);
 
-  const addToast = useCallback((message: string, type: Toast['type'] = 'info') => {
+  const addToast = useCallback(({ message, type = 'info' }: { message: string; type?: Toast['type'] }) => {
     const id = Date.now();
     if (!isMounted.current) return;
     setToasts((prev) => [...prev, { id, message, type }]);
@@ -71,9 +71,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-2"
           >
-            <div
-              className={`px-4 py-2 rounded shadow text-white ${bgClassMap[type]}`}
-            >
+            <div className={`px-4 py-2 rounded shadow text-white ${bgClassMap[type]}`}>
               {message}
             </div>
           </Transition>

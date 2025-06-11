@@ -114,10 +114,10 @@ const DentgoChat: React.FC = () => {
     if (!prompt || isThinking) return;
 
     if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
-      addToast(
-        `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`,
-        "error"
-      );
+      addToast({
+        message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`,
+        type: "error",
+      });
       return;
     }
 
