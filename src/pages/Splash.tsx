@@ -41,30 +41,15 @@ const Splash: React.FC = () => {
   const [initial, setInitial] = useState(true);
   const [index, setIndex] = useState(0);
 
-  // Always call hooks first
   useEffect(() => {
     const timer = setTimeout(() => setInitial(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
-  // After hooks, conditionally redirect if already logged in
+  // If user is already logged in, skip splash
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
-
-  const handleNext = () => {
-    if (index < slides.length - 1) {
-      setIndex(i => i + 1);
-    } else {
-      navigate('/login');
-    }
-  } () => {
-    if (index < slides.length - 1) {
-      setIndex(i => i + 1);
-    } else {
-      navigate('/login');
-    }
-  };
 
   if (initial) {
     return (
@@ -75,25 +60,26 @@ const Splash: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-800">Dentgo</h1>
           <p className="text-center text-gray-500">Smarter Dentistry Starts Here</p>
         </div>
-        <img
-          src={dotsPatternBottom}
-          alt=""
-          className="absolute bottom-0 left-0 w-48"
-          aria-hidden="true"
-        />
+        <img src={dotsPatternBottom} alt="" className="absolute bottom-0 left-0 w-48" aria-hidden="true" />
       </div>
     );
   }
 
   const { img, title, text } = slides[index];
 
+  const handleNext = () => {
+    if (index < slides.length - 1) {
+      setIndex(i => i + 1);
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen w-screen">
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         <img src={img} alt={title} className="w-full max-w-xs mb-6" />
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          {title}
-        </h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">{title}</h2>
         <p className="text-center text-gray-500 max-w-md">{text}</p>
       </div>
 
