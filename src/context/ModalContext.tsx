@@ -22,18 +22,15 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const cleanupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const open = useCallback((content: React.ReactNode) => {
-    // Cancel any scheduled cleanup from previous modal
     if (cleanupTimer.current) {
       clearTimeout(cleanupTimer.current);
       cleanupTimer.current = null;
     }
-
-    // Force React to remount modal to reset animations/states
+    // Ensure fresh mount for animations
     const fresh =
       React.isValidElement(content) && content.key == null
         ? React.cloneElement(content, { key: Date.now() })
         : content;
-
     setNode(fresh);
     setIsOpen(true);
   }, []);
@@ -43,7 +40,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     cleanupTimer.current = setTimeout(() => {
       setNode(null);
       cleanupTimer.current = null;
-    }, 300); // This should match your modal transition duration
+    }, 300); // match your transition duration
   }, []);
 
   return (
@@ -52,10 +49,11 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {isOpen && node &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center"
+            className="fixed inset-0 z-50 pointer-events-none"
             aria-modal="true"
             role="dialog"
           >
+            {/* Only the inserted modal should absorb pointer events */}
             <div className="pointer-events-auto">
               {node}
             </div>
