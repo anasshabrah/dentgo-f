@@ -25,19 +25,23 @@ export const STRIPE_PK: string = import.meta.env
   .VITE_STRIPE_PUBLISHABLE_KEY as string;
 
 /**
- * 5. Frontend allowed origins (for CORS checks or iframe embeds, if needed)
- *    Always includes localhost in dev and your prod server URL.
- *    You can extend via VITE_FRONTEND_PROD_DOMAINS = "myapp.com,another.com"
+ * 5. Free messages per day for Basic plan
+ */
+export const FREE_MESSAGES_PER_DAY = Number(
+  import.meta.env.VITE_FREE_MESSAGES_PER_DAY ?? 1
+);
+
+/**
+ * 6. Frontend allowed origins (for CORS checks or iframe embeds)
  */
 const PROD_DOMAINS = import.meta.env.VITE_FRONTEND_PROD_DOMAINS
   ? (import.meta.env.VITE_FRONTEND_PROD_DOMAINS as string).split(',')
   : [];
 
 export const ALLOWED_ORIGINS: Array<string | RegExp> = [
-  // Dev local host
   'http://localhost:5173',
-  // Your primary prod frontend
   (import.meta.env.VITE_SERVER_URL as string),
-  // Any additional domains you list in VITE_FRONTEND_PROD_DOMAINS
-  ...PROD_DOMAINS.map((d) => new RegExp(`^https?://[\\w-]+\\.${d.replace(/^\.*|\.*$/g, '')}$`)),
+  ...PROD_DOMAINS.map(
+    (d) => new RegExp(`^https?://[\\w-]+\\.${d.replace(/^\.*|\.*$/g, '')}$`)
+  ),
 ];
