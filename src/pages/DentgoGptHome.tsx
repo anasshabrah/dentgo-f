@@ -4,22 +4,27 @@ import { useNavigate, Navigate } from "react-router-dom";
 import logo from "@/assets/images/logo.png";
 import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
+import { useStripeData } from "@context/StripeContext";
 import Loader from "@components/ui/Loader";
 import SideMenu from "@components/SideMenu";
 
 const DentgoGptHome: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, initializing } = useAuth();
+  const { subscription } = useStripeData();
   const [isVisible, setIsVisible] = useState(false);
 
+  // Show loading while auth initializes
   if (initializing) {
     return <Loader />;
   }
 
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Clean up any off-canvas backdrops
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -33,7 +38,13 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    navigate("/dentgo-chat");
+    // Check for active subscription
+    if (subscription?.status === "active") {
+      navigate("/dentgo-chat");
+    } else {
+      // Redirect users without an active plan
+      navigate("/subscribe");
+    }
   };
 
   return (
@@ -84,6 +95,7 @@ const DentgoGptHome: React.FC = () => {
         </div>
       </main>
       <SideMenu />
+
       {isVisible && (
         <>
           <div
