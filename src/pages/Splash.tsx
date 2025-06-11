@@ -41,14 +41,14 @@ const Splash: React.FC = () => {
   const [initial, setInitial] = useState(true);
   const [index, setIndex] = useState(0);
 
-  // If authenticated (and not initializing), skip splash
+  // If authenticated (and auth not initializing), skip splash
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
 
   useEffect(() => {
-    const t = setTimeout(() => setInitial(false), 1500);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setInitial(false), 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleNext = () => {
@@ -62,18 +62,11 @@ const Splash: React.FC = () => {
   if (initial) {
     return (
       <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
-        <img
-          src={dotsPattern}
-          alt=""
-          className="absolute top-0 left-0 w-48"
-          aria-hidden="true"
-        />
+        <img src={dotsPattern} alt="" className="absolute top-0 left-0 w-48" aria-hidden="true" />
         <div className="flex flex-col items-center space-y-4">
           <img src={logo} alt="Dentgo logo" className="w-48" />
           <h1 className="text-3xl font-bold text-gray-800">Dentgo</h1>
-          <p className="text-center text-gray-500">
-            Smarter Dentistry Starts Here
-          </p>
+          <p className="text-center text-gray-500">Smarter Dentistry Starts Here</p>
         </div>
         <img
           src={dotsPatternBottom}
@@ -90,11 +83,7 @@ const Splash: React.FC = () => {
   return (
     <div className="flex flex-col h-screen w-screen">
       <div className="flex-1 flex flex-col items-center justify-center px-4">
-        <img
-          src={img}
-          alt={title}
-          className="w-full max-w-xs mb-6"
-        />
+        <img src={img} alt={title} className="w-full max-w-xs mb-6" />
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           {title}
         </h2>
