@@ -33,7 +33,7 @@ const Login: React.FC = () => {
     async (response: any) => {
       const { credential } = response;
       if (!credential) {
-        addToast("No credentials returned. Please try again.", "error");
+        addToast({ message: "No credentials returned. Please try again.", type: "error" });
         return;
       }
       try {
@@ -42,11 +42,12 @@ const Login: React.FC = () => {
         navigate("/dentgo-gpt-home", { replace: true });
       } catch (err: any) {
         console.error("Google login error:", err);
-        addToast(
-          err?.message ||
+        addToast({
+          message:
+            err?.message ||
             "Authentication failed. Please try again or use a different browser mode.",
-          "error"
-        );
+          type: "error",
+        });
       }
     },
     [login, navigate, addToast]
@@ -61,7 +62,7 @@ const Login: React.FC = () => {
         if (window.google?.accounts?.id) {
           if (!CLIENT_ID) {
             console.error("Missing VITE_GOOGLE_CLIENT_ID!");
-            addToast("Google Login misconfigured: missing client ID.", "error");
+            addToast({ message: "Google Login misconfigured: missing client ID.", type: "error" });
             setLoading(false);
             return;
           }
@@ -127,14 +128,14 @@ const Login: React.FC = () => {
                   } catch (err: any) {
                     if (err.name !== "AbortError") {
                       console.error("Google prompt error:", err);
-                      addToast(
-                        "Unexpected error when opening Google login. Please try again.",
-                        "error"
-                      );
+                      addToast({
+                        message: "Unexpected error when opening Google login. Please try again.",
+                        type: "error",
+                      });
                     }
                   }
                 } else {
-                  addToast("Google login is not ready yet.", "error");
+                  addToast({ message: "Google login is not ready yet.", type: "error" });
                 }
               }}
             >
@@ -151,11 +152,12 @@ const Login: React.FC = () => {
                   await loginWithApple();
                 } catch (err: any) {
                   console.error("Apple login error:", err);
-                  addToast(
-                    err?.message ||
+                  addToast({
+                    message:
+                      err?.message ||
                       "Apple authentication failed. Please try again.",
-                    "error"
-                  );
+                    type: "error",
+                  });
                 }
               }}
             >
