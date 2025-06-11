@@ -25,18 +25,20 @@ const Wallet: React.FC = () => {
       setLoadingSecret(true);
       createSetupIntent()
         .then(secret => setClientSecret(secret))
-        .catch(err => addToast({ message: err.message || 'Failed to initialize payment form', type: 'error' }))
+        .catch(err =>
+          addToast({ message: err.message || 'Failed to initialize payment form', type: 'error' })
+        )
         .finally(() => setLoadingSecret(false));
     }
   }, [active, addToast]);
 
   const handleCardAdded = () => {
-    addToast('Card linked successfully', 'success');
+    addToast({ message: 'Card linked successfully', type: 'success' });
     setActive('Saved Cards');
   };
 
   const handleCardError = (err: any) => {
-    addToast(err.message || 'Failed to add card', 'error');
+    addToast({ message: err.message || 'Failed to add card', type: 'error' });
   };
 
   return (
