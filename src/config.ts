@@ -27,9 +27,10 @@ export const STRIPE_PK: string =
 /**
  * 5. Free messages per day for Basic plan
  */
-export const FREE_MESSAGES_PER_DAY = Number(
-  import.meta.env.VITE_FREE_MESSAGES_PER_DAY ?? 1
-);
+const FREE_MESSAGES_RAW = import.meta.env.VITE_FREE_MESSAGES_PER_DAY;
+export const FREE_MESSAGES_PER_DAY: number = Number.isNaN(Number(FREE_MESSAGES_RAW))
+  ? 1
+  : parseInt(FREE_MESSAGES_RAW as string, 10);
 
 /**
  * 6. Frontend allowed origins (for CORS or embed checks)

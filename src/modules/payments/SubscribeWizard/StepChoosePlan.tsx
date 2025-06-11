@@ -1,24 +1,35 @@
 // src/modules/payments/SubscribeWizard/StepChoosePlan.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FREE_MESSAGES_PER_DAY } from '@/config';
-
-const plans = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: 0,
-    description: `Free, ${FREE_MESSAGES_PER_DAY} message${
-      FREE_MESSAGES_PER_DAY > 1 ? 's' : ''
-    }/day`,
-  },
-  { id: 'plus', name: 'Plus', price: 2500, description: '$25/month, unlimited' },
-];
 
 export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
   onNext,
 }) => {
   const [selected, setSelected] = React.useState<string>('plus');
+
+  // Ensure it's always treated as a number and memoized
+  const freeCount = useMemo(() => FREE_MESSAGES_PER_DAY, []);
+
+  const plans = useMemo(
+    () => [
+      {
+        id: 'basic',
+        name: 'Basic',
+        price: 0,
+        description: `Free, ${freeCount} message${
+          freeCount > 1 ? 's' : ''
+        }/day`,
+      },
+      {
+        id: 'plus',
+        name: 'Plus',
+        price: 2500,
+        description: '$25/month, unlimited',
+      },
+    ],
+    [freeCount]
+  );
 
   return (
     <div className="space-y-6 p-4">

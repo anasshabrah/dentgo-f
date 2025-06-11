@@ -1,4 +1,5 @@
 // src/modules/payments/SubscribeWizard/StepReview.tsx
+
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
@@ -27,12 +28,10 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
   const priceLabel = planId === 'plus' ? '$25.00' : 'Free';
   const priceId = PLAN_TO_PRICE[planId];
 
-  // Pick first card if available
   const card = cards && cards.length > 0 ? cards[0] : null;
   const paymentMethodId = card?.paymentMethodId;
 
   const handleConfirm = async () => {
-    // Free plan shortcut
     if (!priceId) {
       toast.addToast('Free plan selected. No payment required.', 'success');
       onSuccess();
@@ -50,10 +49,8 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
 
     setLoading(true);
     try {
-      // 1) Create subscription on backend
       const { clientSecret, status } = await subscribe(priceId, paymentMethodId);
 
-      // 2) If additional action needed, confirm payment
       if (status === 'requires_action' && clientSecret) {
         const result = await stripe.confirmPayment({
           clientSecret,
@@ -62,7 +59,6 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
         if (result.error) throw result.error;
       }
 
-      // 3) Success
       toast.addToast('Subscription completed successfully!', 'success');
       onSuccess();
     } catch (err: any) {
@@ -94,6 +90,7 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
 
       <div className="flex gap-4">
         <button
+          type="button"
           onClick={onBack}
           className="flex-1 py-2 border rounded hover:bg-gray-100 transition"
         >
