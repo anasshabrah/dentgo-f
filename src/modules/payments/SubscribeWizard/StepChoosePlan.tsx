@@ -8,7 +8,9 @@ const plans = [
     id: 'basic',
     name: 'Basic',
     price: 0,
-    description: `Free, ${FREE_MESSAGES_PER_DAY} message${FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day`,
+    description: `Free, ${FREE_MESSAGES_PER_DAY} message${
+      FREE_MESSAGES_PER_DAY > 1 ? 's' : ''
+    }/day`,
   },
   { id: 'plus', name: 'Plus', price: 2500, description: '$25/month, unlimited' },
 ];
@@ -34,7 +36,9 @@ export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
             <div className="flex justify-between">
               <span className="font-medium">{p.name}</span>
               <span className="font-semibold">
-                {p.price === 0 ? 'Free' : `$${(p.price / 100).toFixed(2)}/mo`}
+                {p.price === 0
+                  ? 'Free'
+                  : `$${(p.price / 100).toFixed(2)}/mo`}
               </span>
             </div>
             <p className="text-sm text-gray-600">{p.description}</p>
