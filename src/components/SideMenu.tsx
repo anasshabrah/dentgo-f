@@ -24,7 +24,7 @@ export default function SideMenu() {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={close}>
-        {/* Overlay - use Dialog.Overlay for click-outside support */}
+        {/* Overlay - HeadlessUI v1.7+ does NOT export Dialog.Overlay. Use div instead */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -34,7 +34,11 @@ export default function SideMenu() {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Dialog.Overlay className="fixed inset-0 bg-black/30" />
+          <div
+            className="fixed inset-0 bg-black/30"
+            aria-hidden="true"
+            onClick={close}
+          />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
