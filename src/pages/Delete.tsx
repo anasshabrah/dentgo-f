@@ -29,10 +29,10 @@ const Delete: React.FC = () => {
       navigate("/login", { replace: true });
     } catch (err: any) {
       console.error("Delete failed", err);
-      addToast(
-        err?.message || "Could not delete account. Please try again.",
-        "error"
-      );
+      addToast({
+        message: err?.message || "Could not delete account. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

@@ -150,7 +150,7 @@ const DentgoChat: React.FC = () => {
   };
 
   const handleEndSession = async () => {
-    if (sessionId) await endChatSession(sessionId, chatName); // ✅ Pass chat name
+    if (sessionId) await endChatSession(sessionId);
     navigate("/dentgo-gpt-home");
   };
 
