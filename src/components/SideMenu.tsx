@@ -26,15 +26,16 @@ export default function SideMenu() {
       <Dialog as="div" className="relative z-50" onClose={close}>
         {/* Overlay - use Dialog.Overlay for click-outside support */}
         <Transition.Child
-          as={Dialog.Overlay}
+          as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
           leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
-          className="fixed inset-0 bg-black/30"
-        />
+        >
+          <Dialog.Overlay className="fixed inset-0 bg-black/30" />
+        </Transition.Child>
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
