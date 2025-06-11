@@ -7,24 +7,30 @@ import axios from 'axios';
 
 // Cards
 export async function fetchCards(): Promise<CardData[]> {
-  // Map the backend Card[] into CardData[]
   const cards = await apiFetchCards();
   return cards.map(c => ({
     id: c.id,
     paymentMethodId: c.paymentMethodId,
-    // Derive last4 from paymentMethodId (adjust if backend provides a real `last4` field)
+    // Derive last4 from the payment method ID; replace if the backend returns an actual last4
     last4: c.paymentMethodId.slice(-4),
-    // TODO: have backend return `network` and `isActive` directly
+    // TODO: backend should provide these fields directly
     network: 'unknown',
     isActive: true,
   }));
 }
 
-export async function addCard(payload: {
+export async function addCard(args: {
   paymentMethodId: string;
-  nickName?: string | null;
+  nickName: string | null;
 }): Promise<void> {
-  // Accept both string and null for nickName
+  // Convert null nickName to undefined for the API client
+  const payload: {
+    paymentMethodId: string;
+    nickName?: string;
+  } = {
+    paymentMethodId: args.paymentMethodId,
+    ...(args.nickName != null ? { nickName: args.nickName } : {}),
+  };
   await apiCreateCard(payload);
 }
 
