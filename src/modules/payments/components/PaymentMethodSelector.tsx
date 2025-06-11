@@ -25,7 +25,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     e.preventDefault();
     if (!stripe || !elements) {
       const error = new Error('Payment form not ready. Please try again.');
-      addToast(error.message, 'error');
+      addToast({ message: error.message, type: 'error' });
       onError?.(error);
       return;
     }
@@ -48,7 +48,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       onSuccess?.();
     } catch (err: any) {
       const error = new Error(err?.message || 'Failed to add card. Please try again.');
-      addToast(error.message, 'error');
+      addToast({ message: error.message, type: 'error' });
       onError?.(error);
     } finally {
       setLoading(false);

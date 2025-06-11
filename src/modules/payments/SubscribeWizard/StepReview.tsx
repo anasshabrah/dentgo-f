@@ -41,7 +41,7 @@ const InnerReview: React.FC<StepReviewProps> = ({
 
   const handleConfirm = async () => {
     if (isFree) {
-      toast.addToast('Free plan selected. No payment required.', 'success');
+      toast.addToast({ message: 'Free plan selected. No payment required.', type: 'success' });
       onSuccess();
       return;
     }

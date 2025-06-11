@@ -25,7 +25,7 @@ const Delete: React.FC = () => {
     try {
       await deleteAccount();
       await logout();
-      addToast("Your account has been deleted successfully.", "success");
+      addToast({ message: "Your account has been deleted successfully.", type: "success" });
       navigate("/login", { replace: true });
     } catch (err: any) {
       console.error("Delete failed", err);

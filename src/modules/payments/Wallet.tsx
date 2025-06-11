@@ -25,7 +25,7 @@ const Wallet: React.FC = () => {
       setLoadingSecret(true);
       createSetupIntent()
         .then(secret => setClientSecret(secret))
-        .catch(err => addToast(err.message || 'Failed to initialize payment form', 'error'))
+        .catch(err => addToast({ message: err.message || 'Failed to initialize payment form', type: 'error' }))
         .finally(() => setLoadingSecret(false));
     }
   }, [active, addToast]);

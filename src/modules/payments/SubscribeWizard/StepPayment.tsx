@@ -18,7 +18,7 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
   // If user chose the free plan, skip payment immediately
   useEffect(() => {
     if (planId === 'basic') {
-      addToast('Free plan selected. No payment required.', 'success');
+      addToast({ message: 'Free plan selected. No payment required.', type: 'success' });
       onNext();
     }
   }, [planId, onNext, addToast]);
@@ -31,12 +31,13 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
           const secret = await createSetupIntent();
           setClientSecret(secret);
         } catch (err: any) {
-          addToast(
-            err instanceof Error
-              ? err.message
-              : 'Failed to initialize payment form.',
-            'error'
-          );
+          addToast({
+            message:
+              err instanceof Error
+                ? err.message
+                : 'Failed to initialize payment form.',
+            type: 'error'
+          });
         }
       };
       init();
@@ -61,7 +62,7 @@ export const StepPayment: React.FC<StepPaymentProps> = ({ planId, onNext }) => {
         <StripeElements options={{ clientSecret }}>
           <PaymentMethodSelector
             onSuccess={() => {
-              addToast('Payment method added successfully!', 'success');
+              addToast({ message: 'Payment method added successfully!', type: 'success' });
               onNext();
             }}
           />
