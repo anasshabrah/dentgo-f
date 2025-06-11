@@ -41,17 +41,24 @@ const Splash: React.FC = () => {
   const [initial, setInitial] = useState(true);
   const [index, setIndex] = useState(0);
 
-  // If authenticated (and auth not initializing), skip splash
-  if (!initializing && isAuthenticated) {
-    return <Navigate to="/dentgo-gpt-home" replace />;
-  }
-
+  // Always call hooks first
   useEffect(() => {
     const timer = setTimeout(() => setInitial(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
+  // After hooks, conditionally redirect if already logged in
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dentgo-gpt-home" replace />;
+  }
+
   const handleNext = () => {
+    if (index < slides.length - 1) {
+      setIndex(i => i + 1);
+    } else {
+      navigate('/login');
+    }
+  } () => {
     if (index < slides.length - 1) {
       setIndex(i => i + 1);
     } else {

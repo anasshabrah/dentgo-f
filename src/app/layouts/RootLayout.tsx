@@ -1,3 +1,4 @@
+// src/app/layouts/RootLayout.tsx
 import React from "react";
 import { Outlet } from "react-router-dom";
 import GlobalModals from "@components/modal/GlobalModals";
