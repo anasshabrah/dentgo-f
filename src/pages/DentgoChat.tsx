@@ -5,7 +5,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
-import { askDentgo, fetchChatSession, endChatSession } from "@/api/chat";
+import { askDentgo } from "@/api/chat";
+import { fetchChatSession, endChatSession } from "@/api/chats";
 import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import { useStripeData } from "@context/StripeContext";
 import { useToast } from "@components/ui/ToastProvider";
@@ -38,10 +39,7 @@ function MessageBubble({
       style={{ direction: rtl ? "rtl" : "ltr" }}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>      
         {text}
       </ReactMarkdown>
     </div>
@@ -96,15 +94,12 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs = session.messages.map((m: any) => ({
-            text: m.content,
-            type:
-              m.role === "USER"
-                ? ("personal" as const)
-                : ("bot" as const),
+          const msgs = session.messages.map(msg => ({
+            text: msg.content,
+            type: msg.role === "USER" ? ("personal" as const) : ("bot" as const),
           }));
           setMessages(msgs);
-          historyRef.current = msgs.map((m) => ({
+          historyRef.current = msgs.map(m => ({
             role: m.type === "personal" ? "user" : "assistant",
             text: m.text,
           }));
@@ -148,10 +143,7 @@ const DentgoChat: React.FC = () => {
       return;
     }
 
-    setMessages((prev) => [
-      ...prev,
-      { text: prompt, type: "personal" },
-    ]);
+    setMessages(prev => [...prev, { text: prompt, type: "personal" }]);
     historyRef.current.push({ role: "user", text: prompt });
     setInput("");
     setThinking(true);
@@ -168,19 +160,13 @@ const DentgoChat: React.FC = () => {
         navigate(`?sessionId=${newSid}`, { replace: true });
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { text: answer, type: "bot" },
-      ]);
+      setMessages(prev => [...prev, { text: answer, type: "bot" }]);
       historyRef.current.push({ role: "assistant", text: answer });
-      setUsedToday((u) => u + 1);
+      setUsedToday(u => u + 1);
     } catch (err: any) {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
-        {
-          text: `❌ ${err.message || "Something went wrong."}`,
-          type: "bot",
-        },
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
       ]);
     } finally {
       setThinking(false);
@@ -211,30 +197,15 @@ const DentgoChat: React.FC = () => {
               aria-label="End Chat"
               className="hover:opacity-80"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                stroke="var(--color-primary)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4" ref={containerRef}>
-            {messages.map((m, i) => (
-              <MessageBubble key={i} {...m} />
-            ))}
-            {isThinking && (
-              <div className="italic text-gray-500 mt-2">
-                Dentgo is typing…
-              </div>
-            )}
+            {messages.map((m, i) => <MessageBubble key={i} {...m} />)}
+            {isThinking && <div className="italic text-gray-500 mt-2">Dentgo is typing…</div>}
           </div>
 
           <div className="flex p-4 gap-3">
@@ -242,26 +213,11 @@ const DentgoChat: React.FC = () => {
               className="flex-1 p-2 rounded-lg bg-gray-100 focus:ring-2 focus:ring-primary/50"
               placeholder="Write here…"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === "Enter" && !e.shiftKey
-                  ? (e.preventDefault(), send())
-                  : undefined
-              }
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && !e.shiftKey ? (e.preventDefault(), send()) : undefined}
             />
-            <button
-              onClick={send}
-              disabled={isThinking}
-              className="w-12 h-12 bg-primary text-white rounded-lg"
-              aria-label="Send message"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+            <button onClick={send} disabled={isThinking} className="w-12 h-12 bg-primary text-white rounded-lg" aria-label="Send message">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
               </svg>
             </button>
@@ -274,29 +230,17 @@ const DentgoChat: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full text-center">
             <h2 className="text-2xl font-semibold mb-2">End Session</h2>
-            <p className="text-gray-500 mb-4">
-              This session will be saved.
-            </p>
+            <p className="text-gray-500 mb-4">This session will be saved.</p>
             <input
               type="text"
               placeholder="Name this chat (optional)"
               value={chatName}
-              onChange={(e) => setChatName(e.target.value)}
+              onChange={e => setChatName(e.target.value)}
               className="w-full p-2 mb-4 border rounded-lg focus:ring-2 focus:ring-primary/50"
             />
             <div className="flex justify-center gap-3">
-              <button
-                onClick={handleEndSession}
-                className="bg-primary text-white px-6 py-3 rounded-lg"
-              >
-                Yes, End
-              </button>
-              <button
-                onClick={() => setShowEndSessionModal(false)}
-                className="bg-gray-100 text-primary px-6 py-3 rounded-lg"
-              >
-                Cancel
-              </button>
+              <button onClick={handleEndSession} className="bg-primary text-white px-6 py-3 rounded-lg">Yes, End</button>
+              <button onClick={() => setShowEndSessionModal(false)} className="bg-gray-100 text-primary px-6 py-3 rounded-lg">Cancel</button>
             </div>
           </div>
         </div>
