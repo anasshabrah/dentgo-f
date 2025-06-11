@@ -7,14 +7,25 @@ import axios from 'axios';
 
 // Cards
 export async function fetchCards(): Promise<CardData[]> {
-  return apiFetchCards();
+  // Map the backend Card[] into CardData[]
+  const cards = await apiFetchCards();
+  return cards.map(c => ({
+    id: c.id,
+    paymentMethodId: c.paymentMethodId,
+    // Derive last4 from paymentMethodId (adjust if backend provides a real `last4` field)
+    last4: c.paymentMethodId.slice(-4),
+    // TODO: have backend return `network` and `isActive` directly
+    network: 'unknown',
+    isActive: true,
+  }));
 }
 
 export async function addCard(payload: {
   paymentMethodId: string;
-  nickName: string | null;
+  nickName?: string | null;
 }): Promise<void> {
-  return apiCreateCard(payload);
+  // Accept both string and null for nickName
+  await apiCreateCard(payload);
 }
 
 // Stripe Customer & Intents
@@ -86,11 +97,11 @@ export async function createSubscriptionIntent(
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.error || 'Failed to create subscription intent.');
   }
-  return (await resp.json()) as {
+  return resp.json() as Promise<{
     clientSecret: string;
     subscriptionId: string;
     status: string;
-  };
+  }>;
 }
 
 // Active Subscription
@@ -128,5 +139,5 @@ export async function createPortalSession(
     const err = await resp.json().catch(() => ({}));
     throw new Error(err.error || 'Failed to create portal session.');
   }
-  return (await resp.json()) as { url: string };
+  return resp.json() as Promise<{ url: string }>;
 }
