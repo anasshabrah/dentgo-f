@@ -13,6 +13,8 @@ export interface StepReviewProps {
   onAddCard: () => void;
 }
 
+const stripePromise = loadStripe(STRIPE_PK);
+
 const PLAN_TO_PRICE: Record<string, string | null> = {
   basic: null,
   plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
@@ -116,7 +118,6 @@ const InnerReview: React.FC<StepReviewProps> = ({
 };
 
 export default function StepReview(props: StepReviewProps) {
-  const stripePromise = loadStripe(STRIPE_PK);
   return (
     <Elements stripe={stripePromise}>
       <InnerReview {...props} />

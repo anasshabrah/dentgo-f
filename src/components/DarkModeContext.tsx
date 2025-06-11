@@ -1,6 +1,12 @@
 // src/context/DarkModeContext.tsx
-
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useLayoutEffect,
+  useEffect,
+  ReactNode,
+} from 'react';
 
 interface DarkModeContextValue {
   isDarkMode: boolean;
@@ -9,7 +15,7 @@ interface DarkModeContextValue {
 
 const defaultValue: DarkModeContextValue = {
   isDarkMode: false,
-  toggleDarkMode: () => {}
+  toggleDarkMode: () => {},
 };
 
 const DarkModeContext = createContext<DarkModeContextValue>(defaultValue);
@@ -19,12 +25,14 @@ interface DarkModeProviderProps {
 }
 
 export const DarkModeProvider: React.FC<DarkModeProviderProps> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('darkMode') === 'true';
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Safe default on SSR
+
+  useLayoutEffect(() => {
+    const stored = localStorage.getItem('darkMode');
+    if (stored === 'true') {
+      setIsDarkMode(true);
     }
-    return false;
-  });
+  }, []);
 
   useEffect(() => {
     const htmlElement = document.documentElement;
@@ -38,7 +46,7 @@ export const DarkModeProvider: React.FC<DarkModeProviderProps> = ({ children }) 
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
-    setIsDarkMode(prev => !prev);
+    setIsDarkMode((prev) => !prev);
   };
 
   return (

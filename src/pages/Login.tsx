@@ -7,10 +7,10 @@ import AppleIcon from "@/assets/images/Icon-apple.png";
 import GoogleIcon from "@/assets/images/Icon-google.png";
 import dentaiBottom from "@/assets/images/dentaiBottom.png";
 
-import useGoogleIdentity from "@hooks/useGoogleIdentity";
 import { useAuth } from "@context/AuthContext";
 import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from "@/api/auth";
 import { useToast } from "@components/ui/ToastProvider";
+import { loadGoogle } from "@/lib/google";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -21,10 +21,7 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Initialize Google Identity script
-  useGoogleIdentity();
-
-  // If authenticated, redirect
+  // Redirect if authenticated
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
@@ -59,29 +56,32 @@ const Login: React.FC = () => {
   useEffect(() => {
     let retryTimeout: number | null = null;
 
-    const tryInitialize = () => {
-      if (window.google?.accounts?.id) {
-        if (!CLIENT_ID) {
-          console.error("Missing VITE_GOOGLE_CLIENT_ID!");
-          addToast("Google Login misconfigured: missing client ID.", "error");
+    loadGoogle(() => {
+      const tryInitialize = () => {
+        if (window.google?.accounts?.id) {
+          if (!CLIENT_ID) {
+            console.error("Missing VITE_GOOGLE_CLIENT_ID!");
+            addToast("Google Login misconfigured: missing client ID.", "error");
+            setLoading(false);
+            return;
+          }
+
+          window.google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: handleCredentialResponse,
+            ux_mode: "popup",
+          });
+
+          setGoogleReady(true);
           setLoading(false);
-          return;
+        } else {
+          retryTimeout = window.setTimeout(tryInitialize, 100);
         }
+      };
 
-        window.google.accounts.id.initialize({
-          client_id: CLIENT_ID,
-          callback: handleCredentialResponse,
-          ux_mode: "popup",
-        });
+      tryInitialize();
+    });
 
-        setGoogleReady(true);
-        setLoading(false);
-      } else {
-        retryTimeout = window.setTimeout(tryInitialize, 100);
-      }
-    };
-
-    tryInitialize();
     return () => {
       if (retryTimeout) clearTimeout(retryTimeout);
     };

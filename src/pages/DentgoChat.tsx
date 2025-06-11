@@ -55,7 +55,6 @@ const DentgoChat: React.FC = () => {
 
   const isBasic = subscription?.status !== "active";
 
-  // Load today’s count and any existing session
   useEffect(() => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
@@ -79,7 +78,6 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          // Cast the type field to the literal union
           const msgs = session.messages.map((m: any) => ({
             text: m.content as string,
             type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
@@ -96,7 +94,6 @@ const DentgoChat: React.FC = () => {
     }
   }, [search]);
 
-  // Auto-scroll on new messages or thinking
   useEffect(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current.scrollHeight,
@@ -104,7 +101,6 @@ const DentgoChat: React.FC = () => {
     });
   }, [messages, isThinking]);
 
-  // Initial greeting
   useEffect(() => {
     if (!loading && sessionId === null) {
       const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
@@ -154,7 +150,7 @@ const DentgoChat: React.FC = () => {
   };
 
   const handleEndSession = async () => {
-    if (sessionId) await endChatSession(sessionId);
+    if (sessionId) await endChatSession(sessionId, chatName); // ✅ Pass chat name
     navigate("/dentgo-gpt-home");
   };
 

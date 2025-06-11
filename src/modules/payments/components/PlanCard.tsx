@@ -6,7 +6,7 @@ import { useStripeData } from '@/context/StripeContext';
 import { FREE_MESSAGES_PER_DAY } from '@/config';
 
 export const PlanCard: React.FC = () => {
-  const { subscription } = useStripeData();
+  const { subscription, openCustomerPortal } = useStripeData();
   const navigate = useNavigate();
 
   // Loading state
@@ -65,7 +65,7 @@ export const PlanCard: React.FC = () => {
       </div>
       <button
         onClick={async () => {
-          const url = await useStripeData().openCustomerPortal();
+          const url = await openCustomerPortal();
           window.location.href = url;
         }}
         className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"

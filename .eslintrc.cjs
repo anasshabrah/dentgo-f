@@ -37,7 +37,7 @@ module.exports = {
     'no-unused-vars': 'off',
 
     // disable the react-hooks plugin missing rule error
-    'react-hooks/exhaustive-deps': 'off',
+    'react-hooks/exhaustive-deps': 'warn',
 
     // your other overrides here...
   },

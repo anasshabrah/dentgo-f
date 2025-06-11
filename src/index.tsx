@@ -9,7 +9,6 @@ import { AuthProvider } from '@context/AuthContext';
 import { StripeProvider } from '@context/StripeContext';
 import { ToastProvider } from '@components/ui/ToastProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ErrorBoundary from '@components/ErrorBoundary';
 
 const queryClient = new QueryClient();
 
@@ -19,20 +18,17 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        {/* AuthProvider must wrap everything that uses useAuth */}
-        <AuthProvider>
-          <ToastProvider>
-            <StripeProvider>
-              <DarkModeProvider>
-                <App />
-              </DarkModeProvider>
-            </StripeProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ToastProvider>
+          <StripeProvider>
+            <DarkModeProvider>
+              <App />
+            </DarkModeProvider>
+          </StripeProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );
 

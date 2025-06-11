@@ -25,17 +25,23 @@ const Confirmation = lazy(() => import("../pages/Confirmation"));
 
 export default function RoutesConfig() {
   useEffect(() => {
-    console.log("[Lifecycle] routes.tsx → RoutesConfig rendered");
+    if (import.meta.env.DEV) {
+      console.log("[Lifecycle] routes.tsx → RoutesConfig rendered");
+    }
   }, []);
 
   const renderRoutes = (list: any[]) =>
-    list.map(({ path, element, children, index }, i) =>
-      // The comma operator here logs first, then returns the <Route> element:
-      (console.log(`[Routing] Adding route #${i}: path="${path ?? "(index)"}"`),
-      <Route key={i} path={path} element={element} index={index}>
-        {children ? renderRoutes(children) : null}
-      </Route>)
-    );
+    list.map(({ path, element, children, index }, i) => {
+      if (import.meta.env.DEV) {
+        console.log(`[Routing] Adding route #${i}: path="${path ?? "(index)"}"`);
+      }
+
+      return (
+        <Route key={i} path={path} element={element} index={index}>
+          {children ? renderRoutes(children) : null}
+        </Route>
+      );
+    });
 
   const routes = [
     // PUBLIC
@@ -57,9 +63,8 @@ export default function RoutesConfig() {
       ),
       children: [
         {
-          element: <DashboardLayout />, // adds SideMenu + padding
+          element: <DashboardLayout />,
           children: [
-            // core app
             { path: "dentgo-gpt-home", element: <DentgoGptHome /> },
             { path: "dentgo-chat", element: <DentgoChat /> },
             { path: "history", element: <History /> },
@@ -69,14 +74,13 @@ export default function RoutesConfig() {
             { path: "terms-and-privacy", element: <TermsAndPrivacy /> },
             { path: "contact-us", element: <ContactUs /> },
             { path: "delete", element: <DeleteAccount /> },
-            // feature modules (payment routes live under src/modules/payments)
             ...paymentRoutes,
           ],
         },
       ],
     },
 
-    // STANDALONE (accessible without menu)
+    // STANDALONE
     { path: "alert", element: <Alert /> },
     { path: "confirmation", element: <Confirmation /> },
   ];

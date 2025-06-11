@@ -25,7 +25,8 @@ const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const isMounted = useRef(true);
-  const timeouts = useRef<Record<number, number>>({});
+
+  const timeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     return () => {
@@ -38,7 +39,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const id = Date.now();
     if (!isMounted.current) return;
     setToasts((prev) => [...prev, { id, message, type }]);
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       if (isMounted.current) {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }
@@ -46,6 +47,12 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, 4000);
     timeouts.current[id] = timer;
   }, []);
+
+  const bgClassMap: Record<Toast['type'], string> = {
+    error: 'bg-red-600',
+    success: 'bg-green-600',
+    info: 'bg-gray-700',
+  };
 
   return (
     <ToastContext.Provider value={{ addToast }}>
@@ -65,13 +72,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             leaveTo="opacity-0 translate-y-2"
           >
             <div
-              className={`px-4 py-2 rounded shadow text-white bg-${
-                type === 'error'
-                  ? 'red-600'
-                  : type === 'success'
-                  ? 'green-600'
-                  : 'gray-700'
-              }`}
+              className={`px-4 py-2 rounded shadow text-white ${bgClassMap[type]}`}
             >
               {message}
             </div>

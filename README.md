@@ -1,7 +1,6 @@
 # Dentgo – AI-Powered Dental Assistant Platform
 
-Dentgo is a full-stack AI-powered dental assistant application that provides personalized dental guidance, subscription management, payment processing, and secure authentication using Google and Apple OAuth. Built with **Next.js**, **Express.js**, **Prisma**, **Stripe**, and **OpenAI**, it supports both web and mobile experiences through a feature-rich frontend and secure backend APIs.
-
+Dentgo Frontend – a modern, Vite-powered React web application using TypeScript, Tailwind CSS, Stripe integration, and RESTful API routing for a dental service platform.
 ---
 
 ## 🚀 Features

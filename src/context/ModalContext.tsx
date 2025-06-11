@@ -21,7 +21,6 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const close = useCallback(() => {
     setIsOpen(false);
-    // Optionally, delay clearing node until animation completes
     setTimeout(() => setNode(null), 300);
   }, []);
 
@@ -30,8 +29,12 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {isOpen && node &&
         createPortal(
-          // Only render the modal content. Backdrop is handled by HeadlessUI Dialog.
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+          // Accessibility fix: allow modal to be focused by screen readers
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            aria-modal="true"
+            role="dialog"
+          >
             <div className="pointer-events-auto">
               {node}
             </div>
