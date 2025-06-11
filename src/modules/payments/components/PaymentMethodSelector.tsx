@@ -1,6 +1,7 @@
 // src/modules/payments/components/PaymentMethodSelector.tsx
 import React, { useState } from 'react';
 import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import type { StripeSetupIntentResult } from '@stripe/stripe-js';
 import { useStripeData } from '@/context/StripeContext';
 import { useToast } from '@components/ui/ToastProvider';
 
@@ -31,10 +32,12 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
-      const result = await stripe.confirmSetup({
+      // Tell TS that this result may have both error and setupIntent
+      const result: StripeSetupIntentResult = await stripe.confirmSetup({
         elements,
         confirmParams: { return_url: window.location.href },
       });
+
       if (result.error) throw result.error;
 
       const pm = result.setupIntent?.payment_method as string;
