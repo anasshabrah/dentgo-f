@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { FREE_MESSAGES_PER_DAY } from '@/config';
 
 export interface StepSuccessProps {
   planId: string;
@@ -17,17 +18,15 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
     queryClient.invalidateQueries(['subscription']);
   }, [queryClient]);
 
-  // Determine content based on plan
   const isFree = planId === 'basic';
   const title = isFree
     ? 'Free Plan Activated!'
     : 'Subscription Successful!';
   const message = isFree
-    ? "You're on the Basic plan with 1 free message per day. Enjoy your Dentgo experience!"
+    ? `You're on the Basic plan with ${FREE_MESSAGES_PER_DAY} free message${FREE_MESSAGES_PER_DAY > 1 ? 's' : ''} per day. Enjoy your Dentgo experience!`
     : 'Thank you for subscribing. You now have unlimited access.';
 
   const handleStart = () => {
-    // Navigate to chat
     navigate('/dentgo-chat');
   };
 
