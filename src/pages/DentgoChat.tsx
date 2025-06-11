@@ -53,7 +53,8 @@ const DentgoChat: React.FC = () => {
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [chatName, setChatName] = useState("");
 
-  const isBasic = subscription?.status !== "active";
+  // Treat any subscription with no Stripe ID as our free/basic plan
+  const isBasic = !subscription || subscription.subscriptionId === null;
 
   useEffect(() => {
     async function loadCount() {
