@@ -11,9 +11,7 @@ export async function fetchCards(): Promise<CardData[]> {
   return cards.map(c => ({
     id: c.id,
     paymentMethodId: c.paymentMethodId,
-    // Derive last4 from the payment method ID; replace if the backend returns an actual last4
     last4: c.paymentMethodId.slice(-4),
-    // TODO: backend should provide these fields directly
     network: 'unknown',
     isActive: true,
   }));
@@ -23,7 +21,6 @@ export async function addCard(args: {
   paymentMethodId: string;
   nickName: string | null;
 }): Promise<void> {
-  // Convert null nickName to undefined for the API client
   const payload: {
     paymentMethodId: string;
     nickName?: string;
@@ -36,9 +33,6 @@ export async function addCard(args: {
 
 // Stripe Customer & Intents
 
-/**
- * Create (or retrieve) a Stripe Customer for the current user
- */
 export async function createCustomer(): Promise<string> {
   const resp = await axios.post(
     `${API_BASE}/api/payments/create-customer`,
@@ -51,9 +45,6 @@ export async function createCustomer(): Promise<string> {
   return resp.data.customerId;
 }
 
-/**
- * Create a SetupIntent, returning its clientSecret
- */
 export async function createSetupIntent(): Promise<string> {
   const resp = await fetch(`${API_BASE}/api/payments/create-setup-intent`, {
     method: 'POST',
@@ -70,13 +61,17 @@ export async function createSetupIntent(): Promise<string> {
 
 /**
  * Create a one-off PaymentIntent for the given amount (in cents)
+ * → now includes currency
  */
-export async function createPaymentIntent(amount: number): Promise<string> {
+export async function createPaymentIntent(
+  amount: number,
+  currency: string = 'usd'
+): Promise<string> {
   const resp = await fetch(`${API_BASE}/api/payments/create-payment-intent`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({ amount, currency }),
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
@@ -87,13 +82,14 @@ export async function createPaymentIntent(amount: number): Promise<string> {
 }
 
 /**
- * Create a Stripe subscription and return the clientSecret, subscriptionId, and status.
+ * Create a Stripe subscription and return its clientSecret, subscriptionId, and status.
+ * → now calls the payments router
  */
 export async function createSubscriptionIntent(
   priceId: string,
   paymentMethodId: string
 ): Promise<{ clientSecret: string; subscriptionId: string; status: string }> {
-  const resp = await fetch(`${API_BASE}/api/subscriptions`, {
+  const resp = await fetch(`${API_BASE}/api/payments/create-subscription`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -110,11 +106,6 @@ export async function createSubscriptionIntent(
   }>;
 }
 
-// Active Subscription
-
-/**
- * Fetch the current active subscription record from your backend
- */
 export async function fetchActiveSubscription(): Promise<{
   subscriptionId: string;
   status: string;
@@ -126,11 +117,6 @@ export async function fetchActiveSubscription(): Promise<{
   return resp.data;
 }
 
-// Customer Portal Session
-
-/**
- * Create a Stripe Customer Portal session and return its URL
- */
 export async function createPortalSession(
   args?: { return_url: string }
 ): Promise<{ url: string }> {

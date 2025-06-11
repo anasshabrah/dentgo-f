@@ -1,6 +1,6 @@
-// src/api/payments.ts
+// File: src/api/payments.ts
 
-import { API_BASE } from '@/config';
+import { API_BASE } from "@/config";
 
 /**
  * Utility: Parses error responses consistently.
@@ -47,24 +47,26 @@ export async function createSetupIntent(): Promise<string> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, 'Failed to create setup intent');
   }
-
   const { clientSecret } = (await res.json()) as { clientSecret: string };
   return clientSecret;
 }
 
 /**
  * Create a one-off PaymentIntent for the given amount (in cents)
+ * NOTE: now includes `currency`
  */
-export async function createPaymentIntent(amount: number): Promise<string> {
+export async function createPaymentIntent(
+  amount: number,
+  currency: string = 'usd'
+): Promise<string> {
   const res = await fetch(`${API_BASE}/api/payments/create-payment-intent`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({ amount, currency }),
   });
 
   if (!res.ok) {
@@ -77,6 +79,7 @@ export async function createPaymentIntent(amount: number): Promise<string> {
 
 /**
  * Create a Stripe subscription and return its clientSecret, subscriptionId & status
+ * → Now points to the correct payments endpoint
  */
 export async function createSubscriptionIntent(
   priceId: string,
@@ -86,7 +89,7 @@ export async function createSubscriptionIntent(
   subscriptionId: string;
   status: string;
 }> {
-  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+  const res = await fetch(`${API_BASE}/api/payments/create-subscription`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -102,6 +105,7 @@ export async function createSubscriptionIntent(
 
 /**
  * Create a Stripe Customer Portal session and return its URL
+ * (note: backend must implement /api/payments/create-portal-session)
  */
 export async function createPortalSession(): Promise<{ url: string }> {
   const res = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
@@ -109,10 +113,8 @@ export async function createPortalSession(): Promise<{ url: string }> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, 'Failed to create portal session');
   }
-
   return res.json();
 }

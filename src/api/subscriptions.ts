@@ -1,4 +1,4 @@
-// src/api/subscriptions.ts
+// File: src/api/subscriptions.ts
 
 import { API_BASE } from "@/config";
 
@@ -52,12 +52,13 @@ export async function fetchActiveSubscription(): Promise<Subscription | null> {
 
 /**
  * Creates a new subscription using a Stripe price and payment method ID
+ * → now calls the payments router, not the Prisma-only route
  */
 export async function createSubscriptionIntent(
   priceId: string,
   paymentMethodId: string
 ): Promise<SubscriptionResponse> {
-  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+  const res = await fetch(`${API_BASE}/api/payments/create-subscription`, {
     method: "POST",
     credentials: "include",
     headers: {
