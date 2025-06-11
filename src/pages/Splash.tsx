@@ -1,6 +1,8 @@
 // src/pages/Splash.tsx
+
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 import logo from '@/assets/images/logo.png';
 import dotsPattern from '@/assets/images/dots_pattern.png';
@@ -35,8 +37,14 @@ const slides = [
 
 const Splash: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, initializing } = useAuth();
   const [initial, setInitial] = useState(true);
   const [index, setIndex] = useState(0);
+
+  // If authenticated (and not initializing), skip splash
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dentgo-gpt-home" replace />;
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setInitial(false), 1500);
