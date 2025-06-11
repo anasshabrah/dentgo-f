@@ -6,7 +6,6 @@ import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
 import { useStripeData } from "@context/StripeContext";
 import Loader from "@components/ui/Loader";
-import SideMenu from "@components/SideMenu";
 
 const DentgoGptHome: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ const DentgoGptHome: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Clean up any off-canvas backdrops
+  // Clean up any off-canvas backdrops left over
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -38,11 +37,9 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    // Check for active subscription
     if (subscription?.status === "active") {
       navigate("/dentgo-chat");
     } else {
-      // Redirect users without an active plan
       navigate("/subscribe");
     }
   };
@@ -94,7 +91,6 @@ const DentgoGptHome: React.FC = () => {
           </div>
         </div>
       </main>
-      <SideMenu />
 
       {isVisible && (
         <>
