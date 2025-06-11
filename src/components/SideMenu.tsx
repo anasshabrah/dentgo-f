@@ -22,20 +22,19 @@ export default function SideMenu() {
   };
 
   return (
-    <Transition.Root appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" open={isOpen} onClose={close}>
-        {/* Overlay */}
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={close}>
+        {/* Overlay - use Dialog.Overlay for click-outside support */}
         <Transition.Child
-          as={Fragment}
+          as={Dialog.Overlay}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
           leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/30" />
-        </Transition.Child>
+          className="fixed inset-0 bg-black/30"
+        />
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
