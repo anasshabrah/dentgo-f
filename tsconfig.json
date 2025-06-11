@@ -12,6 +12,7 @@
       "@context/*": ["src/context/*"],
       "@utils/*": ["src/utils/*"],
       "@hooks/*": ["src/hooks/*"],
+	  "@api/*": ["src/api/*"],
       "@lib/*": ["src/lib/*"]
     },
     "esModuleInterop": true,
@@ -20,6 +21,5 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["src"],
-  "exclude": []
+  "include": ["src"]
 }
