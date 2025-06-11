@@ -23,7 +23,7 @@ export default function SideMenu() {
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={close}>
+      <Dialog as="div" className="fixed inset-0 z-50" onClose={close}>
         {/* Overlay */}
         <Transition.Child
           as={Fragment}
@@ -52,7 +52,7 @@ export default function SideMenu() {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="relative z-50 w-80 max-w-full h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
+              <Dialog.Panel className="fixed left-0 top-0 z-50 w-80 max-w-full h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
                 <div className="p-6 flex flex-col h-full overflow-y-auto">
                   <Dialog.Title className="text-lg font-medium mb-4">
                     Menu
