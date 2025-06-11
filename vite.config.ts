@@ -5,6 +5,7 @@ import Checker from 'vite-plugin-checker';
 import path from 'path';
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     Checker({

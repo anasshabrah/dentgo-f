@@ -7,6 +7,10 @@
       "destination": "https://api.dentgo.io/api/$1"
     },
     {
+      "source": "/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
