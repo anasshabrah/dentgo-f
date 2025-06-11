@@ -1,5 +1,4 @@
 // src/modules/payments/SubscribeWizard/StepReview.tsx
-
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
@@ -11,6 +10,7 @@ export interface StepReviewProps {
   planId: string;
   onSuccess: () => void;
   onBack: () => void;
+  onAddCard: () => void;
 }
 
 const PLAN_TO_PRICE: Record<string, string | null> = {
@@ -18,39 +18,46 @@ const PLAN_TO_PRICE: Record<string, string | null> = {
   plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
 };
 
-const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) => {
+const InnerReview: React.FC<StepReviewProps> = ({
+  planId,
+  onSuccess,
+  onBack,
+  onAddCard,
+}) => {
   const toast = useToast();
   const stripe = useStripe();
   const { cards, subscribe } = useStripeData();
   const [loading, setLoading] = useState(false);
 
-  const planName = planId === 'plus' ? 'Plus' : 'Basic';
-  const priceLabel = planId === 'plus' ? '$25.00' : 'Free';
+  const isFree = planId === 'basic';
+  const planName = isFree ? 'Basic' : 'Plus';
+  const priceLabel = isFree ? 'Free' : '$25.00';
   const priceId = PLAN_TO_PRICE[planId];
 
   const card = cards && cards.length > 0 ? cards[0] : null;
   const paymentMethodId = card?.paymentMethodId;
 
   const handleConfirm = async () => {
-    if (!priceId) {
+    if (isFree) {
       toast.addToast('Free plan selected. No payment required.', 'success');
       onSuccess();
       return;
     }
 
     if (!stripe) {
-      toast.addToast('Stripe has not loaded yet. Please try again.', 'error');
+      toast.addToast('Stripe not loaded yet, please try again.', 'error');
       return;
     }
+
     if (!paymentMethodId) {
-      toast.addToast('Please add a payment card before subscribing.', 'error');
+      toast.addToast('Let’s add your first card!', 'info');
+      onAddCard();
       return;
     }
 
     setLoading(true);
     try {
-      const { clientSecret, status } = await subscribe(priceId, paymentMethodId);
-
+      const { clientSecret, status } = await subscribe(priceId!, paymentMethodId);
       if (status === 'requires_action' && clientSecret) {
         const result = await stripe.confirmPayment({
           clientSecret,
@@ -58,8 +65,7 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
         });
         if (result.error) throw result.error;
       }
-
-      toast.addToast('Subscription completed successfully!', 'success');
+      toast.addToast('Subscription successful!', 'success');
       onSuccess();
     } catch (err: any) {
       toast.addToast(err.message || 'Subscription failed. Please try again.', 'error');
@@ -90,7 +96,6 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
 
       <div className="flex gap-4">
         <button
-          type="button"
           onClick={onBack}
           className="flex-1 py-2 border rounded hover:bg-gray-100 transition"
         >
@@ -112,7 +117,6 @@ const InnerReview: React.FC<StepReviewProps> = ({ planId, onSuccess, onBack }) =
 
 export default function StepReview(props: StepReviewProps) {
   const stripePromise = loadStripe(STRIPE_PK);
-
   return (
     <Elements stripe={stripePromise}>
       <InnerReview {...props} />

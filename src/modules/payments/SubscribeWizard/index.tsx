@@ -18,8 +18,8 @@ const SubscribeWizard: React.FC = () => {
         <StepChoosePlan
           onNext={p => {
             setPlanId(p);
-            // Always go to review step first
-            setCurrent('review');
+            // if free, skip straight to review, otherwise go pay
+            setCurrent(p === 'basic' ? 'review' : 'payment');
           }}
         />
       )}
@@ -34,11 +34,10 @@ const SubscribeWizard: React.FC = () => {
       {current === 'review' && (
         <StepReview
           planId={planId}
-          onBack={() => {
-            // If free plan, back goes to chooser; otherwise back to payment
-            setCurrent(planId === 'basic' ? 'choose' : 'payment');
-          }}
+          onBack={() => setCurrent(planId === 'basic' ? 'choose' : 'payment')}
           onSuccess={() => setCurrent('success')}
+          // when no card exists, take them back to the Add Card step
+          onAddCard={() => setCurrent('payment')}
         />
       )}
 
