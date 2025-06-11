@@ -47,12 +47,12 @@ const InnerReview: React.FC<StepReviewProps> = ({
     }
 
     if (!stripe) {
-      toast.addToast('Stripe not loaded yet, please try again.', 'error');
+      toast.addToast({ message: 'Stripe not loaded yet, please try again.', type: 'error' });
       return;
     }
 
     if (!paymentMethodId) {
-      toast.addToast('Let’s add your first card!', 'info');
+      toast.addToast({ message: 'Let’s add your first card!', type: 'info' });
       onAddCard();
       return;
     }
@@ -67,10 +67,10 @@ const InnerReview: React.FC<StepReviewProps> = ({
         });
         if (result.error) throw result.error;
       }
-      toast.addToast('Subscription successful!', 'success');
+      toast.addToast({ message: 'Subscription successful!', type: 'success' });
       onSuccess();
     } catch (err: any) {
-      toast.addToast(err.message || 'Subscription failed. Please try again.', 'error');
+      toast.addToast({ message: err.message || 'Subscription failed. Please try again.', type: 'error' });
     } finally {
       setLoading(false);
     }
