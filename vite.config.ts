@@ -27,6 +27,12 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
+    minify: 'terser',
+    terserOptions: {
+      format: {
+        comments: false,
+      },
+    },
   },
   server: {
     hmr: {
