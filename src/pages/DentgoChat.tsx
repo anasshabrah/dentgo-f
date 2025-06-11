@@ -29,7 +29,7 @@ function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" 
       style={{ direction: rtl ? "rtl" : "ltr" }}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>      
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
         {text}
       </ReactMarkdown>
     </div>
@@ -60,10 +60,9 @@ const DentgoChat: React.FC = () => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
       try {
-        const res = await fetch(
-          `${API_BASE}/api/chat/count?date=${today}`,
-          { credentials: "include" }
-        );
+        const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+          credentials: "include",
+        });
         if (res.ok) {
           const { count } = await res.json();
           setUsedToday(count);
@@ -80,9 +79,15 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs = session.messages.map((m: any) => ({ text: m.content, type: m.role === "USER" ? "personal" : "bot" } as const));
+          const msgs = session.messages.map((m: any) => ({
+            text: m.content,
+            type: m.role === "USER" ? "personal" : "bot",
+          }));
           setMessages(msgs);
-          historyRef.current = msgs.map((m) => ({ role: m.type === "personal" ? "user" : "assistant", text: m.text }));
+          historyRef.current = msgs.map((m) => ({
+            role: m.type === "personal" ? "user" : "assistant",
+            text: m.text,
+          }));
         })
         .finally(() => setLoading(false));
     } else {
@@ -92,7 +97,10 @@ const DentgoChat: React.FC = () => {
 
   // Auto-scroll
   useEffect(() => {
-    containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" });
+    containerRef.current?.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, isThinking]);
 
   // Greeting if no session
@@ -122,7 +130,11 @@ const DentgoChat: React.FC = () => {
     setThinking(true);
 
     try {
-      const { sessionId: newSid, answer } = await askDentgo(prompt, historyRef.current.slice(0, -1), sessionId);
+      const { sessionId: newSid, answer } = await askDentgo(
+        prompt,
+        historyRef.current.slice(0, -1),
+        sessionId
+      );
       if (!sessionId) {
         setSessionId(newSid);
         navigate(`?sessionId=${newSid}`, { replace: true });
@@ -131,7 +143,10 @@ const DentgoChat: React.FC = () => {
       historyRef.current.push({ role: "assistant", text: answer });
       setUsedToday((u) => u + 1);
     } catch (err: any) {
-      setMessages((prev) => [...prev, { text: `❌ ${err.message || "Something won’t right."}`, type: "bot" }]);
+      setMessages((prev) => [
+        ...prev,
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
+      ]);
     } finally {
       setThinking(false);
     }
@@ -146,19 +161,29 @@ const DentgoChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <div className="px-4 py-2 text-gray-600 text-sm text-center">
-        Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
-      </div>
       <div className="flex-grow overflow-hidden flex flex-col px-4">
         <div className="flex-grow bg-white rounded-xl shadow-inner p-4 flex flex-col">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-lg font-semibold">Dentgo Chat</h1>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-lg font-semibold">Dentgo Chat</h1>
+              {isBasic ? (
+                <span className="text-gray-600 text-sm">
+                  Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+                </span>
+              ) : (
+                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                  PLUS
+                </span>
+              )}
+            </div>
             <button type="button" onClick={() => setShowEndSessionModal(true)}>
               ✖
             </button>
           </div>
           <div ref={containerRef} className="flex-grow overflow-auto space-y-1">
-            {messages.map((m, i) => <MessageBubble key={i} {...m} />)}
+            {messages.map((m, i) => (
+              <MessageBubble key={i} {...m} />
+            ))}
             {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
           </div>
           <div className="mt-4 flex items-center space-x-2">
@@ -168,9 +193,16 @@ const DentgoChat: React.FC = () => {
               placeholder="Type your message..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey ? (e.preventDefault(), send()) : undefined}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey ? (e.preventDefault(), send()) : undefined
+              }
             />
-            <button type="button" onClick={send} disabled={isThinking} className="p-3 bg-primary rounded-lg text-white">
+            <button
+              type="button"
+              onClick={send}
+              disabled={isThinking}
+              className="p-3 bg-primary rounded-lg text-white"
+            >
               ➤
             </button>
           </div>
@@ -189,8 +221,20 @@ const DentgoChat: React.FC = () => {
               className="w-full p-2 border rounded mb-4"
             />
             <div className="flex justify-end space-x-2">
-              <button type="button" onClick={() => setShowEndSessionModal(false)} className="px-4 py-2 rounded bg-gray-200">Cancel</button>
-              <button type="button" onClick={handleEndSession} className="px-4 py-2 rounded bg-primary text-white">End</button>
+              <button
+                type="button"
+                onClick={() => setShowEndSessionModal(false)}
+                className="px-4 py-2 rounded bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleEndSession}
+                className="px-4 py-2 rounded bg-primary text-white"
+              >
+                End
+              </button>
             </div>
           </div>
         </div>
