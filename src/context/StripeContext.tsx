@@ -12,9 +12,10 @@ interface StripeContextValue {
     | { subscriptionId: string; status: string; currentPeriodEnd: number }
     | undefined;
   addCard: (paymentMethodId: string, nickName: string | null) => Promise<void>;
+  /** `paymentMethodId` may be omitted for the “FREE” plan */
   subscribe: (
     priceId: string,
-    paymentMethodId: string
+    paymentMethodId?: string | null
   ) => Promise<{ clientSecret: string; subscriptionId: string; status: string }>;
   openCustomerPortal: () => Promise<string>;
   refresh: () => void;
@@ -26,7 +27,6 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
 
-  // Only fetch when authenticated
   const {
     data: cards,
     isLoading: isLoadingCards,
@@ -34,9 +34,13 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     enabled: isAuthenticated,
   });
 
-  const { data: subscription } = useQuery(['subscription'], paymentsClient.fetchActiveSubscription, {
-    enabled: isAuthenticated,
-  });
+  const { data: subscription } = useQuery(
+    ['subscription'],
+    paymentsClient.fetchActiveSubscription,
+    {
+      enabled: isAuthenticated,
+    }
+  );
 
   const addCardMutation = useMutation<void, Error, { paymentMethodId: string; nickName: string | null }>(
     (args) => paymentsClient.addCard(args),
@@ -48,7 +52,7 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const subscribeMutation = useMutation<
     { clientSecret: string; subscriptionId: string; status: string },
     Error,
-    { priceId: string; paymentMethodId: string }
+    { priceId: string; paymentMethodId?: string | null }
   >(
     (args) => paymentsClient.createSubscriptionIntent(args.priceId, args.paymentMethodId),
     {
@@ -79,7 +83,6 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     },
   };
 
-  // Prefetch once authenticated
   useEffect(() => {
     if (isAuthenticated) {
       queryClient.prefetchQuery(['cards'], paymentsClient.fetchCards);

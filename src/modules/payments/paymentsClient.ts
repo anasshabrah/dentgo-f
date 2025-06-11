@@ -83,17 +83,20 @@ export async function createPaymentIntent(
 
 /**
  * Create a Stripe subscription and return its clientSecret, subscriptionId, and status.
- * → now calls the payments router
+ * → now supports optional paymentMethodId for FREE plans
  */
 export async function createSubscriptionIntent(
   priceId: string,
-  paymentMethodId: string
+  paymentMethodId?: string | null
 ): Promise<{ clientSecret: string; subscriptionId: string; status: string }> {
   const resp = await fetch(`${API_BASE}/api/payments/create-subscription`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId, paymentMethodId }),
+    body: JSON.stringify({
+      priceId,
+      ...(paymentMethodId ? { paymentMethodId } : {}), // omit for FREE
+    }),
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));
