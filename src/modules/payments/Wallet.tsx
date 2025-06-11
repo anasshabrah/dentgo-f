@@ -15,19 +15,18 @@ const Wallet: React.FC = () => {
   const [active, setActive] = useState<Tab>('Saved Cards');
   const { cards, isLoadingCards } = useStripeData();
   const { addToast } = useToast();
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loadingSecret, setLoadingSecret] = useState(false);
+
+  // Whenever user switches to "Add Card", fetch the SetupIntent
   useEffect(() => {
     if (active === 'Add Card') {
-      const init = async () => {
-        try {
-          const secret = await createSetupIntent();
-          setClientSecret(secret);
-        } catch (err: any) {
-          addToast(err.message || 'Failed to initialize payment form', 'error');
-        }
-      };
-      init();
+      setLoadingSecret(true);
+      createSetupIntent()
+        .then(secret => setClientSecret(secret))
+        .catch(err => addToast(err.message || 'Failed to initialize payment form', 'error'))
+        .finally(() => setLoadingSecret(false));
     }
   }, [active, addToast]);
 
@@ -42,6 +41,7 @@ const Wallet: React.FC = () => {
 
   return (
     <div className="max-w-lg mx-auto my-8 p-4">
+      {/* Tabs */}
       <div className="flex border-b mb-4">
         {tabs.map(tab => (
           <button
@@ -59,6 +59,7 @@ const Wallet: React.FC = () => {
         ))}
       </div>
 
+      {/* Saved Cards */}
       {active === 'Saved Cards' && (
         <div className="bg-gray-50 dark:bg-gray-900 rounded">
           {isLoadingCards ? (
@@ -78,17 +79,23 @@ const Wallet: React.FC = () => {
         </div>
       )}
 
-      {active === 'Add Card' && clientSecret && (
+      {/* Add Card */}
+      {active === 'Add Card' && (
         <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
-          <StripeElements options={{ clientSecret }}>
-            <PaymentMethodSelector
-              onSuccess={handleCardAdded}
-              onError={handleCardError}
-            />
-          </StripeElements>
+          {loadingSecret ? (
+            <div className="text-center text-gray-500">Loading payment form…</div>
+          ) : clientSecret ? (
+            <StripeElements options={{ clientSecret }}>
+              <PaymentMethodSelector
+                onSuccess={handleCardAdded}
+                onError={handleCardError}
+              />
+            </StripeElements>
+          ) : null}
         </div>
       )}
 
+      {/* Plan & Billing */}
       {active === 'Plan & Billing' && (
         <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
           <PlanCard />

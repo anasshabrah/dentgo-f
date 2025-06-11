@@ -1,4 +1,4 @@
-// src/components/layout/AppHeader.tsx
+// src/components/AppHeader.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "@/context/ModalContext";
@@ -40,6 +40,10 @@ const AppHeader: React.FC<Props> = ({
     }
   };
 
+  const handleTitleClick = () => {
+    navigate("/dentgo-gpt-home");
+  };
+
   return (
     <header className="bg-primary text-white p-4 flex items-center gap-3">
       {showBack && (
@@ -76,7 +80,12 @@ const AppHeader: React.FC<Props> = ({
         </button>
       )}
 
-      <h1 className="text-lg font-medium flex-1">{title}</h1>
+      <h1
+        onClick={handleTitleClick}
+        className="text-lg font-medium flex-1 cursor-pointer select-none"
+      >
+        {title}
+      </h1>
 
       {showNotifications && (
         <button
