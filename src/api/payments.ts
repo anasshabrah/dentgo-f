@@ -3,6 +3,24 @@
 import { API_BASE } from '@/config';
 
 /**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(
+  res: Response,
+  defaultMessage: string
+): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
+  try {
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
+  }
+  throw new Error(errorMsg);
+}
+
+/**
  * Create (or retrieve) a Stripe Customer for the current user
  */
 export async function createCustomer(): Promise<string> {
@@ -11,10 +29,11 @@ export async function createCustomer(): Promise<string> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({} as any));
-    throw new Error(err.error || 'Failed to create customer');
+    await handleErrorResponse(res, 'Failed to create customer');
   }
+
   const { customerId } = (await res.json()) as { customerId: string };
   return customerId;
 }
@@ -28,10 +47,11 @@ export async function createSetupIntent(): Promise<string> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({} as any));
-    throw new Error(err.error || 'Failed to create setup intent');
+    await handleErrorResponse(res, 'Failed to create setup intent');
   }
+
   const { clientSecret } = (await res.json()) as { clientSecret: string };
   return clientSecret;
 }
@@ -46,10 +66,11 @@ export async function createPaymentIntent(amount: number): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ amount }),
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({} as any));
-    throw new Error(err.error || 'Failed to create payment intent');
+    await handleErrorResponse(res, 'Failed to create payment intent');
   }
+
   const { clientSecret } = (await res.json()) as { clientSecret: string };
   return clientSecret;
 }
@@ -71,15 +92,12 @@ export async function createSubscriptionIntent(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ priceId, paymentMethodId }),
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({} as any));
-    throw new Error(err.error || 'Failed to create subscription intent');
+    await handleErrorResponse(res, 'Failed to create subscription intent');
   }
-  return (await res.json()) as {
-    clientSecret: string;
-    subscriptionId: string;
-    status: string;
-  };
+
+  return res.json();
 }
 
 /**
@@ -91,9 +109,10 @@ export async function createPortalSession(): Promise<{ url: string }> {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
   });
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({} as any));
-    throw new Error(err.error || 'Failed to create portal session');
+    await handleErrorResponse(res, 'Failed to create portal session');
   }
-  return (await res.json()) as { url: string };
+
+  return res.json();
 }

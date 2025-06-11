@@ -1,81 +1,74 @@
-// pages/api/subscriptions.ts
+// src/api/subscriptions.ts
 
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-import Stripe from 'stripe';
+import { API_BASE } from "@/config";
 
-const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2022-11-15' });
+export interface Subscription {
+  id: number;
+  userId: string;
+  subscriptionId: string;
+  status: string;
+  currentPeriodEnd: number;
+}
 
-console.log('📦 Using DATABASE_URL:', process.env.DATABASE_URL);
+export interface SubscriptionResponse {
+  clientSecret: string;
+  subscriptionId: string;
+  status: string;
+}
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.setHeader('Cache-Control', 'no-store');
-
+/**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(
+  res: Response,
+  defaultMessage: string
+): Promise<never> {
+  const text = await res.text().catch(() => "");
+  let errorMsg = defaultMessage;
   try {
-    if (req.method === 'GET') {
-      const active = await prisma.subscription.findFirst({
-        where: { userId: req.cookies.userId, status: 'active' },
-      });
-      return res.status(200).json(active || null);
-    }
-
-    if (req.method === 'POST') {
-      const { priceId, paymentMethodId } = req.body;
-      if (!priceId || !paymentMethodId) {
-        return res
-          .status(400)
-          .json({ error: 'Both priceId and paymentMethodId are required' });
-      }
-
-      // Create or retrieve Stripe customer
-      const customerRecord = await prisma.user.findUnique({
-        where: { id: req.cookies.userId },
-        select: { stripeCustomerId: true },
-      });
-
-      let stripeCustomerId = customerRecord?.stripeCustomerId;
-      if (!stripeCustomerId) {
-        const customer = await stripe.customers.create();
-        stripeCustomerId = customer.id;
-        await prisma.user.update({
-          where: { id: req.cookies.userId },
-          data: { stripeCustomerId },
-        });
-      }
-
-      // Create the subscription in Stripe
-      const subscription = await stripe.subscriptions.create({
-        customer: stripeCustomerId,
-        items: [{ price: priceId }],
-        default_payment_method: paymentMethodId,
-        expand: ['latest_invoice.payment_intent'],
-      });
-
-      // Persist subscription record
-      await prisma.subscription.create({
-        data: {
-          userId: req.cookies.userId,
-          subscriptionId: subscription.id,
-          status: subscription.status,
-          currentPeriodEnd: subscription.current_period_end,
-        },
-      });
-
-      const clientSecret = (subscription.latest_invoice as Stripe.Invoice)
-        .payment_intent!.client_secret!;
-
-      return res.status(201).json({
-        clientSecret,
-        subscriptionId: subscription.id,
-        status: subscription.status,
-      });
-    }
-
-    res.setHeader('Allow', ['GET', 'POST']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  } catch (error: any) {
-    console.error('❌ /api/subscriptions error:', error);
-    return res.status(500).json({ error: error.message || 'Internal Server Error' });
+    const body = JSON.parse(text);
+    errorMsg = body.error || errorMsg;
+  } catch {
+    errorMsg = text || errorMsg;
   }
+  throw new Error(errorMsg);
+}
+
+/**
+ * Fetches the active subscription for the current user
+ */
+export async function fetchActiveSubscription(): Promise<Subscription | null> {
+  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to fetch active subscription");
+  }
+
+  return res.json();
+}
+
+/**
+ * Creates a new subscription using a Stripe price and payment method ID
+ */
+export async function createSubscriptionIntent(
+  priceId: string,
+  paymentMethodId: string
+): Promise<SubscriptionResponse> {
+  const res = await fetch(`${API_BASE}/api/subscriptions`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ priceId, paymentMethodId }),
+  });
+
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to create subscription intent");
+  }
+
+  return res.json();
 }

@@ -27,49 +27,57 @@ async function handleErrorResponse(
   throw new Error(errorMsg);
 }
 
-/* Google login */
+/**
+ * Google login via credential token
+ */
 export async function loginWithGoogle(credential: string): Promise<User> {
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "include",
     body: JSON.stringify({ credential }),
   });
+
   if (!res.ok) {
     await handleErrorResponse(res, "Google login failed");
   }
+
   const { user } = (await res.json()) as { user: User };
   return user;
 }
 
-/* Apple login (redirect) */
+/**
+ * Redirects to Apple login
+ */
 export function loginWithApple(): void {
   window.location.href = `${API_BASE}/api/auth/apple`;
 }
 
-/* Logout */
+/**
+ * Logout current user
+ */
 export async function logout(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
-    mode: "cors",
   });
+
   if (!res.ok) {
     await handleErrorResponse(res, "Logout failed");
   }
 }
 
 /**
- * Permanently deletes the current user’s account (and revokes all sessions).
- * NOTE: we remove any custom headers here so the DELETE remains a “simple” request
- * and the browser will correctly include cookies.
+ * Permanently delete the current user's account
  */
 export async function deleteAccount(): Promise<void> {
   const res = await fetch(`${API_BASE}/api/auth/delete`, {
     method: "DELETE",
     credentials: "include",
-    mode: "cors",
   });
+
   if (!res.ok) {
     await handleErrorResponse(res, "Failed to delete account");
   }

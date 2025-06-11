@@ -1,7 +1,24 @@
 // src/api/chat.ts
+
 import { API_BASE } from "@/config";
 
-async function handleErrorResponse(res: Response, defaultMessage: string): Promise<never> {
+export interface ChatMessage {
+  role: string;
+  text: string;
+}
+
+export interface ChatResponse {
+  sessionId: number;
+  answer: string;
+}
+
+/**
+ * Utility: Parses error responses consistently.
+ */
+async function handleErrorResponse(
+  res: Response,
+  defaultMessage: string
+): Promise<never> {
   const text = await res.text().catch(() => "");
   let errorMsg = defaultMessage;
   try {
@@ -13,21 +30,28 @@ async function handleErrorResponse(res: Response, defaultMessage: string): Promi
   throw new Error(errorMsg);
 }
 
+/**
+ * Sends a message to the Dentgo chat assistant.
+ */
 export async function askDentgo(
   prompt: string,
-  history: Array<{ role: string; text: string }> = [],
+  history: ChatMessage[] = [],
   sessionId: number | null = null,
   signal?: AbortSignal
-): Promise<{ sessionId: number; answer: string }> {
+): Promise<ChatResponse> {
   const res = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     credentials: "include",
     body: JSON.stringify({ prompt, history, sessionId }),
     signal,
   });
+
   if (!res.ok) {
     await handleErrorResponse(res, "Chat failed");
   }
+
   return res.json();
 }
