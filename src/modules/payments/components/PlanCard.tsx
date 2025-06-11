@@ -1,12 +1,14 @@
 // src/modules/payments/components/PlanCard.tsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStripeData } from '@/context/StripeContext';
 import { FREE_MESSAGES_PER_DAY } from '@/config';
 
 export const PlanCard: React.FC = () => {
-  const { subscription, openCustomerPortal } = useStripeData();
+  const { subscription } = useStripeData();
+  const navigate = useNavigate();
 
-  // Handle loading state
+  // Loading state
   if (subscription === undefined) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
@@ -16,17 +18,17 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // If no subscription record, treat as Basic free plan
-  if (Array.isArray(subscription) && subscription.length === 0) {
+  // No subscription = free plan
+  const isFreePlan = Array.isArray(subscription) && subscription.length === 0;
+  if (isFreePlan) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
         <h3 className="text-lg font-semibold">Basic Plan</h3>
-        <p className="text-gray-600">Free, {FREE_MESSAGES_PER_DAY} message{FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day</p>
+        <p className="text-gray-600">
+          Free, {FREE_MESSAGES_PER_DAY} message{FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day
+        </p>
         <button
-          onClick={async () => {
-            const url = await openCustomerPortal();
-            window.location.href = url;
-          }}
+          onClick={() => navigate('/subscribe')}
           className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
         >
           Upgrade to Plus
@@ -35,9 +37,8 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // If subscription exists
+  // Active paid subscription
   const sub = Array.isArray(subscription) ? subscription[0] : subscription;
-
   if (!sub || sub.status !== 'ACTIVE') {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
@@ -62,7 +63,8 @@ export const PlanCard: React.FC = () => {
       </div>
       <button
         onClick={async () => {
-          const url = await openCustomerPortal();
+          // existing customers manage in Stripe Portal
+          const url = await useStripeData().openCustomerPortal();
           window.location.href = url;
         }}
         className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
