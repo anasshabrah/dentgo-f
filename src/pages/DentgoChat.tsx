@@ -1,3 +1,5 @@
+// src/pages/DentgoChat.tsx
+
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -76,8 +78,9 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs = session.messages.map((m: any) => ({
-            text: m.content,
+          // Fix: explicitly type msgs with correct literal types
+          const msgs: { text: string; type: "personal" | "bot" }[] = session.messages.map((m: any) => ({
+            text: String(m.content),
             type: m.role === "USER" ? "personal" : "bot",
           }));
           setMessages(msgs);
