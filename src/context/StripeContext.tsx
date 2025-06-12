@@ -1,4 +1,5 @@
 // src/context/StripeContext.tsx
+
 import React, { createContext, useContext, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CardData } from "@/modules/payments/types";
@@ -52,23 +53,17 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
     void,
     Error,
     { paymentMethodId: string; nickName: string | null }
-  >(
-    (args) => addCard(args.paymentMethodId, args.nickName),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["cards"]),
-    }
-  );
+  >((args) => addCard(args), {
+    onSuccess: () => queryClient.invalidateQueries(["cards"]),
+  });
 
   const subscribeMutation = useMutation<
     { clientSecret: string; subscriptionId: string; status: string },
     Error,
     { priceId: string; paymentMethodId?: string | null }
-  >(
-    (args) => createSubscription(args.priceId, args.paymentMethodId),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["subscription"]),
-    }
-  );
+  >((args) => createSubscription(args.priceId, args.paymentMethodId), {
+    onSuccess: () => queryClient.invalidateQueries(["subscription"]),
+  });
 
   const portalMutation = useMutation<{ url: string }, Error, void>(
     () => createPortalSession(),
