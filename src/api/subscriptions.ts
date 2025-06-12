@@ -1,15 +1,23 @@
-// File: src/api/subscriptions.ts
+// src/api/subscriptions.ts
 import { API_BASE } from "@/config";
+
+export type PlanType = "FREE" | "PLUS";
 
 export interface ActiveSubscription {
   subscriptionId: string | null;
   status: string;
   currentPeriodEnd: number | null;
-  plan: 'FREE' | 'PLUS';
+  plan: PlanType;
+}
+
+export interface SubscriptionResponse {
+  clientSecret: string;
+  subscriptionId: string;
+  status: string;
 }
 
 /**
- * Utility: Parses error responses consistently.
+ * Parses error responses consistently.
  */
 async function handleErrorResponse(
   res: Response,
@@ -27,32 +35,31 @@ async function handleErrorResponse(
 }
 
 /**
- * Fetches the active subscription for the current user
- * Returns plan 'FREE' if stripeSubscriptionId is null
+ * Fetches the active subscription for the current user.
+ * If stripeSubscriptionId is null, we treat it as FREE.
  */
 export async function fetchActiveSubscription(): Promise<ActiveSubscription | null> {
   const res = await fetch(`${API_BASE}/api/subscriptions`, {
     method: "GET",
     credentials: "include",
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, "Failed to fetch active subscription");
   }
 
-  const data = await res.json() as {
+  const data = (await res.json()) as {
     subscriptionId: string | null;
     status: string;
     currentPeriodEnd: number | null;
     plan?: string;
   };
 
-  // Derive plan if not explicitly provided
-  const plan = data.plan === 'PLUS'
-    ? 'PLUS'
-    : data.subscriptionId
-      ? 'PLUS'
-      : 'FREE';
+  const plan: PlanType =
+    data.plan === "PLUS"
+      ? "PLUS"
+      : data.subscriptionId
+      ? "PLUS"
+      : "FREE";
 
   return {
     subscriptionId: data.subscriptionId,
@@ -60,4 +67,26 @@ export async function fetchActiveSubscription(): Promise<ActiveSubscription | nu
     currentPeriodEnd: data.currentPeriodEnd,
     plan,
   };
+}
+
+/**
+ * Creates a new Stripe subscription (or activates FREE plan).
+ */
+export async function createSubscriptionIntent(
+  priceId: string,
+  paymentMethodId?: string | null
+): Promise<SubscriptionResponse> {
+  const res = await fetch(`${API_BASE}/api/payments/create-subscription`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      priceId,
+      ...(paymentMethodId ? { paymentMethodId } : {}),
+    }),
+  });
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to create subscription intent");
+  }
+  return res.json();
 }

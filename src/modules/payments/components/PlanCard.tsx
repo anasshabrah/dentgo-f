@@ -1,15 +1,15 @@
-// File: src/modules/payments/components/PlanCard.tsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useStripeData } from '@/context/StripeContext';
-import { FREE_MESSAGES_PER_DAY } from '@/config';
+// src/modules/payments/components/PlanCard.tsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useStripeData } from "@/context/StripeContext";
+import { FREE_MESSAGES_PER_DAY } from "@/config";
 
 export const PlanCard: React.FC = () => {
   const { subscription, openCustomerPortal } = useStripeData();
   const navigate = useNavigate();
 
-  // Loading skeleton while subscription is undefined
   if (subscription === undefined) {
+    // loading skeleton
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
         <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
@@ -18,19 +18,18 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // Treat null as no active subscription
-  if (subscription === null || subscription.plan === 'FREE') {
+  // FREE plan
+  if (subscription.plan === "FREE") {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
         <h3 className="text-lg font-semibold">Free Basic</h3>
         <p className="text-gray-600">
-          Free, {FREE_MESSAGES_PER_DAY} message{FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day
+          Free, {FREE_MESSAGES_PER_DAY} message
+          {FREE_MESSAGES_PER_DAY > 1 ? "s" : ""}/day
         </p>
         <button
-          onClick={() => navigate('/subscribe')}
-          className="w-full py-2 bg-primary text-white rounded
-                     transition active:scale-95 duration-150
-                     hover:bg-primary/90"
+          onClick={() => navigate("/subscribe")}
+          className="w-full py-2 bg-primary text-white rounded transition active:scale-95 duration-150 hover:bg-primary/90"
         >
           Upgrade to Plus
         </button>
@@ -38,9 +37,8 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // Paid plan
-  const sub = subscription;
-  if (sub.status.toLowerCase() !== 'active') {
+  // PLUS plan
+  if (subscription.status.toLowerCase() !== "active") {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
         No active paid subscription.
@@ -48,9 +46,9 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  const renewDate = sub.currentPeriodEnd
-    ? new Date(sub.currentPeriodEnd * 1000).toLocaleDateString()
-    : '—';
+  const renewDate = subscription.currentPeriodEnd
+    ? new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()
+    : "—";
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4">
@@ -67,9 +65,7 @@ export const PlanCard: React.FC = () => {
           const url = await openCustomerPortal();
           window.location.href = url;
         }}
-        className="w-full py-2 bg-primary text-white rounded
-                   transition active:scale-95 duration-150
-                   hover:bg-primary/90"
+        className="w-full py-2 bg-primary text-white rounded transition active:scale-95 duration-150 hover:bg-primary/90"
       >
         Manage in Stripe Portal
       </button>
