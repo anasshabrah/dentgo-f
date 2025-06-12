@@ -8,7 +8,6 @@ export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
 }) => {
   const [selected, setSelected] = React.useState<string>('plus');
 
-  // Ensure it's always treated as a number and memoized
   const freeCount = useMemo(() => FREE_MESSAGES_PER_DAY, []);
 
   const plans = useMemo(
@@ -17,9 +16,7 @@ export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
         id: 'basic',
         name: 'Basic',
         price: 0,
-        description: `Free, ${freeCount} message${
-          freeCount > 1 ? 's' : ''
-        }/day`,
+        description: `Free, ${freeCount} message${freeCount > 1 ? 's' : ''}/day`,
       },
       {
         id: 'plus',
@@ -47,9 +44,7 @@ export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
             <div className="flex justify-between">
               <span className="font-medium">{p.name}</span>
               <span className="font-semibold">
-                {p.price === 0
-                  ? 'Free'
-                  : `$${(p.price / 100).toFixed(2)}/mo`}
+                {p.price === 0 ? 'Free' : `$${(p.price / 100).toFixed(2)}/mo`}
               </span>
             </div>
             <p className="text-sm text-gray-600">{p.description}</p>
@@ -58,7 +53,7 @@ export const StepChoosePlan: React.FC<{ onNext: (planId: string) => void }> = ({
       </div>
       <button
         onClick={() => onNext(selected)}
-        className="mt-4 w-full py-2 bg-primary text-white rounded hover:bg-primary/90"
+        className="mt-4 w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition active:scale-95 duration-150"
       >
         Next
       </button>

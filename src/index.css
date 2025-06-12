@@ -2,6 +2,9 @@
 
 :root {
   --color-primary     : #375066;
+  --color-primary-dark: #274057;
+  --color-accent-mint : #00C2A8;
+  --color-accent-blue : #0CA6FF;
   --color-white       : #ffffff;
 
   --background-color  : var(--color-white);
@@ -10,11 +13,22 @@
 
 .dark {
   --background-color  : #121212;
-  --text-color        : #e0e0e0;
+  --text-color        : #d1d7e0;
+
+  /* Dark‑mode accents */
+  --color-primary     : #1F2C3A;
+  --color-primary-dark: #14202B;
 }
 
 body {
   @apply bg-[var(--background-color)] text-[var(--text-color)] font-sans;
+}
+
+/* Loader + typing pulse keyframes (re‑used in chat) */
+@keyframes dg-pulse {
+  0%   { transform: translateY(0);   opacity: .25; }
+  50%  { transform: translateY(-4px);opacity: 1;   }
+  100% { transform: translateY(0);   opacity: .25; }
 }
 
 @tailwind base;

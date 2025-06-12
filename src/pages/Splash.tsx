@@ -46,7 +46,6 @@ const Splash: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // If user is already logged in, skip splash
   if (!initializing && isAuthenticated) {
     return <Navigate to="/dentgo-gpt-home" replace />;
   }
@@ -79,7 +78,13 @@ const Splash: React.FC = () => {
     <div className="flex flex-col h-screen w-screen">
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         <img src={img} alt={title} className="w-full max-w-xs mb-6" />
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">{title}</h2>
+        <h2
+          className="text-2xl font-bold text-center text-gray-800 mb-2
+                     transition-transform duration-300 ease-in-out
+                     motion-safe:hover:scale-[1.02]"
+        >
+          {title}
+        </h2>
         <p className="text-center text-gray-500 max-w-md">{text}</p>
       </div>
 

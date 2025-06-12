@@ -1,4 +1,5 @@
 // src/modules/payments/SubscribeWizard/StepReview.tsx
+
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
@@ -43,7 +44,6 @@ const InnerReview: React.FC<StepReviewProps> = ({
     if (isFree) {
       setLoading(true);
       try {
-        // Call backend to create the FREE subscription row
         await subscribe('FREE');
         toast.addToast({ message: 'Basic plan activated!', type: 'success' });
         onSuccess();
@@ -108,14 +108,14 @@ const InnerReview: React.FC<StepReviewProps> = ({
       <div className="flex gap-4">
         <button
           onClick={onBack}
-          className="flex-1 py-2 border rounded hover:bg-gray-100 transition"
+          className="flex-1 py-2 border rounded hover:bg-gray-100 transition active:scale-95 duration-150"
         >
           Back
         </button>
         <button
           onClick={handleConfirm}
           disabled={loading}
-          className={`flex-1 py-2 bg-primary text-white rounded transition ${
+          className={`flex-1 py-2 bg-primary text-white rounded transition active:scale-95 duration-150 ${
             loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary/90'
           }`}
         >

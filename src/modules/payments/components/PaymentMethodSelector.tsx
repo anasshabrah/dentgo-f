@@ -67,10 +67,10 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       <button
         type="submit"
         disabled={loading}
-        className={`w-full py-2 rounded text-white ${
+        className={`w-full py-2 rounded text-white transition active:scale-95 duration-150 ${
           loading
             ? 'bg-gray-400 cursor-not-allowed'
-            : 'bg-primary hover:bg-primary/90 transition'
+            : 'bg-primary hover:bg-primary/90'
         }`}
       >
         {loading ? 'Saving…' : 'Add Card'}

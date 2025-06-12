@@ -1,5 +1,4 @@
 // src/modules/payments/components/PlanCard.tsx
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStripeData } from '@/context/StripeContext';
@@ -9,7 +8,6 @@ export const PlanCard: React.FC = () => {
   const { subscription, openCustomerPortal } = useStripeData();
   const navigate = useNavigate();
 
-  // Loading state
   if (subscription === undefined) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
@@ -19,7 +17,6 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // No subscription = free plan
   const isFreePlan = subscription === null;
 
   if (isFreePlan) {
@@ -31,7 +28,9 @@ export const PlanCard: React.FC = () => {
         </p>
         <button
           onClick={() => navigate('/subscribe')}
-          className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+          className="w-full py-2 bg-primary text-white rounded
+                     transition active:scale-95 duration-150
+                     hover:bg-primary/90 data-[busy=true]:opacity-70"
         >
           Upgrade to Plus
         </button>
@@ -39,7 +38,6 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // Active paid subscription
   const sub = subscription;
   if (!sub || sub.status.toLowerCase() !== 'active') {
     return (
@@ -68,7 +66,9 @@ export const PlanCard: React.FC = () => {
           const url = await openCustomerPortal();
           window.location.href = url;
         }}
-        className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
+        className="w-full py-2 bg-primary text-white rounded
+                   transition active:scale-95 duration-150
+                   hover:bg-primary/90 data-[busy=true]:opacity-70"
       >
         Manage in Stripe Portal
       </button>

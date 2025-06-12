@@ -21,14 +21,12 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [googleReady, setGoogleReady] = useState(false);
 
-  // Redirect if authenticated
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
     }
   }, [initializing, isAuthenticated, navigate]);
 
-  // Handle Google One-Tap credential
   const handleCredentialResponse = useCallback(
     async (response: any) => {
       const { credential } = response;
@@ -53,7 +51,6 @@ const Login: React.FC = () => {
     [login, navigate, addToast]
   );
 
-  // Initialize Google One-Tap
   useEffect(() => {
     let retryTimeout: number | null = null;
 
@@ -118,7 +115,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               disabled={!googleReady}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition ${
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
                 googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
               }`}
               onClick={() => {
@@ -146,7 +143,7 @@ const Login: React.FC = () => {
             {/* Apple Login */}
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100"
+              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100 active:scale-[.97] duration-150"
               onClick={async () => {
                 try {
                   await loginWithApple();

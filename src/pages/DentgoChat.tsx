@@ -1,5 +1,5 @@
-// DentgoChat.tsx — Refactored for robust mobile UX
-import React, { useCallback, useEffect, useRef, useState } from "react";
+// DentgoChat.tsx
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -21,27 +21,49 @@ type BubbleProps = { text: string; type: "personal" | "bot" };
 
 function MessageBubble({ text, type }: BubbleProps) {
   const rtl = isRTL(text);
-  const shared =
-    "mb-3 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words prose prose-sm dark:prose-invert";
 
-  const personal = `self-end bg-primary text-white ${
-    rtl ? "text-right" : "text-left"
-  } rounded-br-lg`;
-  const bot = `self-start bg-primary/10 text-primary ${
-    rtl ? "text-right" : "text-left"
-  } rounded-bl-lg`;
+  const match =
+    text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ??
+    text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
+  const imgUrl = match?.groups?.url ?? match?.[0];
+  const md = imgUrl ? text.replace(match[0], "") : text;
+
+  const shared =
+    "mb-3 px-4 py-3 rounded-2xl shadow-sm max-w-[85%] sm:max-w-[80%] " +
+    "prose prose-sm dark:prose-invert break-words leading-6";
+
+  const bubblePalette =
+    type === "personal"
+      ? "self-end bg-[var(--color-primary)] text-white rounded-br-lg"
+      : "self-start bg-[var(--color-primary-dark)]/5 text-[var(--color-primary)] rounded-bl-lg dark:bg-white/5";
 
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
-      className={`${shared} ${type === "personal" ? personal : bot}`}
-      contentEditable={false}
-      style={{ caretColor: "transparent" }}
+      className={`${shared} ${bubblePalette} ${imgUrl ? "p-0" : "px-4 py-3"}`}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-        {text}
-      </ReactMarkdown>
+      {imgUrl ? (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <img
+            src={imgUrl}
+            alt=""
+            className="w-full sm:w-48 h-auto object-contain rounded-lg border border-black/5 dark:border-white/10"
+          />
+          <div className="px-4 py-3">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSanitize]}
+            >
+              {md || "*Image attached*"}
+            </ReactMarkdown>
+          </div>
+        </div>
+      ) : (
+        <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+          {md}
+        </ReactMarkdown>
+      )}
     </div>
   );
 }
@@ -58,9 +80,7 @@ const DentgoChat: React.FC = () => {
   const [input, setInput] = useState("");
   const [usedToday, setUsedToday] = useState(0);
   const [isThinking, setThinking] = useState(false);
-  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>(
-    []
-  );
+  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
@@ -74,7 +94,6 @@ const DentgoChat: React.FC = () => {
   const greetingPlaceholder =
     "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
 
-  // Helpers
   const scrollToBottom = useCallback(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current.scrollHeight,
@@ -82,15 +101,13 @@ const DentgoChat: React.FC = () => {
     });
   }, []);
 
-  // Load count & session
   useEffect(() => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
       try {
-        const res = await fetch(
-          `${API_BASE}/api/chat/count?date=${today}`,
-          { credentials: "include" }
-        );
+        const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+          credentials: "include",
+        });
         if (res.ok) {
           const { count } = await res.json();
           setUsedToday(count);
@@ -102,9 +119,7 @@ const DentgoChat: React.FC = () => {
     loadCount();
 
     const params = new URLSearchParams(search);
-    const sid = params.has("sessionId")
-      ? Number(params.get("sessionId"))
-      : null;
+    const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
     if (sid) {
       setSessionId(sid);
       fetchChatSession(sid)
@@ -131,7 +146,6 @@ const DentgoChat: React.FC = () => {
 
   useEffect(() => scrollToBottom(), [messages, isThinking, scrollToBottom]);
 
-  // Scroll hint
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -141,7 +155,6 @@ const DentgoChat: React.FC = () => {
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Send message
   const send = async () => {
     const prompt = input.trim();
     if (!prompt || isThinking || sessionMeta.isEnded) return;
@@ -222,7 +235,18 @@ const DentgoChat: React.FC = () => {
             <MessageBubble key={i} {...m} />
           ))}
           {isThinking && (
-            <div className="text-gray-500 italic">Dentgo is typing…</div>
+            <div className="flex items-center gap-1 text-gray-400 px-4 py-1">
+              <span>Dentgo is typing</span>
+              <span className="flex gap-1 pl-1">
+                {[0, 1, 2].map((d) => (
+                  <span
+                    key={d}
+                    style={{ animationDelay: `${d * 0.15}s` }}
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-[dg-pulse_1s_infinite]"
+                  />
+                ))}
+              </span>
+            </div>
           )}
         </div>
 
@@ -232,16 +256,19 @@ const DentgoChat: React.FC = () => {
             <button
               onClick={scrollToBottom}
               aria-label="Scroll to latest message"
-              className="absolute bottom-24 right-6 p-3 rounded-full bg-primary shadow-lg text-white animate-bounce"
+              className="absolute bottom-24 right-6 p-3 rounded-full bg-[var(--color-accent-mint)] text-white shadow-lg animate-bounce hover:scale-105 transition"
             >
               ↓
             </button>
           </>
         )}
 
-        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 flex items-end space-x-2">
+        <div
+          className="sticky bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-t border-gray-200 dark:border-gray-700 p-4 flex items-end gap-2"
+        >
           <textarea
             rows={2}
+            autoFocus
             disabled={sessionMeta.isEnded}
             className="flex-1 resize-none p-2 rounded-lg bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary outline-none transition leading-6"
             placeholder={greetingPlaceholder}
