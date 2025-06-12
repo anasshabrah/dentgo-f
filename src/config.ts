@@ -52,3 +52,9 @@ export const ALLOWED_ORIGINS: Array<string | RegExp> = [
       )
   ),
 ];
+
+/**
+ * 7. Stripe Price ID for Plus Plan
+ */
+export const STRIPE_PRICE_ID: string =
+  import.meta.env.VITE_STRIPE_PRICE_ID as string;

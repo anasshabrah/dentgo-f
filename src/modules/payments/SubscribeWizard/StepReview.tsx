@@ -1,11 +1,11 @@
-// src/modules/payments/SubscribeWizard/StepReview.tsx
+// File: src/modules/payments/SubscribeWizard/StepReview.tsx
 
 import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { useStripeData } from '@/context/StripeContext';
 import { useToast } from '@components/ui/ToastProvider';
-import { STRIPE_PK } from '@/config';
+import { STRIPE_PRICE_ID } from '@/config';
 
 export interface StepReviewProps {
   planId: string;
@@ -14,15 +14,12 @@ export interface StepReviewProps {
   onAddCard: () => void;
 }
 
-const stripePromise = loadStripe(STRIPE_PK);
-
-// Read the Plus plan Price ID from env (must be a **test** price in your Stripe dashboard)
-const PLUS_PRICE_ID = import.meta.env.STRIPE_PRICE_ID as string;
+const stripePromise = loadStripe(STRIPE_PRICE_ID);
 
 // Map plan IDs to price IDs (Basic has no price, Plus uses your test-mode price)
 const PLAN_TO_PRICE: Record<string, string | null> = {
   basic: null,
-  plus: PLUS_PRICE_ID,
+  plus: STRIPE_PRICE_ID,
 };
 
 const InnerReview: React.FC<StepReviewProps> = ({
@@ -72,6 +69,7 @@ const InnerReview: React.FC<StepReviewProps> = ({
 
     setLoading(true);
     try {
+      // pass the correct priceId now
       const { clientSecret, status } = await subscribe(priceId!, paymentMethodId);
       if (status === 'requires_action' && clientSecret) {
         const result = await stripe.confirmPayment({
