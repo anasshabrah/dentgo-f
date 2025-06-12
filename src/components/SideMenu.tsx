@@ -35,7 +35,7 @@ export default function SideMenu() {
           leaveTo="opacity-0"
         >
           <div
-            className="fixed inset-0 bg-black/30 z-40"
+            className="fixed inset-0 bg-black/30 z-40 pointer-events-none"
             aria-hidden="true"
           />
         </Transition.Child>
@@ -51,7 +51,7 @@ export default function SideMenu() {
               leaveFrom="translate-x-0"
               leaveTo="-translate-x-full"
             >
-              <Dialog.Panel className="fixed left-0 top-0 z-60 w-80 max-w-full h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
+              <Dialog.Panel className="fixed left-0 top-0 z-50 w-80 max-w-full h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
                 <div className="p-6 flex flex-col h-full overflow-y-auto">
                   <Dialog.Title className="text-lg font-medium mb-4">
                     Menu
