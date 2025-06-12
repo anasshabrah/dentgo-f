@@ -30,8 +30,8 @@ module.exports = {
         DEFAULT: {
           css: {
             'h2, h3': {
-              marginTop: theme('spacing.5'), // 1.5rem
-              marginBottom: theme('spacing.3'), // 1rem
+              marginTop: theme('spacing.5'),
+              marginBottom: theme('spacing.3'),
             },
             'ul, ol': {
               marginTop: theme('spacing.5'),
