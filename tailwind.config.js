@@ -9,6 +9,11 @@ module.exports = {
 
   theme: {
     extend: {
+      // Add `transform` to transition utilities for smoother slide animations
+      transitionProperty: {
+        'transform': 'transform',
+      },
+
       colors: {
         primary: 'var(--color-primary)',
         white  : 'var(--color-white)',

@@ -49,14 +49,11 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {isOpen && node &&
         createPortal(
           <div
-            className="fixed inset-0 z-50 pointer-events-none"
+            className="fixed inset-0 z-50"
             aria-modal="true"
             role="dialog"
           >
-            {/* Only the inserted modal should absorb pointer events */}
-            <div className="pointer-events-auto">
-              {node}
-            </div>
+            {node}
           </div>,
           document.body
         )}
