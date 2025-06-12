@@ -1,5 +1,4 @@
 // src/pages/History.tsx
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "@components/ui/Loader";
@@ -11,6 +10,8 @@ interface ChatSession {
   title?: string;
   startedAt: string;
   endedAt?: string | null;
+  isActive: boolean;
+  isEnded: boolean;
 }
 
 export default function History() {
@@ -25,9 +26,7 @@ export default function History() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return <Loader fullscreen />;
-  }
+  if (loading) return <Loader fullscreen />;
 
   if (error) {
     return (
@@ -43,11 +42,8 @@ export default function History() {
 
   const renderList = (items: ChatSession[], isEnded: boolean) =>
     items.map((s) => {
-      // Determine chat name or fallback to 'Unnamed'
-      const name = s.title && s.title.trim() !== "" ? s.title : "Unnamed";
-      // Use endedAt for ended chats, otherwise startedAt
-      const dateString = new Date(isEnded ? s.endedAt! : s.startedAt)
-        .toLocaleDateString();
+      const name = s.title?.trim() || "Unnamed";
+      const date = new Date(isEnded ? s.endedAt! : s.startedAt).toLocaleDateString();
 
       return (
         <Link
@@ -61,15 +57,15 @@ export default function History() {
               {name}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm leading-5">
-              {isEnded ? `Ended ${dateString}` : `Started ${dateString}`}
+              {isEnded ? `Ended ${date}` : `Started ${date}`}
             </p>
           </div>
         </Link>
       );
     });
 
-  const active = sessions.filter((s) => !s.endedAt);
-  const ended = sessions.filter((s) => !!s.endedAt);
+  const active = sessions.filter((s) => s.isActive);
+  const ended = sessions.filter((s) => s.isEnded);
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 min-h-screen pb-4 flex flex-col">
