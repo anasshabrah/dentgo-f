@@ -1,5 +1,3 @@
-// src/pages/DentgoChat.tsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -12,7 +10,7 @@ import { useStripeData } from "@context/StripeContext";
 import { useToast } from "@components/ui/ToastProvider";
 import Loader from "@components/ui/Loader";
 
-// RTL detection for Arabic
+// RTL detection for Arabic and similar scripts
 function isRTL(text: string) {
   return /[\u0600-\u06FF]/.test(text);
 }
@@ -21,11 +19,11 @@ function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" 
   const rtl = isRTL(text);
   return (
     <div
-      className={`mb-4 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words ${
-        type === "personal"
+      className={`mb-3 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words
+        ${type === "personal"
           ? `self-end bg-primary text-white ${rtl ? "text-right" : "text-left"} rounded-br-lg`
           : `self-start bg-primary/10 text-primary ${rtl ? "text-right" : "text-left"} rounded-bl-lg`
-      }`}
+        }`}
       style={{ direction: rtl ? "rtl" : "ltr" }}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
@@ -53,7 +51,6 @@ const DentgoChat: React.FC = () => {
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [chatName, setChatName] = useState("");
 
-  // Treat any subscription with no Stripe ID as our free/basic plan
   const isBasic = !subscription || subscription.subscriptionId === null;
 
   useEffect(() => {
@@ -68,7 +65,7 @@ const DentgoChat: React.FC = () => {
           setUsedToday(count);
         }
       } catch {
-        // ignore
+        // ignore errors silently
       }
     }
     loadCount();
@@ -80,8 +77,8 @@ const DentgoChat: React.FC = () => {
       fetchChatSession(sid)
         .then((session) => {
           const msgs = session.messages.map((m: any) => ({
-            text: m.content as string,
-            type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
+            text: m.content,
+            type: m.role === "USER" ? "personal" : "bot",
           }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
@@ -159,81 +156,133 @@ const DentgoChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <div className="flex-grow overflow-hidden flex flex-col px-4">
-        <div className="flex-grow bg-white rounded-xl shadow-inner p-4 flex flex-col">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-semibold">Dentgo Chat</h1>
-              {isBasic ? (
-                <span className="text-gray-600 text-sm">
-                  Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
-                </span>
-              ) : (
-                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                  PLUS
-                </span>
-              )}
-            </div>
-            <button type="button" onClick={() => setShowEndSessionModal(true)}>
-              ✖
-            </button>
-          </div>
-
-          <div ref={containerRef} className="flex-grow overflow-auto space-y-1">
-            {messages.map((m, i) => (
-              <MessageBubble key={i} {...m} />
-            ))}
-            {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
-          </div>
-
-          <div className="mt-4 flex items-center space-x-2">
-            <textarea
-              rows={2}
-              className="flex-grow p-2 rounded-lg bg-gray-200 focus:bg-white focus:ring-2 focus:ring-primary transition"
-              placeholder="Type your message..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === "Enter" && !e.shiftKey
-                  ? (e.preventDefault(), send())
-                  : undefined
-              }
-            />
-            <button
-              type="button"
-              onClick={send}
-              disabled={isThinking}
-              className="p-3 bg-primary rounded-lg text-white"
-            >
-              ➤
-            </button>
-          </div>
+      {/* Sticky header */}
+      <header className="flex items-center justify-between px-6 py-4 bg-white shadow sticky top-0 z-20">
+        <div className="flex items-center space-x-3">
+          <h1 className="text-xl font-semibold">Dentgo Chat</h1>
+          {isBasic ? (
+            <span className="text-gray-600 text-sm">
+              Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+            </span>
+          ) : (
+            <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+              PLUS
+            </span>
+          )}
         </div>
-      </div>
+        <button
+          aria-label="End chat session"
+          onClick={() => setShowEndSessionModal(true)}
+          className="text-gray-500 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary rounded"
+        >
+          ✖
+        </button>
+      </header>
 
+      {/* Chat messages container */}
+      <main
+        ref={containerRef}
+        className="flex-grow overflow-y-auto p-4 flex flex-col space-y-2 bg-white rounded-t-xl shadow-inner"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
+        {messages.map((m, i) => (
+          <MessageBubble key={i} {...m} />
+        ))}
+        {isThinking && (
+          <p className="self-start italic text-gray-500 select-none" aria-live="assertive">
+            Dentgo is typing…
+          </p>
+        )}
+      </main>
+
+      {/* Input area fixed at bottom */}
+      <footer className="bg-white p-4 shadow-inner sticky bottom-0 z-20 flex items-center space-x-2">
+        <textarea
+          rows={1}
+          className="flex-grow resize-none rounded-lg bg-gray-200 px-3 py-2 text-base placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
+          placeholder="Type your message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+          aria-label="Message input"
+          disabled={isThinking}
+        />
+        <button
+          onClick={send}
+          disabled={isThinking || !input.trim()}
+          aria-label="Send message"
+          className={`p-3 rounded-lg text-white ${
+            isThinking || !input.trim() ? "bg-primary/60 cursor-not-allowed" : "bg-primary hover:bg-primary-dark"
+          } transition`}
+          type="button"
+        >
+          {isThinking ? (
+            <svg
+              className="animate-spin h-5 w-5 mx-auto"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              />
+            </svg>
+          ) : (
+            "➤"
+          )}
+        </button>
+      </footer>
+
+      {/* End session modal */}
       {showEndSessionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-80">
-            <h2 className="text-xl font-semibold mb-2">End Session?</h2>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="endSessionTitle"
+        >
+          <div className="bg-white rounded-lg p-6 w-80 max-w-full mx-4">
+            <h2 id="endSessionTitle" className="text-xl font-semibold mb-2">
+              End Session?
+            </h2>
             <input
               type="text"
               value={chatName}
               onChange={(e) => setChatName(e.target.value)}
               placeholder="Chat name (optional)"
-              className="w-full p-2 border rounded mb-4"
+              className="w-full p-2 border rounded mb-4 focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Chat name"
+              autoFocus
             />
             <div className="flex justify-end space-x-2">
               <button
                 type="button"
                 onClick={() => setShowEndSessionModal(false)}
-                className="px-4 py-2 rounded bg-gray-200"
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleEndSession}
-                className="px-4 py-2 rounded bg-primary text-white"
+                className="px-4 py-2 rounded bg-primary text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 End
               </button>
