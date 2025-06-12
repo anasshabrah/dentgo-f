@@ -1,13 +1,8 @@
-// DentgoChat.tsx — Refactored for robust mobile UX
-// ---------------------------------------------------
-// Major improvements:
-// • Reliable scrolling for long messages (flex layout + overflow-y-auto on the log)
-// • Gradient + FAB scroll‑to‑bottom hint when user is scrolled up
-// • Hidden caret on bot bubbles to remove blinking cursor artefact
-// • Clear chat hierarchy (avatars, stronger spacing)
-// • Input docked to bottom; content grows independently
-// • Accessibility: role="log" + aria-live for screen‑readers
-// • RTL-aware message alignment remains intact
+// DentgoChat.tsx — Refactored for robust mobile UX (v2)
+// ----------------------------------------------------
+// • Uses global <EndSessionModal> via ModalContext (no duplicate modal)
+// • Keeps all UX fixes: scroll‑safe log, gradient cue, FAB, hidden caret, etc.
+// • Removes redundant local state for session‑end dialog.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -15,11 +10,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import { askDentgo } from "@/api/chat";
-import { fetchChatSession, endChatSession } from "@/api/chats";
+import { fetchChatSession } from "@/api/chats";
 import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import { useStripeData } from "@/context/StripeContext";
 import { useToast } from "@/components/ui/ToastProvider";
 import Loader from "@/components/ui/Loader";
+import { useModal } from "@/context/ModalContext";
+import EndSessionModal from "@/components/modal/EndSessionModal";
 
 function isRTL(text: string) {
   return /[\u0600-\u06FF]/.test(text);
@@ -40,15 +37,11 @@ function MessageBubble({ text, type }: BubbleProps) {
     <div
       dir={rtl ? "rtl" : "ltr"}
       className={`${shared} ${type === "personal" ? personal : bot}`}
-      // Prevent blinking caret artefact on iOS Safari
       contentEditable={false}
       style={{ caretColor: "transparent" }}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
         {text}
       </ReactMarkdown>
     </div>
@@ -60,6 +53,7 @@ const DentgoChat: React.FC = () => {
   const { search } = useLocation();
   const { subscription } = useStripeData();
   const { addToast } = useToast();
+  const { open: openModal } = useModal();
 
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<BubbleProps[]>([]);
@@ -77,9 +71,6 @@ const DentgoChat: React.FC = () => {
     title: "Dentgo Chat",
     isEnded: false,
   });
-
-  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
-  const [chatName, setChatName] = useState("");
 
   const isBasic = !subscription || subscription.subscriptionId === null;
 
@@ -103,13 +94,10 @@ const DentgoChat: React.FC = () => {
           const { count } = await res.json();
           setUsedToday(count);
         }
-      } catch {
-        /* ignore */
-      }
+      } catch {/* ignore */}
     }
     loadCount();
 
-    // Restore session (if any)
     const params = new URLSearchParams(search);
     const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
     if (sid) {
@@ -134,12 +122,11 @@ const DentgoChat: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [search, navigate]);
+  }, [search]);
 
-  // Auto-scroll on new content
   useEffect(() => scrollToBottom(), [messages, isThinking, scrollToBottom]);
 
-  // Greet on fresh chat
+  // greet if new session
   useEffect(() => {
     if (!loading && sessionId === null) {
       const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
@@ -148,14 +135,13 @@ const DentgoChat: React.FC = () => {
     }
   }, [loading, sessionId]);
 
-  // Scroll‑hint (FAB + gradient) visibility
+  // manage scroll hint
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
     const onScroll = () => {
       const fromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
-      setShowScrollHint(fromBottom > 120); // px threshold
+      setShowScrollHint(fromBottom > 120);
     };
     el.addEventListener("scroll", onScroll);
     return () => el.removeEventListener("scroll", onScroll);
@@ -202,17 +188,6 @@ const DentgoChat: React.FC = () => {
     }
   };
 
-  const handleEndSession = async () => {
-    if (sessionId) {
-      await endChatSession(
-        sessionId,
-        chatName.trim() !== "" ? chatName.trim() : undefined
-      );
-    }
-    setShowEndSessionModal(false);
-    navigate("/dentgo-gpt-home");
-  };
-
   if (loading) return <Loader fullscreen />;
 
   // ---------- render ----------
@@ -229,7 +204,7 @@ const DentgoChat: React.FC = () => {
           )}
           <button
             type="button"
-            onClick={() => setShowEndSessionModal(true)}
+            onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
             disabled={sessionMeta.isEnded}
             className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40"
           >
@@ -240,23 +215,17 @@ const DentgoChat: React.FC = () => {
 
       {/* Body */}
       <main className="flex flex-col flex-1 relative overflow-hidden">
-        {/* Messages log */}
         <div
           ref={containerRef}
           role="log"
           aria-live="polite"
           className="flex-1 overflow-y-auto px-4 pt-3 pb-16 space-y-1"
         >
-          {/* Usage badge */}
           <div className="flex justify-between items-center mb-4">
             {isBasic ? (
-              <span className="text-gray-500 text-xs">
-                Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
-              </span>
+              <span className="text-gray-500 text-xs">Free: {usedToday}/{FREE_MESSAGES_PER_DAY}</span>
             ) : (
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                PLUS
-              </span>
+              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">PLUS</span>
             )}
           </div>
 
@@ -268,23 +237,20 @@ const DentgoChat: React.FC = () => {
           )}
         </div>
 
-        {/* Gradient fade when not at bottom */}
         {showScrollHint && (
-          <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
+          <>
+            <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
+            <button
+              onClick={scrollToBottom}
+              aria-label="Scroll to latest message"
+              className="absolute bottom-24 right-6 p-3 rounded-full bg-primary shadow-lg text-white animate-bounce"
+            >
+              ↓
+            </button>
+          </>
         )}
 
-        {/* FAB scroll‑to‑bottom */}
-        {showScrollHint && (
-          <button
-            onClick={scrollToBottom}
-            aria-label="Scroll to latest message"
-            className="absolute bottom-24 right-6 p-3 rounded-full bg-primary shadow-lg text-white animate-bounce"
-          >
-            ↓
-          </button>
-        )}
-
-        {/* Input bar */}
+        {/* Input */}
         <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 flex items-end space-x-2">
           <textarea
             rows={2}
@@ -310,42 +276,6 @@ const DentgoChat: React.FC = () => {
           </button>
         </div>
       </main>
-
-      {/* End Session Modal */}
-      {showEndSessionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
-            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-100">
-              End Session
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              This chat will be saved in your history. You can give it a name
-              (optional):
-            </p>
-            <input
-              type="text"
-              value={chatName}
-              onChange={(e) => setChatName(e.target.value)}
-              placeholder="Chat name"
-              className="w-full p-2 border rounded mb-4 bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 transition"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                className="px-4 py-2 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-                onClick={() => setShowEndSessionModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 rounded bg-primary text-white"
-                onClick={handleEndSession}
-              >
-                Yes, End
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
