@@ -1,4 +1,3 @@
-// DentgoChat.tsx
 import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -25,7 +24,7 @@ function MessageBubble({ text, type }: BubbleProps) {
   const match =
     text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ??
     text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
-  const imgUrl = match?.groups?.url ?? match?.[0];
+  const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
   const md = imgUrl ? text.replace(match[0], "") : text;
 
   const shared =
