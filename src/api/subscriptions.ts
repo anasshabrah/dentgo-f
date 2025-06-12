@@ -16,7 +16,9 @@ export interface SubscriptionResponse {
   status: string;
 }
 
-// Utility to parse error responses
+/**
+ * Parses error responses consistently.
+ */
 async function handleErrorResponse(
   res: Response,
   defaultMessage: string
@@ -26,17 +28,15 @@ async function handleErrorResponse(
   try {
     const body = JSON.parse(text);
     errorMsg = body.error || errorMsg;
-  } catch {
-    errorMsg = text || errorMsg;
-  }
+  } catch {}
   throw new Error(errorMsg);
 }
 
 /**
  * Fetches the active subscription for the current user.
- * If stripeSubscriptionId is null, we treat it as FREE.
+ * If no paid subscription exists, returns the FREE plan explicitly.
  */
-export async function fetchActiveSubscription(): Promise<ActiveSubscription | null> {
+export async function fetchActiveSubscription(): Promise<ActiveSubscription> {
   const res = await fetch(`${API_BASE}/api/subscriptions`, {
     method: "GET",
     credentials: "include",
@@ -52,10 +52,8 @@ export async function fetchActiveSubscription(): Promise<ActiveSubscription | nu
     plan?: string;
   };
 
-  if (!data) return null;
-
-  // Use the plan directly
-  const plan: PlanType = data.plan === "PLUS" ? "PLUS" : "FREE";
+  const plan: PlanType =
+    data.plan === "PLUS" ? "PLUS" : "FREE";
 
   return {
     subscriptionId: data.subscriptionId,
