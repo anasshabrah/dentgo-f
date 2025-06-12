@@ -25,7 +25,7 @@ function MessageBubble({ text, type }: BubbleProps) {
     text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ??
     text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
   const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
-  const md = imgUrl ? text.replace(match[0], "") : text;
+  const md = match ? text.replace(match[0], "") : text;
 
   const shared =
     "mb-3 px-4 py-3 rounded-2xl shadow-sm max-w-[85%] sm:max-w-[80%] " +
