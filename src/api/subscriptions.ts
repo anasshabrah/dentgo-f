@@ -16,9 +16,7 @@ export interface SubscriptionResponse {
   status: string;
 }
 
-/**
- * Parses error responses consistently.
- */
+// Utility to parse error responses
 async function handleErrorResponse(
   res: Response,
   defaultMessage: string
@@ -54,12 +52,10 @@ export async function fetchActiveSubscription(): Promise<ActiveSubscription | nu
     plan?: string;
   };
 
-  const plan: PlanType =
-    data.plan === "PLUS"
-      ? "PLUS"
-      : data.subscriptionId
-      ? "PLUS"
-      : "FREE";
+  if (!data) return null;
+
+  // Use the plan directly
+  const plan: PlanType = data.plan === "PLUS" ? "PLUS" : "FREE";
 
   return {
     subscriptionId: data.subscriptionId,

@@ -1,11 +1,13 @@
 // src/modules/payments/components/PlanCard.tsx
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStripeData } from "@/context/StripeContext";
+import { API_BASE } from "@/config";
 
 export const PlanCard: React.FC = () => {
-  const { subscription, openCustomerPortal } = useStripeData();
+  const { subscription, refresh } = useStripeData();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   // still loading?
   if (subscription === undefined) {
@@ -64,13 +66,28 @@ export const PlanCard: React.FC = () => {
         </span>
       </div>
       <button
+        disabled={loading}
         onClick={async () => {
-          const url = await openCustomerPortal();
-          window.location.href = url;
+          setLoading(true);
+          try {
+            await fetch(`${API_BASE}/api/payments/cancel-subscription`, {
+              method: "POST",
+              credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ subscriptionId: subscription.subscriptionId }),
+            });
+            refresh();
+          } catch (err) {
+            console.error("Cancel failed", err);
+          } finally {
+            setLoading(false);
+          }
         }}
-        className="w-full py-2 bg-primary text-white rounded transition active:scale-95 duration-150 hover:bg-primary/90"
+        className={`w-full py-2 ${
+          loading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+        } text-white rounded transition active:scale-95 duration-150`}
       >
-        Manage in Stripe Portal
+        {loading ? "Cancelling…" : "Cancel Subscription"}
       </button>
     </div>
   );
