@@ -2,14 +2,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useStripeData } from "@/context/StripeContext";
-import { FREE_MESSAGES_PER_DAY } from "@/config";
 
 export const PlanCard: React.FC = () => {
   const { subscription, openCustomerPortal } = useStripeData();
   const navigate = useNavigate();
 
+  // still loading?
   if (subscription === undefined) {
-    // loading skeleton
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
         <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
@@ -18,15 +17,18 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // FREE plan
+  // FREE plan → show as Active Basic, Unlimited, Upgrade
   if (subscription.plan === "FREE") {
     return (
-      <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
-        <h3 className="text-lg font-semibold">Free Basic</h3>
-        <p className="text-gray-600">
-          Free, {FREE_MESSAGES_PER_DAY} message
-          {FREE_MESSAGES_PER_DAY > 1 ? "s" : ""}/day
-        </p>
+      <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="inline-block px-3 py-1 text-sm font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-full">
+            Active Basic
+          </span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Unlimited
+          </span>
+        </div>
         <button
           onClick={() => navigate("/subscribe")}
           className="w-full py-2 bg-primary text-white rounded transition active:scale-95 duration-150 hover:bg-primary/90"
@@ -37,7 +39,7 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // PLUS plan
+  // you’ve got a paid plan but it isn’t active right now
   if (subscription.status.toLowerCase() !== "active") {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
@@ -46,6 +48,7 @@ export const PlanCard: React.FC = () => {
     );
   }
 
+  // PLUS plan (active)
   const renewDate = subscription.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()
     : "—";

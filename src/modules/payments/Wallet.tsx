@@ -19,7 +19,6 @@ const Wallet: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingSecret, setLoadingSecret] = useState(false);
 
-  // Whenever user switches to "Add Card", fetch the SetupIntent
   useEffect(() => {
     if (active === 'Add Card') {
       setLoadingSecret(true);
