@@ -1,5 +1,7 @@
 // src/modules/payments/SubscribeWizard/index.tsx
+
 import React, { useState } from 'react';
+import { useStripeData } from '@/context/StripeContext';
 import { StepChoosePlan } from './StepChoosePlan';
 import { StepPayment } from './StepPayment';
 import StepReview from './StepReview';
@@ -11,6 +13,7 @@ type Step = typeof steps[number];
 const SubscribeWizard: React.FC = () => {
   const [current, setCurrent] = useState<Step>('choose');
   const [planId, setPlanId] = useState<string>('plus');
+  const { cards } = useStripeData();
 
   return (
     <div className="max-w-md mx-auto my-8 bg-white dark:bg-gray-800 rounded shadow">
@@ -18,8 +21,12 @@ const SubscribeWizard: React.FC = () => {
         <StepChoosePlan
           onNext={p => {
             setPlanId(p);
-            // if free, skip straight to review, otherwise go pay
-            setCurrent(p === 'basic' ? 'review' : 'payment');
+            // If Basic or Plus with existing cards, skip payment and go to review
+            if (p === 'basic' || (p === 'plus' && cards && cards.length > 0)) {
+              setCurrent('review');
+            } else {
+              setCurrent('payment');
+            }
           }}
         />
       )}
@@ -36,7 +43,7 @@ const SubscribeWizard: React.FC = () => {
           planId={planId}
           onBack={() => setCurrent(planId === 'basic' ? 'choose' : 'payment')}
           onSuccess={() => setCurrent('success')}
-          // when no card exists, take them back to the Add Card step
+          // when no card exists, take them back to the payment step
           onAddCard={() => setCurrent('payment')}
         />
       )}
