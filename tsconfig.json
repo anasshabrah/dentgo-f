@@ -11,8 +11,9 @@
       "@components/*": ["src/components/*"],
       "@context/*": ["src/context/*"],
       "@utils/*": ["src/utils/*"],
-	  "@api/*": ["src/api/*"],
-      "@lib/*": ["src/lib/*"]
+      "@api/*": ["src/api/*"],
+      "@lib/*": ["src/lib/*"],
+      "@assets/*": ["src/assets/*"]
     },
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
