@@ -10,8 +10,7 @@ import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import { useStripeData } from "@/context/StripeContext";
 import { useToast } from "@components/ui/ToastProvider";
 import Loader from "@components/ui/Loader";
-
-// … (MessageBubble stays the same) …
+import MessageBubble from "@/components/MessageBubble";
 
 const DentgoChat: React.FC = () => {
   const navigate = useNavigate();
@@ -63,10 +62,13 @@ const DentgoChat: React.FC = () => {
             title: session.title || "Unnamed chat",
             isEnded: session.isEnded,
           });
-          const msgs = session.messages.map((m) => ({
+
+          // ** CAST type to the literal union so TS knows it's "personal"|"bot" **
+          const msgs: { text: string; type: "personal" | "bot" }[] = session.messages.map((m) => ({
             text: m.content,
-            type: m.role === "USER" ? "personal" : "bot",
+            type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
           }));
+
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
             role: m.type === "personal" ? "user" : "assistant",
@@ -166,7 +168,7 @@ const DentgoChat: React.FC = () => {
 
           <div ref={containerRef} className="flex-grow overflow-auto space-y-1">
             {messages.map((m, i) => (
-              <MessageBubble key={i} {...m} />
+              <MessageBubble key={i} text={m.text} type={m.type} />
             ))}
             {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
           </div>
