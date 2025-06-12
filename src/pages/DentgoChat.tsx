@@ -1,3 +1,4 @@
+// src/pages/DentgoChat.tsx
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -20,18 +21,14 @@ type BubbleProps = { text: string; type: "personal" | "bot" };
 
 function MessageBubble({ text, type }: BubbleProps) {
   const rtl = isRTL(text);
-
   const match =
     text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ??
     text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
-
   const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
   const md = match ? text.replace(match[0], "") : text;
-
   const shared =
     "mb-3 px-4 py-3 rounded-2xl shadow-sm max-w-[85%] sm:max-w-[80%] " +
     "prose prose-sm dark:prose-invert break-words leading-6";
-
   const bubblePalette =
     type === "personal"
       ? "self-end bg-[var(--color-primary)] text-white rounded-br-lg"
@@ -80,6 +77,7 @@ const DentgoChat: React.FC = () => {
   const [input, setInput] = useState("");
   const [usedToday, setUsedToday] = useState(0);
   const [isThinking, setThinking] = useState(false);
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
   const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
@@ -150,7 +148,9 @@ const DentgoChat: React.FC = () => {
     const el = containerRef.current;
     if (!el) return;
     const onScroll = () =>
-      setShowScrollHint(el.scrollHeight - (el.scrollTop + el.clientHeight) > 120);
+      setShowScrollHint(
+        el.scrollHeight - (el.scrollTop + el.clientHeight) > 120
+      );
     el.addEventListener("scroll", onScroll);
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
@@ -161,9 +161,10 @@ const DentgoChat: React.FC = () => {
 
     if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
       addToast({
-        message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`,
+        message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today.`,
         type: "error",
       });
+      setShowUpgradeBanner(true);
       return;
     }
 
@@ -216,10 +217,7 @@ const DentgoChat: React.FC = () => {
         </div>
         <button
           type="button"
-          onClick={() => {
-            console.log("EndSessionModal opened");
-            openModal(<EndSessionModal sessionId={sessionId} />);
-          }}
+          onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
           disabled={sessionMeta.isEnded}
           className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 text-base leading-none"
         >
@@ -232,7 +230,7 @@ const DentgoChat: React.FC = () => {
           ref={containerRef}
           role="log"
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-4 pt-3 pb-16 space-y-1"
+          className="flex-1 overflow-y-auto px-4 pt-3 pb-2 space-y-1"
         >
           {messages.map((m, i) => (
             <MessageBubble key={i} {...m} />
@@ -264,6 +262,19 @@ const DentgoChat: React.FC = () => {
               ↓
             </button>
           </>
+        )}
+
+        {/* Upgrade Banner for Basic Plan Limit */}
+        {showUpgradeBanner && (
+          <div className="bg-yellow-100 text-yellow-900 p-3 text-center">
+            You’ve reached your free message limit ({usedToday}/{FREE_MESSAGES_PER_DAY}).{' '}
+            <button
+              onClick={() => navigate('/subscribe')}
+              className="underline font-semibold"
+            >
+              Upgrade to Plus
+            </button>
+          </div>
         )}
 
         <div className="sticky bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-t border-gray-200 dark:border-gray-700 p-4 flex items-end gap-2">
