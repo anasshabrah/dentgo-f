@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -24,6 +24,7 @@ function MessageBubble({ text, type }: BubbleProps) {
   const match =
     text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ??
     text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
+
   const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
   const md = match ? text.replace(match[0], "") : text;
 
@@ -198,26 +199,29 @@ const DentgoChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
-      <header className="px-4 py-3 bg-white dark:bg-gray-800 shadow flex items-center justify-between sticky top-0 z-10">
+      <header className="px-3 py-2 bg-white dark:bg-gray-800 shadow flex items-center justify-between sticky top-0 z-10 h-12">
         <div className="flex items-center space-x-2">
-          <h2 className="font-semibold text-base text-gray-800 dark:text-gray-100 truncate max-w-[60%]">
+          <h2 className="font-medium text-sm text-gray-800 dark:text-gray-100 truncate max-w-[60%]">
             {sessionMeta.title}
           </h2>
           {isBasic ? (
-            <span className="text-gray-500 text-xs">
+            <span className="text-gray-500 text-[10px]">
               Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
             </span>
           ) : (
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+            <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-[10px] font-semibold rounded-full">
               PLUS
             </span>
           )}
         </div>
         <button
           type="button"
-          onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
+          onClick={() => {
+            console.log("EndSessionModal opened");
+            openModal(<EndSessionModal sessionId={sessionId} />);
+          }}
           disabled={sessionMeta.isEnded}
-          className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 ml-2"
+          className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 text-base leading-none"
         >
           ✖
         </button>
@@ -262,9 +266,7 @@ const DentgoChat: React.FC = () => {
           </>
         )}
 
-        <div
-          className="sticky bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-t border-gray-200 dark:border-gray-700 p-4 flex items-end gap-2"
-        >
+        <div className="sticky bottom-0 left-0 right-0 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-t border-gray-200 dark:border-gray-700 p-4 flex items-end gap-2">
           <textarea
             rows={2}
             autoFocus
