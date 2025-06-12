@@ -1,21 +1,13 @@
 // frontend/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import Checker from 'vite-plugin-checker';
 import path from 'path';
 
 export default defineConfig({
-  // Serve assets (and code‐split chunks) from the root `/assets` path
   base: '/',
-
   plugins: [
     react(),
-    Checker({
-      typescript: true,
-      eslint: {
-        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
-      },
-    }),
+    // Removed vite-plugin-checker with eslint
   ],
   resolve: {
     alias: {
