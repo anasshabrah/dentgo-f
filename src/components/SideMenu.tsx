@@ -23,7 +23,11 @@ export default function SideMenu() {
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="fixed inset-0 z-50 pointer-events-none" onClose={close}>
+      <Dialog
+        as="div"
+        className="fixed inset-0 z-50 pointer-events-none"
+        onClose={close}
+      >
         {/* Overlay */}
         <Transition.Child
           as={Fragment}
@@ -42,6 +46,7 @@ export default function SideMenu() {
 
         <div className="fixed inset-0 overflow-hidden">
           <div className="absolute inset-0 overflow-hidden">
+            {/* Slide-in panel */}
             <Transition.Child
               as={Fragment}
               enter="transform transition ease-in-out duration-300"
