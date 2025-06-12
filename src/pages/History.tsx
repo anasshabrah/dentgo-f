@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "@components/ui/Loader";
-import chatMenuImg from "@/assets/images/chat-menu-img.png";
+import chatMenuImg from "@assets/images/chat-menu-img.png";
 import { fetchChatSessions } from "@/api/chats";
 
 interface ChatSession {
@@ -42,25 +42,31 @@ export default function History() {
   }
 
   const renderList = (items: ChatSession[], isEnded: boolean) =>
-    items.map((s) => (
-      <Link
-        key={s.id}
-        to={`/dentgo-chat?sessionId=${s.id}`}
-        className="flex items-center mb-4"
-      >
-        <img src={chatMenuImg} alt="Chat icon" className="w-6 h-6 mr-3" />
-        <div>
-          <h3 className="text-gray-800 dark:text-gray-200 text-base font-bold leading-6 pb-1">
-            {s.title ?? `Chat #${s.id}`}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm leading-5">
-            {isEnded
-              ? `Ended ${new Date(s.endedAt!).toLocaleString()}`
-              : `Started ${new Date(s.startedAt).toLocaleString()}`}
-          </p>
-        </div>
-      </Link>
-    ));
+    items.map((s) => {
+      // Determine chat name or fallback to 'Unnamed'
+      const name = s.title && s.title.trim() !== "" ? s.title : "Unnamed";
+      // Use endedAt for ended chats, otherwise startedAt
+      const dateString = new Date(isEnded ? s.endedAt! : s.startedAt)
+        .toLocaleDateString();
+
+      return (
+        <Link
+          key={s.id}
+          to={`/dentgo-chat?sessionId=${s.id}`}
+          className="flex items-center mb-4"
+        >
+          <img src={chatMenuImg} alt="Chat icon" className="w-6 h-6 mr-3" />
+          <div>
+            <h3 className="text-gray-800 dark:text-gray-200 text-base font-bold leading-6 pb-1">
+              {name}
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-5">
+              {isEnded ? `Ended ${dateString}` : `Started ${dateString}`}
+            </p>
+          </div>
+        </Link>
+      );
+    });
 
   const active = sessions.filter((s) => !s.endedAt);
   const ended = sessions.filter((s) => !!s.endedAt);
