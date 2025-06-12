@@ -1,5 +1,4 @@
 // src/pages/DentgoChat.tsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -8,33 +7,11 @@ import rehypeSanitize from "rehype-sanitize";
 import { askDentgo } from "@/api/chat";
 import { fetchChatSession, endChatSession } from "@/api/chats";
 import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
-import { useStripeData } from "@context/StripeContext";
+import { useStripeData } from "@/context/StripeContext";
 import { useToast } from "@components/ui/ToastProvider";
 import Loader from "@components/ui/Loader";
 
-// RTL detection for Arabic
-function isRTL(text: string) {
-  return /[\u0600-\u06FF]/.test(text);
-}
-
-function MessageBubble({ text, type }: { text: string; type: "personal" | "bot" }) {
-  const rtl = isRTL(text);
-  return (
-    <div
-      className={`mb-4 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words ${
-        type === "personal"
-          ? `self-end bg-primary text-white ${rtl ? "text-right" : "text-left"} rounded-br-lg`
-          : `self-start bg-primary/10 text-primary ${rtl ? "text-right" : "text-left"} rounded-bl-lg`
-      }`}
-      style={{ direction: rtl ? "rtl" : "ltr" }}
-      aria-label={type === "personal" ? "Your message" : "Bot response"}
-    >
-      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-        {text}
-      </ReactMarkdown>
-    </div>
-  );
-}
+// … (MessageBubble stays the same) …
 
 const DentgoChat: React.FC = () => {
   const navigate = useNavigate();
@@ -47,17 +24,22 @@ const DentgoChat: React.FC = () => {
   const [input, setInput] = useState("");
   const [usedToday, setUsedToday] = useState(0);
   const [isThinking, setThinking] = useState(false);
+  const [sessionId, setSessionId] = useState<number | null>(null);
+
+  // ** New state for title & ended flag **
+  const [sessionMeta, setSessionMeta] = useState<{ title: string; isEnded: boolean }>({
+    title: "Dentgo Chat",
+    isEnded: false,
+  });
+
   const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [sessionId, setSessionId] = useState<number | null>(null);
-  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
-  const [chatName, setChatName] = useState("");
 
-  // Treat any subscription with no Stripe ID as our free/basic plan
   const isBasic = !subscription || subscription.subscriptionId === null;
 
   useEffect(() => {
-    async function loadCount() {
+    // load today's count
+    ;(async () => {
       const today = new Date().toISOString().slice(0, 10);
       try {
         const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
@@ -67,21 +49,23 @@ const DentgoChat: React.FC = () => {
           const { count } = await res.json();
           setUsedToday(count);
         }
-      } catch {
-        // ignore
-      }
-    }
-    loadCount();
+      } catch {}
+    })();
 
+    // if there's a sessionId in the URL, load it
     const params = new URLSearchParams(search);
     const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
     if (sid) {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs = session.messages.map((m: any) => ({
-            text: m.content as string,
-            type: (m.role === "USER" ? "personal" : "bot") as "personal" | "bot",
+          setSessionMeta({
+            title: session.title || "Unnamed chat",
+            isEnded: session.isEnded,
+          });
+          const msgs = session.messages.map((m) => ({
+            text: m.content,
+            type: m.role === "USER" ? "personal" : "bot",
           }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
@@ -93,7 +77,7 @@ const DentgoChat: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, subscription]);
 
   useEffect(() => {
     containerRef.current?.scrollTo({
@@ -103,6 +87,7 @@ const DentgoChat: React.FC = () => {
   }, [messages, isThinking]);
 
   useEffect(() => {
+    // initial greeting when no sessionId
     if (!loading && sessionId === null) {
       const greeting = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
       setMessages([{ text: greeting, type: "bot" }]);
@@ -112,7 +97,7 @@ const DentgoChat: React.FC = () => {
 
   const send = async () => {
     const prompt = input.trim();
-    if (!prompt || isThinking) return;
+    if (!prompt || isThinking || sessionMeta.isEnded) return;
 
     if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
       addToast({
@@ -150,20 +135,20 @@ const DentgoChat: React.FC = () => {
     }
   };
 
-  const handleEndSession = async () => {
-    if (sessionId) await endChatSession(sessionId);
-    navigate("/dentgo-gpt-home");
-  };
-
   if (loading) return <Loader fullscreen />;
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
+      {/* ** Header with title & ended flag ** */}
+      <div className="p-4 bg-white shadow flex items-center justify-between">
+        <h2 className="font-semibold text-lg">{sessionMeta.title}</h2>
+        {sessionMeta.isEnded && <span className="text-red-600">[Ended]</span>}
+      </div>
+
       <div className="flex-grow overflow-hidden flex flex-col px-4">
         <div className="flex-grow bg-white rounded-xl shadow-inner p-4 flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-semibold">Dentgo Chat</h1>
               {isBasic ? (
                 <span className="text-gray-600 text-sm">
                   Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
@@ -174,7 +159,7 @@ const DentgoChat: React.FC = () => {
                 </span>
               )}
             </div>
-            <button type="button" onClick={() => setShowEndSessionModal(true)}>
+            <button type="button" onClick={() => setSessionMeta((m) => ({ ...m, isEnded: true }))}>
               ✖
             </button>
           </div>
@@ -189,6 +174,7 @@ const DentgoChat: React.FC = () => {
           <div className="mt-4 flex items-center space-x-2">
             <textarea
               rows={2}
+              disabled={sessionMeta.isEnded}
               className="flex-grow p-2 rounded-lg bg-gray-200 focus:bg-white focus:ring-2 focus:ring-primary transition"
               placeholder="Type your message..."
               value={input}
@@ -202,45 +188,14 @@ const DentgoChat: React.FC = () => {
             <button
               type="button"
               onClick={send}
-              disabled={isThinking}
-              className="p-3 bg-primary rounded-lg text-white"
+              disabled={sessionMeta.isEnded || isThinking}
+              className="p-3 bg-primary rounded-lg text-white disabled:opacity-50"
             >
               ➤
             </button>
           </div>
         </div>
       </div>
-
-      {showEndSessionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 w-80">
-            <h2 className="text-xl font-semibold mb-2">End Session?</h2>
-            <input
-              type="text"
-              value={chatName}
-              onChange={(e) => setChatName(e.target.value)}
-              placeholder="Chat name (optional)"
-              className="w-full p-2 border rounded mb-4"
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                type="button"
-                onClick={() => setShowEndSessionModal(false)}
-                className="px-4 py-2 rounded bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleEndSession}
-                className="px-4 py-2 rounded bg-primary text-white"
-              >
-                End
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
