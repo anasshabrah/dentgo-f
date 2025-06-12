@@ -16,9 +16,13 @@ export interface StepReviewProps {
 
 const stripePromise = loadStripe(STRIPE_PK);
 
+// Read the Plus plan Price ID from env (must be a **test** price in your Stripe dashboard)
+const PLUS_PRICE_ID = import.meta.env.STRIPE_PRICE_ID as string;
+
+// Map plan IDs to price IDs (Basic has no price, Plus uses your test-mode price)
 const PLAN_TO_PRICE: Record<string, string | null> = {
   basic: null,
-  plus: 'price_1RGpe2GaZTzD8EjfQ1nZydXJ',
+  plus: PLUS_PRICE_ID,
 };
 
 const InnerReview: React.FC<StepReviewProps> = ({
