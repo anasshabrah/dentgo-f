@@ -32,15 +32,23 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
+      // Confirm the SetupIntent entirely in-JS—no redirect
       const result = (await stripe.confirmSetup({
         elements,
-        confirmParams: { return_url: window.location.href },
+        // confirmParams.return_url removed
       })) as SetupIntentResult;
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        throw result.error;
+      }
 
-      const paymentMethod = result.setupIntent?.payment_method as string;
-      await addCard(paymentMethod, nickname || null);
+      const setupIntent = result.setupIntent;
+      if (!setupIntent || !setupIntent.payment_method) {
+        throw new Error('No payment method returned from Stripe.');
+      }
+
+      // Now persist it to your backend
+      await addCard(setupIntent.payment_method as string, nickname || null);
 
       setNickname('');
       addToast({ message: 'Card added successfully!', type: 'success' });
