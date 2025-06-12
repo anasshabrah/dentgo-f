@@ -1,4 +1,5 @@
 // src/pages/History.tsx
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Loader from "@components/ui/Loader";
@@ -22,8 +23,12 @@ export default function History() {
   useEffect(() => {
     fetchChatSessions()
       .then((data) => {
-        const mapped = data.map((s) => ({
-          ...s,
+        const mapped: ChatSession[] = data.map((s) => ({
+          id: s.id,
+          // convert null titles to undefined so they match ChatSession.title?: string
+          title: s.title ?? undefined,
+          startedAt: s.startedAt,
+          endedAt: s.endedAt,
           isActive: s.endedAt === null,
           isEnded: s.endedAt !== null,
         }));

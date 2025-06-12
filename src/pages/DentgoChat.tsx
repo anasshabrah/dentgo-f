@@ -77,7 +77,6 @@ const DentgoChat: React.FC = () => {
   // Treat any subscription with no Stripe ID as our free/basic plan
   const isBasic = !subscription || subscription.subscriptionId === null;
 
-  // Load today's usage count & existing session (if any)
   useEffect(() => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
@@ -91,7 +90,7 @@ const DentgoChat: React.FC = () => {
           setUsedToday(count);
         }
       } catch {
-        // ignore network errors silently
+        // ignore
       }
     }
     loadCount();
@@ -104,27 +103,28 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          setSessionMeta({
-            title: session.title || "Unnamed Chat",
-            isEnded: session.isEnded,
-          });
-          const msgs = session.messages.map((m) => ({
-            text: m.content,
-            type: m.role === "USER" ? "personal" : "bot",
-          }));
+          // map messages with explicit literal types
+          const msgs: { text: string; type: "personal" | "bot" }[] =
+            session.messages.map((m) => ({
+              text: m.content,
+              type: m.role === "USER" ? "personal" : "bot",
+            }));
           setMessages(msgs);
           historyRef.current = msgs.map((m) => ({
             role: m.type === "personal" ? "user" : "assistant",
             text: m.text,
           }));
+          setSessionMeta({
+            title: session.title ?? "Dentgo Chat",
+            isEnded: session.isEnded,
+          });
         })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, navigate]);
 
-  // Auto-scroll on new messages or while thinking
   useEffect(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current.scrollHeight,
@@ -132,7 +132,6 @@ const DentgoChat: React.FC = () => {
     });
   }, [messages, isThinking]);
 
-  // Initial greeting if no session
   useEffect(() => {
     if (!loading && sessionId === null) {
       const greeting =
@@ -190,7 +189,6 @@ const DentgoChat: React.FC = () => {
       );
     }
     setShowEndSessionModal(false);
-    // Optionally update UI to reflect closure, or navigate home
     navigate("/dentgo-gpt-home");
   };
 
