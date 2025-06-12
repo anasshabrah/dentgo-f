@@ -32,10 +32,14 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
-      // Confirm the SetupIntent entirely in-JS—no redirect
+      // Confirm the SetupIntent in-JS; include a return_url and only redirect if required
       const result = (await stripe.confirmSetup({
         elements,
-        // confirmParams.return_url removed
+        confirmParams: {
+          // after any required authentication, Stripe will redirect back here
+          return_url: window.location.href,
+        },
+        redirect: 'if_required',
       })) as SetupIntentResult;
 
       if (result.error) {
@@ -47,7 +51,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         throw new Error('No payment method returned from Stripe.');
       }
 
-      // Now persist it to your backend
+      // Persist it to your backend
       await addCard(setupIntent.payment_method as string, nickname || null);
 
       setNickname('');
