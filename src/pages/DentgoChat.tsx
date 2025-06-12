@@ -24,8 +24,12 @@ function MessageBubble({ text, type }: BubbleProps) {
   const shared =
     "mb-3 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words prose prose-sm dark:prose-invert";
 
-  const personal = `self-end bg-primary text-white ${rtl ? "text-right" : "text-left"} rounded-br-lg`;
-  const bot = `self-start bg-primary/10 text-primary ${rtl ? "text-right" : "text-left"} rounded-bl-lg`;
+  const personal = `self-end bg-primary text-white ${
+    rtl ? "text-right" : "text-left"
+  } rounded-br-lg`;
+  const bot = `self-start bg-primary/10 text-primary ${
+    rtl ? "text-right" : "text-left"
+  } rounded-bl-lg`;
 
   return (
     <div
@@ -54,25 +58,39 @@ const DentgoChat: React.FC = () => {
   const [input, setInput] = useState("");
   const [usedToday, setUsedToday] = useState(0);
   const [isThinking, setThinking] = useState(false);
-  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
+  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>(
+    []
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const [sessionMeta, setSessionMeta] = useState({ title: "Dentgo Chat", isEnded: false });
+  const [sessionMeta, setSessionMeta] = useState({
+    title: "Dentgo Chat",
+    isEnded: false,
+  });
 
   const isBasic = !subscription || subscription.subscriptionId === null;
-  const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+  const greetingPlaceholder =
+    "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
 
+  // Helpers
   const scrollToBottom = useCallback(() => {
-    containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" });
+    containerRef.current?.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, []);
 
+  // Load count & session
   useEffect(() => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
       try {
-        const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, { credentials: "include" });
+        const res = await fetch(
+          `${API_BASE}/api/chat/count?date=${today}`,
+          { credentials: "include" }
+        );
         if (res.ok) {
           const { count } = await res.json();
           setUsedToday(count);
@@ -84,7 +102,9 @@ const DentgoChat: React.FC = () => {
     loadCount();
 
     const params = new URLSearchParams(search);
-    const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
+    const sid = params.has("sessionId")
+      ? Number(params.get("sessionId"))
+      : null;
     if (sid) {
       setSessionId(sid);
       fetchChatSession(sid)
@@ -94,8 +114,14 @@ const DentgoChat: React.FC = () => {
             type: m.role === "USER" ? "personal" : "bot",
           }));
           setMessages(msgs);
-          historyRef.current = msgs.map((m) => ({ role: m.type === "personal" ? "user" : "assistant", text: m.text }));
-          setSessionMeta({ title: session.title ?? "Dentgo Chat", isEnded: session.isEnded });
+          historyRef.current = msgs.map((m) => ({
+            role: m.type === "personal" ? "user" : "assistant",
+            text: m.text,
+          }));
+          setSessionMeta({
+            title: session.title ?? "Dentgo Chat",
+            isEnded: session.isEnded,
+          });
         })
         .finally(() => setLoading(false));
     } else {
@@ -105,20 +131,26 @@ const DentgoChat: React.FC = () => {
 
   useEffect(() => scrollToBottom(), [messages, isThinking, scrollToBottom]);
 
+  // Scroll hint
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const onScroll = () => setShowScrollHint(el.scrollHeight - (el.scrollTop + el.clientHeight) > 120);
+    const onScroll = () =>
+      setShowScrollHint(el.scrollHeight - (el.scrollTop + el.clientHeight) > 120);
     el.addEventListener("scroll", onScroll);
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Send message
   const send = async () => {
     const prompt = input.trim();
     if (!prompt || isThinking || sessionMeta.isEnded) return;
 
     if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
-      addToast({ message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`, type: "error" });
+      addToast({
+        message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today. Upgrade for unlimited.`,
+        type: "error",
+      });
       return;
     }
 
@@ -128,7 +160,11 @@ const DentgoChat: React.FC = () => {
     setThinking(true);
 
     try {
-      const { sessionId: newSid, answer } = await askDentgo(prompt, historyRef.current.slice(0, -1), sessionId);
+      const { sessionId: newSid, answer } = await askDentgo(
+        prompt,
+        historyRef.current.slice(0, -1),
+        sessionId
+      );
       if (!sessionId) {
         setSessionId(newSid);
         navigate(`?sessionId=${newSid}`, { replace: true });
@@ -137,7 +173,10 @@ const DentgoChat: React.FC = () => {
       historyRef.current.push({ role: "assistant", text: answer });
       setUsedToday((u) => u + 1);
     } catch (err: any) {
-      setMessages((prev) => [...prev, { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" }]);
+      setMessages((prev) => [
+        ...prev,
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
+      ]);
     } finally {
       setThinking(false);
     }
@@ -149,27 +188,80 @@ const DentgoChat: React.FC = () => {
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
       <header className="px-4 py-3 bg-white dark:bg-gray-800 shadow flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center space-x-2">
-          <h2 className="font-semibold text-base text-gray-800 dark:text-gray-100 truncate max-w-[60%]">{sessionMeta.title}</h2>
+          <h2 className="font-semibold text-base text-gray-800 dark:text-gray-100 truncate max-w-[60%]">
+            {sessionMeta.title}
+          </h2>
           {isBasic ? (
-            <span className="text-gray-500 text-xs">Free: {usedToday}/{FREE_MESSAGES_PER_DAY}</span>
+            <span className="text-gray-500 text-xs">
+              Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+            </span>
           ) : (
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">PLUS</span>
+            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+              PLUS
+            </span>
           )}
         </div>
-        <button type="button" onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)} disabled={sessionMeta.isEnded} className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 ml-2">✖</button>
+        <button
+          type="button"
+          onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
+          disabled={sessionMeta.isEnded}
+          className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 ml-2"
+        >
+          ✖
+        </button>
       </header>
+
       <main className="flex flex-col flex-1 relative overflow-hidden">
-        <div ref={containerRef} role="log" aria-live="polite" className="flex-1 overflow-y-auto px-4 pt-3 pb-16 space-y-1">
-          {messages.map((m, i) => (<MessageBubble key={i} {...m} />))}
-          {isThinking && <div className="text-gray-500 italic">Dentgo is typing…</div>}
+        <div
+          ref={containerRef}
+          role="log"
+          aria-live="polite"
+          className="flex-1 overflow-y-auto px-4 pt-3 pb-16 space-y-1"
+        >
+          {messages.map((m, i) => (
+            <MessageBubble key={i} {...m} />
+          ))}
+          {isThinking && (
+            <div className="text-gray-500 italic">Dentgo is typing…</div>
+          )}
         </div>
-        {showScrollHint && (<>
-          <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
-          <button onClick={scrollToBottom} aria-label="Scroll to latest message" className="absolute bottom-24 right-6 p-3 rounded-full bg-primary shadow-lg text-white animate-bounce">↓</button>
-        </>)}
+
+        {showScrollHint && (
+          <>
+            <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
+            <button
+              onClick={scrollToBottom}
+              aria-label="Scroll to latest message"
+              className="absolute bottom-24 right-6 p-3 rounded-full bg-primary shadow-lg text-white animate-bounce"
+            >
+              ↓
+            </button>
+          </>
+        )}
+
         <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 flex items-end space-x-2">
-          <textarea rows={2} disabled={sessionMeta.isEnded} className="flex-1 resize-none p-2 rounded-lg bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary outline-none transition leading-6" placeholder={greetingPlaceholder} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
-          <button type="button" onClick={send} disabled={isThinking || sessionMeta.isEnded} className="p-3 bg-primary rounded-lg text-white disabled:opacity-50 shrink-0">➤</button>
+          <textarea
+            rows={2}
+            disabled={sessionMeta.isEnded}
+            className="flex-1 resize-none p-2 rounded-lg bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary outline-none transition leading-6"
+            placeholder={greetingPlaceholder}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={send}
+            disabled={isThinking || sessionMeta.isEnded}
+            className="p-3 bg-primary rounded-lg text-white disabled:opacity-50 shrink-0"
+          >
+            ➤
+          </button>
         </div>
       </main>
     </div>
