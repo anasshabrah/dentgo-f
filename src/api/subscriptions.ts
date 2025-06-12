@@ -1,19 +1,11 @@
 // File: src/api/subscriptions.ts
-
 import { API_BASE } from "@/config";
 
-export interface Subscription {
-  id: number;
-  userId: string;
-  subscriptionId: string;
+export interface ActiveSubscription {
+  subscriptionId: string | null;
   status: string;
-  currentPeriodEnd: number;
-}
-
-export interface SubscriptionResponse {
-  clientSecret: string;
-  subscriptionId: string;
-  status: string;
+  currentPeriodEnd: number | null;
+  plan: 'FREE' | 'PLUS';
 }
 
 /**
@@ -36,8 +28,9 @@ async function handleErrorResponse(
 
 /**
  * Fetches the active subscription for the current user
+ * Returns plan 'FREE' if stripeSubscriptionId is null
  */
-export async function fetchActiveSubscription(): Promise<Subscription | null> {
+export async function fetchActiveSubscription(): Promise<ActiveSubscription | null> {
   const res = await fetch(`${API_BASE}/api/subscriptions`, {
     method: "GET",
     credentials: "include",
@@ -47,29 +40,24 @@ export async function fetchActiveSubscription(): Promise<Subscription | null> {
     await handleErrorResponse(res, "Failed to fetch active subscription");
   }
 
-  return res.json();
-}
+  const data = await res.json() as {
+    subscriptionId: string | null;
+    status: string;
+    currentPeriodEnd: number | null;
+    plan?: string;
+  };
 
-/**
- * Creates a new subscription using a Stripe price and payment method ID
- * → now calls the payments router, not the Prisma-only route
- */
-export async function createSubscriptionIntent(
-  priceId: string,
-  paymentMethodId: string
-): Promise<SubscriptionResponse> {
-  const res = await fetch(`${API_BASE}/api/payments/create-subscription`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ priceId, paymentMethodId }),
-  });
+  // Derive plan if not explicitly provided
+  const plan = data.plan === 'PLUS'
+    ? 'PLUS'
+    : data.subscriptionId
+      ? 'PLUS'
+      : 'FREE';
 
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to create subscription intent");
-  }
-
-  return res.json();
+  return {
+    subscriptionId: data.subscriptionId,
+    status: data.status,
+    currentPeriodEnd: data.currentPeriodEnd,
+    plan,
+  };
 }

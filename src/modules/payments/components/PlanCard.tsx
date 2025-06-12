@@ -1,4 +1,4 @@
-// src/modules/payments/components/PlanCard.tsx
+// File: src/modules/payments/components/PlanCard.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStripeData } from '@/context/StripeContext';
@@ -8,6 +8,7 @@ export const PlanCard: React.FC = () => {
   const { subscription, openCustomerPortal } = useStripeData();
   const navigate = useNavigate();
 
+  // Loading skeleton while subscription is undefined
   if (subscription === undefined) {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded animate-pulse">
@@ -17,12 +18,11 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  const isFreePlan = subscription === null;
-
-  if (isFreePlan) {
+  // Treat null as no active subscription
+  if (subscription === null || subscription.plan === 'FREE') {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4 text-center">
-        <h3 className="text-lg font-semibold">Basic Plan</h3>
+        <h3 className="text-lg font-semibold">Free Basic</h3>
         <p className="text-gray-600">
           Free, {FREE_MESSAGES_PER_DAY} message{FREE_MESSAGES_PER_DAY > 1 ? 's' : ''}/day
         </p>
@@ -30,7 +30,7 @@ export const PlanCard: React.FC = () => {
           onClick={() => navigate('/subscribe')}
           className="w-full py-2 bg-primary text-white rounded
                      transition active:scale-95 duration-150
-                     hover:bg-primary/90 data-[busy=true]:opacity-70"
+                     hover:bg-primary/90"
         >
           Upgrade to Plus
         </button>
@@ -38,8 +38,9 @@ export const PlanCard: React.FC = () => {
     );
   }
 
+  // Paid plan
   const sub = subscription;
-  if (!sub || sub.status.toLowerCase() !== 'active') {
+  if (sub.status.toLowerCase() !== 'active') {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
         No active paid subscription.
@@ -68,7 +69,7 @@ export const PlanCard: React.FC = () => {
         }}
         className="w-full py-2 bg-primary text-white rounded
                    transition active:scale-95 duration-150
-                   hover:bg-primary/90 data-[busy=true]:opacity-70"
+                   hover:bg-primary/90"
       >
         Manage in Stripe Portal
       </button>
