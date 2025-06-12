@@ -68,9 +68,10 @@ const DentgoChat: React.FC = () => {
   });
 
   const isBasic = !subscription || subscription.subscriptionId === null;
-  const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+  const greetingPlaceholder =
+    "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
 
-  // ---------- helpers ----------
+  // Helpers
   const scrollToBottom = useCallback(() => {
     containerRef.current?.scrollTo({
       top: containerRef.current.scrollHeight,
@@ -78,24 +79,20 @@ const DentgoChat: React.FC = () => {
     });
   }, []);
 
-  // ---------- effects ----------
+  // Effects
   useEffect(() => {
     async function loadCount() {
       const today = new Date().toISOString().slice(0, 10);
       try {
         const res = await fetch(
           `${API_BASE}/api/chat/count?date=${today}`,
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
         if (res.ok) {
           const { count } = await res.json();
           setUsedToday(count);
         }
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     }
     loadCount();
 
@@ -107,7 +104,7 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs: BubbleProps[] = session.messages.map((m) => ({
+          const msgs = session.messages.map((m) => ({
             text: m.content,
             type: m.role === "USER" ? "personal" : "bot",
           }));
@@ -129,7 +126,6 @@ const DentgoChat: React.FC = () => {
 
   useEffect(() => scrollToBottom(), [messages, isThinking, scrollToBottom]);
 
-  // manage scroll hint
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -141,7 +137,7 @@ const DentgoChat: React.FC = () => {
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ---------- actions ----------
+  // Actions
   const send = async () => {
     const prompt = input.trim();
     if (!prompt || isThinking || sessionMeta.isEnded) return;
@@ -184,27 +180,33 @@ const DentgoChat: React.FC = () => {
 
   if (loading) return <Loader fullscreen />;
 
-  // ---------- render ----------
+  // Render
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
       {/* Header */}
       <header className="px-4 py-3 bg-white dark:bg-gray-800 shadow flex items-center justify-between sticky top-0 z-10">
-        <h2 className="font-semibold text-lg text-gray-800 dark:text-gray-100 truncate max-w-[70%]">
-          {sessionMeta.title}
-        </h2>
-        <div className="flex items-center space-x-3">
-          {sessionMeta.isEnded && (
-            <span className="text-red-600 text-sm">[Ended]</span>
+        <div className="flex items-center space-x-2">
+          <h2 className="font-semibold text-base text-gray-800 dark:text-gray-100 truncate max-w-[60%]">
+            {sessionMeta.title}
+          </h2>
+          {isBasic ? (
+            <span className="text-gray-500 text-xs">
+              Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+            </span>
+          ) : (
+            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+              PLUS
+            </span>
           )}
-          <button
-            type="button"
-            onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
-            disabled={sessionMeta.isEnded}
-            className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40"
-          >
-            ✖
-          </button>
         </div>
+        <button
+          type="button"
+          onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
+          disabled={sessionMeta.isEnded}
+          className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 ml-2"
+        >
+          ✖
+        </button>
       </header>
 
       {/* Body */}
@@ -215,18 +217,6 @@ const DentgoChat: React.FC = () => {
           aria-live="polite"
           className="flex-1 overflow-y-auto px-4 pt-3 pb-16 space-y-1"
         >
-          <div className="flex justify-between items-center mb-4">
-            {isBasic ? (
-              <span className="text-gray-500 text-xs">
-                Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
-              </span>
-            ) : (
-              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                PLUS
-              </span>
-            )}
-          </div>
-
           {messages.map((m, i) => (
             <MessageBubble key={i} {...m} />
           ))}
@@ -236,7 +226,7 @@ const DentgoChat: React.FC = () => {
         </div>
 
         {showScrollHint && (
-          <>
+          <> 
             <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
             <button
               onClick={scrollToBottom}
