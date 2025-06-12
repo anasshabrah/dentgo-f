@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CardData } from "@/modules/payments/types";
 import {
   fetchCards,
+  addCard,
   fetchActiveSubscription,
   createPortalSession,
   createSubscription,
@@ -47,8 +48,12 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   );
 
-  const addCardMutation = useMutation<void, Error, { paymentMethodId: string; nickName: string | null }>(
-    (args) => addCard(args),
+  const addCardMutation = useMutation<
+    void,
+    Error,
+    { paymentMethodId: string; nickName: string | null }
+  >(
+    (args) => addCard(args.paymentMethodId, args.nickName),
     {
       onSuccess: () => queryClient.invalidateQueries(["cards"]),
     }
