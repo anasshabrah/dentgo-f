@@ -21,7 +21,14 @@ export default function History() {
 
   useEffect(() => {
     fetchChatSessions()
-      .then((data) => setSessions(data))
+      .then((data) => {
+        const mapped = data.map((s) => ({
+          ...s,
+          isActive: s.endedAt === null,
+          isEnded: s.endedAt !== null,
+        }));
+        setSessions(mapped);
+      })
       .catch((err) => setError(err.message || "Failed to load history"))
       .finally(() => setLoading(false));
   }, []);
