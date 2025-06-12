@@ -1,11 +1,13 @@
-// vite.config.ts
+// frontend/vite.config.ts
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import Checker from 'vite-plugin-checker';
 import path from 'path';
 
 export default defineConfig({
-  base: './',
+  // Serve assets (and code‐split chunks) from the root `/assets` path
+  base: '/',
+
   plugins: [
     react(),
     Checker({
@@ -30,14 +32,10 @@ export default defineConfig({
     sourcemap: true,
     minify: 'terser',
     terserOptions: {
-      format: {
-        comments: false,
-      },
+      format: { comments: false },
     },
   },
   server: {
-    hmr: {
-      overlay: true,
-    },
+    hmr: { overlay: true },
   },
 });
