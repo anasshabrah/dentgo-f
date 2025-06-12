@@ -1,9 +1,4 @@
-// DentgoChat.tsx — Refactored for robust mobile UX (v2)
-// ----------------------------------------------------
-// • Uses global <EndSessionModal> via ModalContext (no duplicate modal)
-// • Keeps all UX fixes: scroll-safe log, gradient cue, FAB, hidden caret, etc.
-// • Removes redundant local state for session-end dialog.
-
+// DentgoChat.tsx — Refactored for robust mobile UX
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
@@ -29,12 +24,9 @@ function MessageBubble({ text, type }: BubbleProps) {
   const shared =
     "mb-3 px-4 py-3 max-w-[75%] rounded-2xl shadow-sm text-base leading-6 font-sans break-words prose prose-sm dark:prose-invert";
 
-  const personal = `self-end bg-primary text-white ${
-    rtl ? "text-right" : "text-left"
-  } rounded-br-lg`;
-  const bot = `self-start bg-primary/10 text-primary ${
-    rtl ? "text-right" : "text-left"
-  } rounded-bl-lg`;
+  const personal =
+    `self-end bg-primary text-white ${rtl ? "text-right" : "text-left"} rounded-br-lg`;
+  const bot = `self-start bg-primary/10 text-primary ${rtl ? "text-right" : "text-left"} rounded-bl-lg`;
 
   return (
     <div
@@ -44,10 +36,7 @@ function MessageBubble({ text, type }: BubbleProps) {
       style={{ caretColor: "transparent" }}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeSanitize]}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
         {text}
       </ReactMarkdown>
     </div>
@@ -66,7 +55,9 @@ const DentgoChat: React.FC = () => {
   const [input, setInput] = useState("");
   const [usedToday, setUsedToday] = useState(0);
   const [isThinking, setThinking] = useState(false);
-  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
+  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>(
+    []
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
 
@@ -77,6 +68,7 @@ const DentgoChat: React.FC = () => {
   });
 
   const isBasic = !subscription || subscription.subscriptionId === null;
+  const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
 
   // ---------- helpers ----------
   const scrollToBottom = useCallback(() => {
@@ -137,23 +129,12 @@ const DentgoChat: React.FC = () => {
 
   useEffect(() => scrollToBottom(), [messages, isThinking, scrollToBottom]);
 
-  // greet if new session
-  useEffect(() => {
-    if (!loading && sessionId === null) {
-      const greeting =
-        "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
-      setMessages([{ text: greeting, type: "bot" }]);
-      historyRef.current = [{ role: "assistant", text: greeting }];
-    }
-  }, [loading, sessionId]);
-
   // manage scroll hint
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onScroll = () => {
-      const fromBottom =
-        el.scrollHeight - (el.scrollTop + el.clientHeight);
+      const fromBottom = el.scrollHeight - (el.scrollTop + el.clientHeight);
       setShowScrollHint(fromBottom > 120);
     };
     el.addEventListener("scroll", onScroll);
@@ -173,10 +154,7 @@ const DentgoChat: React.FC = () => {
       return;
     }
 
-    setMessages((prev) => [
-      ...prev,
-      { text: prompt, type: "personal" },
-    ]);
+    setMessages((prev) => [...prev, { text: prompt, type: "personal" }]);
     historyRef.current.push({ role: "user", text: prompt });
     setInput("");
     setThinking(true);
@@ -191,19 +169,13 @@ const DentgoChat: React.FC = () => {
         setSessionId(newSid);
         navigate(`?sessionId=${newSid}`, { replace: true });
       }
-      setMessages((prev) => [
-        ...prev,
-        { text: answer, type: "bot" },
-      ]);
+      setMessages((prev) => [...prev, { text: answer, type: "bot" }]);
       historyRef.current.push({ role: "assistant", text: answer });
       setUsedToday((u) => u + 1);
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        {
-          text: `❌ ${err.message || "Something went wrong."}`,
-          type: "bot",
-        },
+        { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
       ]);
     } finally {
       setThinking(false);
@@ -226,9 +198,7 @@ const DentgoChat: React.FC = () => {
           )}
           <button
             type="button"
-            onClick={() =>
-              openModal(<EndSessionModal sessionId={sessionId} />)
-            }
+            onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
             disabled={sessionMeta.isEnded}
             className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40"
           >
@@ -261,9 +231,7 @@ const DentgoChat: React.FC = () => {
             <MessageBubble key={i} {...m} />
           ))}
           {isThinking && (
-            <div className="text-gray-500 italic">
-              Dentgo is typing…
-            </div>
+            <div className="text-gray-500 italic">Dentgo is typing…</div>
           )}
         </div>
 
@@ -286,7 +254,7 @@ const DentgoChat: React.FC = () => {
             rows={2}
             disabled={sessionMeta.isEnded}
             className="flex-1 resize-none p-2 rounded-lg bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary outline-none transition leading-6"
-            placeholder="Type your message..."
+            placeholder={greetingPlaceholder}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
