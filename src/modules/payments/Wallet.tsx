@@ -7,7 +7,6 @@ import { PlanCard } from '@/modules/payments/components/PlanCard';
 import StripeElements from '@/lib/stripeClient';
 import { createSetupIntent } from '@/modules/payments/paymentsClient';
 import { useToast } from '@components/ui/ToastProvider';
-import { getStripeAppearance } from '@/lib/stripeAppearance';
 
 const tabs = ['Saved Cards', 'Add Card', 'Plan & Billing'] as const;
 type Tab = typeof tabs[number];
@@ -19,15 +18,6 @@ const Wallet: React.FC = () => {
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loadingSecret, setLoadingSecret] = useState(false);
-  const [appearance, setAppearance] = useState(getStripeAppearance());
-
-  // Recompute appearance on breakpoint changes
-  useEffect(() => {
-    const mm = window.matchMedia('(max-width: 640px)');
-    const onChange = () => setAppearance(getStripeAppearance());
-    mm.addEventListener('change', onChange);
-    return () => mm.removeEventListener('change', onChange);
-  }, []);
 
   useEffect(() => {
     if (active === 'Add Card') {
@@ -51,7 +41,7 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="w-full mx-auto my-6 px-2 sm:px-4 max-w-md">
+    <div className="w-full mx-auto my-6 px-2 sm:px-4">
       {/* Tabs */}
       <div className="flex border-b mb-4 -mx-2 sm:mx-0">
         {tabs.map(tab => (
@@ -96,7 +86,7 @@ const Wallet: React.FC = () => {
           {loadingSecret ? (
             <div className="text-center text-gray-500">Loading payment form…</div>
           ) : clientSecret ? (
-            <StripeElements options={{ clientSecret, appearance }}>
+            <StripeElements options={{ clientSecret }}>
               <PaymentMethodSelector
                 onSuccess={handleCardAdded}
                 onError={handleCardError}
