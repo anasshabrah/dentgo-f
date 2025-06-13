@@ -11,6 +11,7 @@ interface Props {
   showNotifications?: boolean;
   onMenuClick?: () => void;
   onBack?: () => void;
+  children?: React.ReactNode;
 }
 
 const AppHeader: React.FC<Props> = ({
@@ -20,6 +21,7 @@ const AppHeader: React.FC<Props> = ({
   showNotifications = false,
   onMenuClick,
   onBack,
+  children,
 }) => {
   const navigate = useNavigate();
   const { open } = useModal();
@@ -103,8 +105,9 @@ const AppHeader: React.FC<Props> = ({
           </svg>
         </button>
       )}
+
+      {children}
     </header>
-  );
-};
+);
 
 export default AppHeader;
