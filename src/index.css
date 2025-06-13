@@ -1,9 +1,4 @@
-/* index.css */
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&display=swap');
-
-html, body, #root {
-  height: 100%;
-}
 
 :root {
   --color-primary     : #375066;
@@ -20,7 +15,7 @@ html, body, #root {
   --background-color  : #121212;
   --text-color        : #d1d7e0;
 
-  /* Dark-mode accents */
+  /* Dark‑mode accents */
   --color-primary     : #1F2C3A;
   --color-primary-dark: #14202B;
 }
@@ -29,7 +24,7 @@ body {
   @apply bg-[var(--background-color)] text-[var(--text-color)] font-sans;
 }
 
-/* Loader + typing pulse keyframes (re-used in chat) */
+/* Loader + typing pulse keyframes (re‑used in chat) */
 @keyframes dg-pulse {
   0%   { transform: translateY(0);   opacity: .25; }
   50%  { transform: translateY(-4px);opacity: 1;   }
