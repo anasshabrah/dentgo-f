@@ -38,9 +38,7 @@ function MessageBubble({ text, type }: BubbleProps) {
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
-      className={`${shared} ${bubblePalette} ${
-        imgUrl ? "p-0" : "px-4 py-3"
-      }`}
+      className={`${shared} ${bubblePalette} ${imgUrl ? "p-0" : "px-4 py-3"}`}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
       {imgUrl ? (
@@ -300,6 +298,7 @@ const DentgoChat: React.FC = () => {
         </div>
       </main>
     </div>
-);
+  );
+};
 
 export default DentgoChat;
