@@ -12,6 +12,7 @@ import {
 } from "@/modules/payments/paymentsClient";
 import { useAuth } from "@/context/AuthContext";
 import type { ActiveSubscription } from "@/api/subscriptions";
+import { deleteCard as apiDeleteCard } from "@/api/cards";
 
 interface StripeContextValue {
   cards: CardData[] | undefined;
@@ -24,6 +25,8 @@ interface StripeContextValue {
   ) => Promise<{ clientSecret: string; subscriptionId: string; status: string }>;
   openCustomerPortal: () => Promise<string>;
   refresh: () => void;
+  /** Remove a saved card */
+  removeCard: (id: string) => Promise<void>;
 }
 
 const StripeContext = createContext<StripeContextValue | undefined>(undefined);
@@ -72,6 +75,13 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   );
 
+  const deleteCardMutation = useMutation<void, Error, string>(
+    (id) => apiDeleteCard(id),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["cards"]),
+    }
+  );
+
   const contextValue: StripeContextValue = {
     cards,
     isLoadingCards,
@@ -86,6 +96,8 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
       queryClient.invalidateQueries(["cards"]);
       queryClient.invalidateQueries(["subscription"]);
     },
+    /** Remove a saved card */
+    removeCard: (id: string) => deleteCardMutation.mutateAsync(id),
   };
 
   useEffect(() => {

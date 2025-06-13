@@ -67,3 +67,17 @@ export async function createCard(input: {
 
   return res.json();
 }
+
+/**
+ * Permanently delete a card by its ID
+ */
+export async function deleteCard(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/cards/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    await handleErrorResponse(res, "Failed to delete card");
+  }
+}
