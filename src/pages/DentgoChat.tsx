@@ -14,9 +14,7 @@ import { useModal } from "@/context/ModalContext";
 import EndSessionModal from "@/components/modal/EndSessionModal";
 import AppHeader from "@/components/AppHeader";
 
-function isRTL(text: string) {
-  return /[\u0600-\u06FF]/.test(text);
-}
+const isRTL = (text: string) => /[\u0600-\u06FF]/.test(text);
 
 type BubbleProps = { text: string; type: "personal" | "bot" };
 
@@ -27,10 +25,15 @@ function MessageBubble({ text, type }: BubbleProps) {
     text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
   const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
   const md = match ? text.replace(match[0], "") : text;
-  const shared =
-    "mb-3 px-4 py-3 rounded-2xl shadow-sm max-w-[85%] sm:max-w-[80%] " +
-    "prose prose-sm dark:prose-invert break-words leading-6";
-  const bubblePalette =
+
+  const shared = [
+    "mb-3",
+    "rounded-2xl",
+    "shadow-sm",
+    "max-w-[85%] sm:max-w-[80%]",
+    "prose prose-sm dark:prose-invert break-words leading-6"
+  ].join(" ");
+  const palette =
     type === "personal"
       ? "self-end bg-[var(--color-primary)] text-white rounded-br-lg"
       : "self-start bg-[var(--color-primary-dark)]/5 text-[var(--color-primary)] rounded-bl-lg dark:bg-white/5";
@@ -38,7 +41,7 @@ function MessageBubble({ text, type }: BubbleProps) {
   return (
     <div
       dir={rtl ? "rtl" : "ltr"}
-      className={`${shared} ${bubblePalette} ${imgUrl ? "p-0" : "px-4 py-3"}`}
+      className={`${shared} ${palette} ${imgUrl ? "p-0" : "px-4 py-3"}`}
       aria-label={type === "personal" ? "Your message" : "Bot response"}
     >
       {imgUrl ? (
@@ -111,8 +114,8 @@ const DentgoChat: React.FC = () => {
           const { count } = await res.json();
           setUsedToday(count);
         }
-      } catch (e: any) {
-        console.warn("Failed to load count", e);
+      } catch {
+        /* ignore */
       }
     }
     loadCount();
@@ -123,18 +126,18 @@ const DentgoChat: React.FC = () => {
       setSessionId(sid);
       fetchChatSession(sid)
         .then((session) => {
-          const msgs: BubbleProps[] = session.messages.map((m) => ({
+          const msgs = session.messages.map(m => ({
             text: m.content,
-            type: m.role === "USER" ? "personal" : "bot",
+            type: m.role === "USER" ? "personal" : "bot"
           }));
           setMessages(msgs);
-          historyRef.current = msgs.map((m) => ({
+          historyRef.current = msgs.map(m => ({
             role: m.type === "personal" ? "user" : "assistant",
-            text: m.text,
+            text: m.text
           }));
           setSessionMeta({
-            title: session.title ?? "Dentgo Chat",
-            isEnded: session.isEnded,
+            title: session.title || "Dentgo Chat",
+            isEnded: session.isEnded
           });
         })
         .finally(() => setLoading(false));
@@ -167,7 +170,7 @@ const DentgoChat: React.FC = () => {
       return;
     }
 
-    setMessages((prev) => [...prev, { text: prompt, type: "personal" }]);
+    setMessages(prev => [...prev, { text: prompt, type: "personal" }]);
     historyRef.current.push({ role: "user", text: prompt });
     setInput("");
     setThinking(true);
@@ -182,11 +185,11 @@ const DentgoChat: React.FC = () => {
         setSessionId(newSid);
         navigate(`?sessionId=${newSid}`, { replace: true });
       }
-      setMessages((prev) => [...prev, { text: answer, type: "bot" }]);
+      setMessages(prev => [...prev, { text: answer, type: "bot" }]);
       historyRef.current.push({ role: "assistant", text: answer });
-      setUsedToday((u) => u + 1);
+      setUsedToday(u => u + 1);
     } catch (err: any) {
-      setMessages((prev) => [
+      setMessages(prev => [
         ...prev,
         { text: `❌ ${err.message || "Something went wrong."}`, type: "bot" },
       ]);
@@ -234,7 +237,7 @@ const DentgoChat: React.FC = () => {
             <div className="flex items-center gap-1 text-gray-400 px-4 py-1">
               <span>Dentgo is typing</span>
               <span className="flex gap-1 pl-1">
-                {[0, 1, 2].map((d) => (
+                {[0, 1, 2].map(d => (
                   <span
                     key={d}
                     style={{ animationDelay: `${d * 0.15}s` }}
@@ -279,8 +282,8 @@ const DentgoChat: React.FC = () => {
             className="flex-1 resize-none p-2 rounded-lg bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary outline-none transition leading-6"
             placeholder={greetingPlaceholder}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 send();

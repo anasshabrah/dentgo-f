@@ -108,6 +108,7 @@ const AppHeader: React.FC<Props> = ({
 
       {children}
     </header>
-);
+  );
+};
 
 export default AppHeader;
