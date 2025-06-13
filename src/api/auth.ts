@@ -28,13 +28,32 @@ async function handleErrorResponse(
 }
 
 /**
- * Google login via credential token
+ * Fetch the CSRF token from the server.
+ */
+async function fetchCsrfToken(): Promise<string> {
+  const res = await fetch(`${API_BASE}/api/auth/csrf-token`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch CSRF token");
+  }
+  const { csrfToken } = (await res.json()) as { csrfToken: string };
+  return csrfToken;
+}
+
+/**
+ * Google login via one-tap credential token
  */
 export async function loginWithGoogle(credential: string): Promise<User> {
+  // Obtain fresh CSRF token for double-submit cookie protection
+  const csrfToken = await fetchCsrfToken();
+
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-csrf-token": csrfToken,    // include CSRF token header
     },
     credentials: "include",
     body: JSON.stringify({ credential }),
@@ -49,7 +68,7 @@ export async function loginWithGoogle(credential: string): Promise<User> {
 }
 
 /**
- * Redirects to Apple login
+ * Redirects to Apple login (OAuth)
  */
 export function loginWithApple(): void {
   window.location.href = `${API_BASE}/api/auth/apple`;
