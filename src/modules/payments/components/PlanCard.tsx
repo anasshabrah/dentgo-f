@@ -1,12 +1,14 @@
-// src/modules/payments/components/PlanCard.tsx
+// frontend/src/modules/payments/components/PlanCard.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStripeData } from "@/context/StripeContext";
+import { useToast } from "@components/ui/ToastProvider";
 import { API_BASE } from "@/config";
 
 export const PlanCard: React.FC = () => {
   const { subscription, refresh } = useStripeData();
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   // still loading?
@@ -19,7 +21,7 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // FREE plan → show as Active Basic, Unlimited, Upgrade
+  // FREE plan
   if (subscription.plan === "FREE") {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4">
@@ -33,7 +35,7 @@ export const PlanCard: React.FC = () => {
         </div>
         <button
           onClick={() => navigate("/subscribe")}
-          className="w-full py-2 bg-primary text-white rounded transition active:scale-95 duration-150 hover:bg-primary/90"
+          className="w-full py-2 bg-primary text-white rounded hover:bg-primary/90 transition"
         >
           Upgrade to Plus
         </button>
@@ -41,7 +43,7 @@ export const PlanCard: React.FC = () => {
     );
   }
 
-  // you’ve got a paid plan but it isn’t active right now
+  // paid but not active
   if (subscription.status.toLowerCase() !== "active") {
     return (
       <div className="p-4 bg-white dark:bg-gray-800 rounded text-center text-gray-500">
@@ -54,6 +56,9 @@ export const PlanCard: React.FC = () => {
   const renewDate = subscription.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()
     : "—";
+  const willCancelAt = subscription.cancelAt
+    ? new Date(subscription.cancelAt * 1000).toLocaleDateString()
+    : null;
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded space-y-4">
@@ -65,29 +70,61 @@ export const PlanCard: React.FC = () => {
           Renews: {renewDate}
         </span>
       </div>
+
+      {willCancelAt && (
+        <div className="text-sm text-yellow-700 dark:text-yellow-300">
+          Scheduled to cancel at period end: {willCancelAt}
+        </div>
+      )}
+
       <button
-        disabled={loading}
+        disabled={loading || !!willCancelAt}
         onClick={async () => {
           setLoading(true);
           try {
-            await fetch(`${API_BASE}/api/payments/cancel-subscription`, {
-              method: "POST",
-              credentials: "include",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ subscriptionId: subscription.subscriptionId }),
-            });
+            const res = await fetch(
+              `${API_BASE}/api/payments/cancel-subscription`,
+              {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  subscriptionId: subscription.subscriptionId,
+                }),
+              }
+            );
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.error || "Cancellation failed");
+            }
+            const { cancelAt } = await res.json();
             refresh();
-          } catch (err) {
+            addToast({
+              message: "Will cancel at period end on " +
+                new Date(cancelAt * 1000).toLocaleDateString(),
+              type: "info",
+            });
+          } catch (err: any) {
             console.error("Cancel failed", err);
+            addToast({
+              message: err.message || "Failed to schedule cancellation",
+              type: "error",
+            });
           } finally {
             setLoading(false);
           }
         }}
-        className={`w-full py-2 ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
-        } text-white rounded transition active:scale-95 duration-150`}
+        className={`w-full py-2 rounded text-white transition active:scale-95 duration-150 ${
+          loading || willCancelAt
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-red-600 hover:bg-red-700"
+        }`}
       >
-        {loading ? "Cancelling…" : "Cancel Subscription"}
+        {willCancelAt
+          ? "Cancellation Scheduled"
+          : loading
+          ? "Scheduling…"
+          : "Cancel at Period End"}
       </button>
     </div>
   );
