@@ -8,6 +8,8 @@ export interface ActiveSubscription {
   status: string;
   currentPeriodEnd: number | null;
   plan: PlanType;
+  /** UNIX timestamp (in seconds) when this subscription will cancel */
+  cancelAt: number | null;
 }
 
 export interface SubscriptionResponse {
@@ -50,16 +52,17 @@ export async function fetchActiveSubscription(): Promise<ActiveSubscription> {
     status: string;
     currentPeriodEnd: number | null;
     plan?: string;
+    cancelAt?: number | null;
   };
 
-  const plan: PlanType =
-    data.plan === "PLUS" ? "PLUS" : "FREE";
+  const plan: PlanType = data.plan === "PLUS" ? "PLUS" : "FREE";
 
   return {
     subscriptionId: data.subscriptionId,
     status: data.status,
     currentPeriodEnd: data.currentPeriodEnd,
     plan,
+    cancelAt: data.cancelAt ?? null,
   };
 }
 

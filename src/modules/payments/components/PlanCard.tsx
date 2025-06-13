@@ -56,8 +56,9 @@ export const PlanCard: React.FC = () => {
   const renewDate = subscription.currentPeriodEnd
     ? new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()
     : "—";
+  // Format cancelAt as M/D/YYYY
   const willCancelAt = subscription.cancelAt
-    ? new Date(subscription.cancelAt * 1000).toLocaleDateString()
+    ? new Date(subscription.cancelAt * 1000).toLocaleDateString("en-US")
     : null;
 
   return (
@@ -73,7 +74,7 @@ export const PlanCard: React.FC = () => {
 
       {willCancelAt && (
         <div className="text-sm text-yellow-700 dark:text-yellow-300">
-          Scheduled to cancel at period end: {willCancelAt}
+          Will cancel on {willCancelAt}
         </div>
       )}
 
@@ -100,8 +101,9 @@ export const PlanCard: React.FC = () => {
             const { cancelAt } = await res.json();
             refresh();
             addToast({
-              message: "Will cancel at period end on " +
-                new Date(cancelAt * 1000).toLocaleDateString(),
+              message:
+                "Will cancel on " +
+                new Date(cancelAt * 1000).toLocaleDateString("en-US"),
               type: "info",
             });
           } catch (err: any) {
@@ -121,7 +123,7 @@ export const PlanCard: React.FC = () => {
         }`}
       >
         {willCancelAt
-          ? "Cancellation Scheduled"
+          ? `Will cancel on ${willCancelAt}`
           : loading
           ? "Scheduling…"
           : "Cancel at Period End"}
