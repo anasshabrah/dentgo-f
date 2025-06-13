@@ -87,7 +87,7 @@ const DentgoChat: React.FC = () => {
 
   const isBasic = !subscription || subscription.subscriptionId === null;
   const greetingPlaceholder =
-    "Hey, I'm Dentgo 😊 How can I assist with your dental cases today?";
+    "How can I assist you today?";
 
   const scrollToBottom = useCallback(() => {
     containerRef.current?.scrollTo({
