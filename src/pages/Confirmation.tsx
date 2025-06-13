@@ -38,7 +38,7 @@ const Confirmation: React.FC = () => {
 
           {/* CTA Button */}
           <Link
-            to="/alert"
+            to="/dentgo-gpt-home"
             className="fixed bottom-5 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-blue-100 text-blue-600 text-lg font-medium rounded-xl py-4 text-center hover:bg-blue-700 hover:text-white transition"
           >
             Go To Home

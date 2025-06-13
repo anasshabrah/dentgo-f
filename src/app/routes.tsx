@@ -1,5 +1,7 @@
+// src/app/routes.tsx
+
 import React, { lazy, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -77,6 +79,9 @@ export default function RoutesConfig() {
 
     // STANDALONE
     { path: "confirmation", element: <Confirmation /> },
+
+    // DEFAULT REDIRECT
+    { path: "/", element: <Navigate to="/dentgo-gpt-home" replace /> },
   ];
 
   return <Routes>{renderRoutes(routes)}</Routes>;
