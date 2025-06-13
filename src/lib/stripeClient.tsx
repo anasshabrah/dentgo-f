@@ -21,22 +21,13 @@ const appearance: StripeElementsOptions['appearance'] = {
     fontFamily: 'Readex Pro, system-ui, sans-serif',
   },
   rules: {
-    // Remove default horizontal padding
-    '.Input': {
-      paddingLeft: '0',
-      paddingRight: '0',
-    },
+    // Remove default horizontal padding on desktop
+    '.Input': 'padding-left: 0; padding-right: 0;',
     // Mobile breakpoint: adjust label and input sizes on small screens
     '@media only screen and (max-width: 600px)': {
-      '.Input': {
-        fontSize: '1rem',
-        lineHeight: '1.4',
-        paddingLeft: '0',
-        paddingRight: '0',
-      },
-      '.Label': {
-        fontSize: '0.875rem',
-      },
+      '.Input':
+        'font-size: 1rem; line-height: 1.4; padding-left: 0; padding-right: 0;',
+      '.Label': 'font-size: 0.875rem;',
     },
   },
 };
