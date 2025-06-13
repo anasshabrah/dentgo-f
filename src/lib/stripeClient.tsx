@@ -12,7 +12,7 @@ if (!STRIPE_PK) {
 const stripePromise = loadStripe(STRIPE_PK);
 
 // Define a consistent, responsive appearance for all Stripe Elements
-const appearance = {
+const appearance: StripeElementsOptions['appearance'] = {
   theme: 'stripe',
   variables: {
     // Base font size for desktop
@@ -21,9 +21,11 @@ const appearance = {
     fontFamily: 'Readex Pro, system-ui, sans-serif',
   },
   rules: {
-    /* Mobile breakpoint: adjust label and input sizes on small screens */
+    // Remove default horizontal padding
+    '.Input': 'padding-left: 0; padding-right: 0;',
+    // Mobile breakpoint: adjust label and input sizes on small screens
     '@media only screen and (max-width: 600px)': {
-      '.Input': 'font-size: 1rem; line-height: 1.4;',      
+      '.Input': 'font-size: 1rem; line-height: 1.4; padding-left: 0; padding-right: 0;',      
       '.Label': 'font-size: 0.875rem;',    
     },
   },
