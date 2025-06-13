@@ -196,7 +196,7 @@ const DentgoChat: React.FC = () => {
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
       {/* Chat content */}
-      <main className="flex flex-col flex-1 relative overflow-hidden">
+      <main className="flex flex-col flex-1 relative">
         <div
           ref={containerRef}
           role="log"
