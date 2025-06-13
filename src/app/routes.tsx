@@ -1,25 +1,23 @@
 // src/app/routes.tsx
-
-import React, { lazy, useEffect } from "react";
+import React, { useEffect, lazy } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import RootLayout from "./layouts/RootLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "@components/RequireAuth";
 import paymentRoutes from "@/modules/payments/routes";
+import DentgoGptHome from "../pages/DentgoGptHome";
 
+// Other pages remain lazy-loaded
 const Splash = lazy(() => import("../pages/Splash"));
 const Login = lazy(() => import("../pages/Login"));
 const NotificationAllow = lazy(() => import("../pages/NotificationAllow"));
-
-const DentgoGptHome = lazy(() => import("../pages/DentgoGptHome"));
 const DentgoChat = lazy(() => import("../pages/DentgoChat"));
 const History = lazy(() => import("../pages/History"));
 const Notification = lazy(() => import("../pages/Notification"));
 const TermsAndPrivacy = lazy(() => import("../pages/TermsAndPrivacy"));
 const ContactUs = lazy(() => import("../pages/ContactUs"));
 const DeleteAccount = lazy(() => import("../pages/Delete"));
-
 const Confirmation = lazy(() => import("../pages/Confirmation"));
 
 export default function RoutesConfig() {
@@ -30,17 +28,11 @@ export default function RoutesConfig() {
   }, []);
 
   const renderRoutes = (list: any[]) =>
-    list.map(({ path, element, children, index }, i) => {
-      if (import.meta.env.DEV) {
-        console.log(`[Routing] Adding route #${i}: path="${path ?? "(index)"}"`);
-      }
-
-      return (
-        <Route key={i} path={path} element={element} index={index}>
-          {children ? renderRoutes(children) : null}
-        </Route>
-      );
-    });
+    list.map(({ path, element, children, index }, i) => (
+      <Route key={i} path={path} element={element} index={index}>
+        {children ? renderRoutes(children) : null}
+      </Route>
+    ));
 
   const routes = [
     // PUBLIC
