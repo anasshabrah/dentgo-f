@@ -21,15 +21,10 @@ const appearance = {
     fontFamily: 'Readex Pro, system-ui, sans-serif',
   },
   rules: {
-    // Mobile breakpoint: adjust label and input sizes on small screens
+    /* Mobile breakpoint: adjust label and input sizes on small screens */
     '@media only screen and (max-width: 600px)': {
-      '.Input': {
-        fontSize: '1rem',
-        lineHeight: '1.4',
-      },
-      '.Label': {
-        fontSize: '0.875rem',
-      },
+      '.Input': 'font-size: 1rem; line-height: 1.4;',      
+      '.Label': 'font-size: 0.875rem;',    
     },
   },
 };
