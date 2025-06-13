@@ -11,41 +11,15 @@ if (!STRIPE_PK) {
 
 const stripePromise = loadStripe(STRIPE_PK);
 
-const appearance: StripeElementsOptions['appearance'] = {
-  theme: 'stripe',
-  variables: {
-    fontSizeBase: '16px',
-    fontFamily: 'Readex Pro, system-ui, sans-serif',
-  },
-  rules: {
-    // top-level selector → must be an object of camelCase props
-    '.Input': {
-      paddingLeft: '0',
-      paddingRight: '0',
-    },
-    // media-query key → nested selectors must be declaration strings
-    '@media only screen and (max-width: 600px)': {
-      '.Input':
-        'font-size: 1rem; line-height: 1.4; padding-left: 0; padding-right: 0;',
-      '.Label':
-        'font-size: 0.875rem;',
-    },
-  },
-};
-
 interface StripeElementsProps {
+  /** Stripe Elements options (must include clientSecret, appearance, etc.) */
   options: StripeElementsOptions;
   children: React.ReactNode;
 }
 
 const StripeElements: React.FC<StripeElementsProps> = ({ options, children }) => {
-  const mergedOptions: StripeElementsOptions = {
-    ...options,
-    appearance,
-  };
-
   return (
-    <Elements stripe={stripePromise} options={mergedOptions}>
+    <Elements stripe={stripePromise} options={options}>
       {children}
     </Elements>
   );
