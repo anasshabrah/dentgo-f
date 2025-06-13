@@ -1,15 +1,29 @@
 // src/components/AppHeader.tsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "@/context/ModalContext";
 import SideMenu from "./SideMenu";
 
+// Chat‑specific imports
+import { useStripeData } from "@/context/StripeContext";
+import {
+  API_BASE,
+  FREE_MESSAGES_PER_DAY,
+} from "@/config";
+import EndSessionModal from "@/components/modal/EndSessionModal";
+
 interface Props {
+  /** Primary label shown in the middle of the header */
   title: string;
+  /** Show burger menu button on the left */
   showMenu?: boolean;
+  /** Show back button on the left */
   showBack?: boolean;
+  /** Show notifications bell on the right */
   showNotifications?: boolean;
+  /** Custom callback for menu button (otherwise opens SideMenu) */
   onMenuClick?: () => void;
+  /** Custom callback for back button (otherwise navigate -1) */
   onBack?: () => void;
 }
 
@@ -22,30 +36,85 @@ const AppHeader: React.FC<Props> = ({
   onBack,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { open } = useModal();
 
+  /* ----------------------------------------------------------------------- */
+  /* Chat‑specific state – rendered only on the /dentgo-chat route            */
+  /* ----------------------------------------------------------------------- */
+  const isChat = location.pathname.startsWith("/dentgo-chat");
+  const query = new URLSearchParams(location.search);
+  const chatSessionId = query.has("sessionId")
+    ? Number(query.get("sessionId"))
+    : null;
+
+  const { subscription } = useStripeData();
+  const [usedToday, setUsedToday] = useState<number>(0);
+
+  // Fetch today’s usage count when landing on the chat route
+  useEffect(() => {
+    if (!isChat) return;
+    const today = new Date().toISOString().slice(0, 10);
+    fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+      credentials: "include",
+    })
+      .then((r) => (r.ok ? r.json() : { count: 0 }))
+      .then(({ count }) => setUsedToday(count as number))
+      .catch(() => {});
+  }, [isChat]);
+
+  /* ----------------------------------------------------------------------- */
+  /* Generic handlers                                                         */
+  /* ----------------------------------------------------------------------- */
   const handleMenuClick = () => {
-    if (onMenuClick) {
-      onMenuClick();
-    } else {
-      open(<SideMenu />);
-    }
+    if (onMenuClick) return onMenuClick();
+    open(<SideMenu />);
   };
 
   const handleBackClick = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      navigate(-1);
-    }
+    if (onBack) return onBack();
+    navigate(-1);
   };
 
   const handleTitleClick = () => {
     navigate("/dentgo-gpt-home");
   };
 
+  /* ----------------------------------------------------------------------- */
+  /* Chat End‑session button                                                  */
+  /* ----------------------------------------------------------------------- */
+  const endSessionBtn = isChat ? (
+    <button
+      aria-label="End chat session"
+      onClick={() => open(<EndSessionModal sessionId={chatSessionId} />)}
+      className="p-1 rounded hover:bg-primary/80 disabled:opacity-50"
+    >
+      {/* ✖ icon */}
+      <span className="text-lg leading-none">✖</span>
+    </button>
+  ) : null;
+
+  /* ----------------------------------------------------------------------- */
+  /* Chat badge / counter                                                     */
+  /* ----------------------------------------------------------------------- */
+  const chatStatus = isChat ? (
+    subscription?.subscriptionId ? (
+      <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-[10px] font-semibold rounded-full">
+        PLUS
+      </span>
+    ) : (
+      <span className="text-gray-100 text-[10px]">
+        Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
+      </span>
+    )
+  ) : null;
+
+  /* ----------------------------------------------------------------------- */
+  /* Render                                                                   */
+  /* ----------------------------------------------------------------------- */
   return (
-    <header className="bg-primary text-white p-4 flex items-center gap-3">
+    <header className="bg-primary text-white p-4 flex items-center gap-3 shadow-sm select-none">
+      {/* Back button */}
       {showBack && (
         <button
           aria-label="Go back"
@@ -63,6 +132,7 @@ const AppHeader: React.FC<Props> = ({
         </button>
       )}
 
+      {/* Menu burger */}
       {showMenu && (
         <button
           aria-label="Open menu"
@@ -80,14 +150,19 @@ const AppHeader: React.FC<Props> = ({
         </button>
       )}
 
+      {/* Title – click to go home */}
       <h1
         onClick={handleTitleClick}
-        className="text-lg font-medium flex-1 cursor-pointer select-none"
+        className="text-lg font-medium flex-1 truncate cursor-pointer"
       >
-        {title}
+        {isChat ? "Dentgo Chat" : title}
       </h1>
 
-      {showNotifications && (
+      {/* Chat badge / counter */}
+      {chatStatus}
+
+      {/* Notifications bell */}
+      {showNotifications && !isChat && (
         <button
           aria-label="Notifications"
           onClick={() => navigate("/notification")}
@@ -103,6 +178,9 @@ const AppHeader: React.FC<Props> = ({
           </svg>
         </button>
       )}
+
+      {/* End‑session button (chat only) */}
+      {endSessionBtn}
     </header>
   );
 };

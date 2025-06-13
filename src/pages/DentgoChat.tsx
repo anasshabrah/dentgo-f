@@ -10,8 +10,6 @@ import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import { useStripeData } from "@/context/StripeContext";
 import { useToast } from "@/components/ui/ToastProvider";
 import Loader from "@/components/ui/Loader";
-import { useModal } from "@/context/ModalContext";
-import EndSessionModal from "@/components/modal/EndSessionModal";
 
 function isRTL(text: string) {
   return /[\u0600-\u06FF]/.test(text);
@@ -70,7 +68,6 @@ const DentgoChat: React.FC = () => {
   const { search } = useLocation();
   const { subscription } = useStripeData();
   const { addToast } = useToast();
-  const { open: openModal } = useModal();
 
   const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState<BubbleProps[]>([]);
@@ -148,9 +145,7 @@ const DentgoChat: React.FC = () => {
     const el = containerRef.current;
     if (!el) return;
     const onScroll = () =>
-      setShowScrollHint(
-        el.scrollHeight - (el.scrollTop + el.clientHeight) > 120
-      );
+      setShowScrollHint(el.scrollHeight - (el.scrollTop + el.clientHeight) > 120);
     el.addEventListener("scroll", onScroll);
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
@@ -200,31 +195,7 @@ const DentgoChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
-      <header className="px-3 py-2 bg-white dark:bg-gray-800 shadow flex items-center justify-between sticky top-0 z-10 h-12">
-        <div className="flex items-center space-x-2">
-          <h2 className="font-medium text-sm text-gray-800 dark:text-gray-100 truncate max-w-[60%]">
-            {sessionMeta.title}
-          </h2>
-          {isBasic ? (
-            <span className="text-gray-500 text-[10px]">
-              Free: {usedToday}/{FREE_MESSAGES_PER_DAY}
-            </span>
-          ) : (
-            <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-[10px] font-semibold rounded-full">
-              PLUS
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => openModal(<EndSessionModal sessionId={sessionId} />)}
-          disabled={sessionMeta.isEnded}
-          className="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-40 text-base leading-none"
-        >
-          ✖
-        </button>
-      </header>
-
+      {/* Chat content */}
       <main className="flex flex-col flex-1 relative overflow-hidden">
         <div
           ref={containerRef}
@@ -267,9 +238,9 @@ const DentgoChat: React.FC = () => {
         {/* Upgrade Banner for Basic Plan Limit */}
         {showUpgradeBanner && (
           <div className="bg-yellow-100 text-yellow-900 p-3 text-center">
-            You’ve reached your free message limit ({usedToday}/{FREE_MESSAGES_PER_DAY}).{' '}
+            You’ve reached your free message limit ({usedToday}/{FREE_MESSAGES_PER_DAY}).{" "}
             <button
-              onClick={() => navigate('/subscribe')}
+              onClick={() => navigate("/subscribe")}
               className="underline font-semibold"
             >
               Upgrade to Plus
