@@ -4,16 +4,16 @@ export function getStripeAppearance() {
   return {
     theme: 'stripe',
     variables: {
-      fontSizeBase: isMobile ? '14px' : '16px',
-      fontSizeSm:   isMobile ? '12px' : '14px',
-      fontSizeXs:   isMobile ? '10px' : '12px',
+      fontSizeBase: isMobile ? '12px' : '14px',
+      fontSizeSm:   isMobile ? '10px' : '12px',
+      fontSizeXs:   isMobile ? '8px' : '10px',
     },
     rules: {
       '.Input': {
-        padding: isMobile ? '8px' : '12px',
+        padding: isMobile ? '6px' : '10px',
       },
       '.Label': {
-        fontSize: isMobile ? '12px' : '14px',
+        fontSize: isMobile ? '10px' : '12px',
       }
     }
   };
