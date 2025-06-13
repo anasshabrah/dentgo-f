@@ -41,9 +41,9 @@ const Wallet: React.FC = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto my-8 p-4">
+    <div className="w-full mx-auto my-6 px-2 sm:px-4">
       {/* Tabs */}
-      <div className="flex border-b mb-4">
+      <div className="flex border-b mb-4 -mx-2 sm:mx-0">
         {tabs.map(tab => (
           <button
             key={tab}
@@ -67,13 +67,13 @@ const Wallet: React.FC = () => {
             Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded"
+                className="h-12 sm:h-16 bg-gray-200 dark:bg-gray-700 animate-pulse mb-2 rounded"
               />
             ))
           ) : cards && cards.length > 0 ? (
             cards.map(c => <CardRow key={c.id} card={c} />)
           ) : (
-            <div className="p-4 text-gray-500 dark:text-gray-400">
+            <div className="p-2 sm:p-4 text-gray-500 dark:text-gray-400">
               No saved cards.
             </div>
           )}
@@ -82,7 +82,7 @@ const Wallet: React.FC = () => {
 
       {/* Add Card */}
       {active === 'Add Card' && (
-        <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded p-2 sm:p-4">
           {loadingSecret ? (
             <div className="text-center text-gray-500">Loading payment form…</div>
           ) : clientSecret ? (
@@ -98,7 +98,7 @@ const Wallet: React.FC = () => {
 
       {/* Plan & Billing */}
       {active === 'Plan & Billing' && (
-        <div className="bg-gray-50 dark:bg-gray-900 rounded p-4">
+        <div className="bg-gray-50 dark:bg-gray-900 rounded p-2 sm:p-4">
           <PlanCard />
         </div>
       )}

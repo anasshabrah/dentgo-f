@@ -32,11 +32,9 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
     setLoading(true);
     try {
-      // Confirm the SetupIntent in-JS; include a return_url and only redirect if required
       const result = (await stripe.confirmSetup({
         elements,
         confirmParams: {
-          // after any required authentication, Stripe will redirect back here
           return_url: window.location.href,
         },
         redirect: 'if_required',
@@ -51,7 +49,6 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         throw new Error('No payment method returned from Stripe.');
       }
 
-      // Persist it to your backend
       await addCard(setupIntent.payment_method as string, nickname || null);
 
       setNickname('');
@@ -67,14 +64,16 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-white dark:bg-gray-800 rounded">
-      <PaymentElement />
+    <form onSubmit={handleSubmit} className="space-y-4 p-2 sm:p-4 bg-white dark:bg-gray-800 rounded">
+      <div className="px-1 sm:px-0">
+        <PaymentElement />
+      </div>
       <input
         type="text"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         placeholder="Card nickname (optional)"
-        className="w-full p-2 border rounded bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-800 transition"
+        className="w-full p-2 sm:p-3 border rounded bg-gray-100 dark:bg-gray-700 focus:bg-white dark:focus:bg-gray-800 transition text-sm sm:text-base"
       />
       <button
         type="submit"
@@ -83,7 +82,7 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           loading
             ? 'bg-gray-400 cursor-not-allowed'
             : 'bg-primary hover:bg-primary/90'
-        }`}
+        } text-sm sm:text-base`}
       >
         {loading ? 'Saving…' : 'Add Card'}
       </button>
