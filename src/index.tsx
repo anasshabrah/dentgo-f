@@ -1,6 +1,6 @@
 // frontend/src/index.tsx
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/react';
+import { BrowserTracing } from '@sentry/tracing';
 
 // Initialize Sentry at the very top before any other imports
 Sentry.init({
