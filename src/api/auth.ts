@@ -53,7 +53,7 @@ export async function loginWithGoogle(credential: string): Promise<User> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-csrf-token": csrfToken,    // include CSRF token header
+      "x-csrf-token": csrfToken,
     },
     credentials: "include",
     body: JSON.stringify({ credential }),
@@ -78,9 +78,16 @@ export function loginWithApple(): void {
  * Logout current user
  */
 export async function logout(): Promise<void> {
+  // 1) Obtain fresh CSRF token
+  const csrfToken = await fetchCsrfToken();
+
+  // 2) Include CSRF token header on logout
   const res = await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
+    headers: {
+      "x-csrf-token": csrfToken,
+    },
   });
 
   if (!res.ok) {
@@ -92,9 +99,16 @@ export async function logout(): Promise<void> {
  * Permanently delete the current user's account
  */
 export async function deleteAccount(): Promise<void> {
+  // 1) Obtain fresh CSRF token
+  const csrfToken = await fetchCsrfToken();
+
+  // 2) Include CSRF token header on account deletion
   const res = await fetch(`${API_BASE}/api/auth/delete`, {
     method: "DELETE",
     credentials: "include",
+    headers: {
+      "x-csrf-token": csrfToken,
+    },
   });
 
   if (!res.ok) {
