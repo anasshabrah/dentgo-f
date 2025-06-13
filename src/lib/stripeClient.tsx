@@ -11,42 +11,34 @@ if (!STRIPE_PK) {
 
 const stripePromise = loadStripe(STRIPE_PK);
 
-// Define a consistent, responsive appearance for all Stripe Elements
 const appearance: StripeElementsOptions['appearance'] = {
   theme: 'stripe',
   variables: {
-    fontSizeBase: '16px', // Base font size for desktop
-    fontFamily: 'Readex Pro, system-ui, sans-serif', // Use the app’s primary font
+    fontSizeBase: '16px',
+    fontFamily: 'Readex Pro, system-ui, sans-serif',
   },
   rules: {
-    // Remove default horizontal padding on desktop
+    // top-level selector → must be an object of camelCase props
     '.Input': {
       paddingLeft: '0',
       paddingRight: '0',
     },
-    // Mobile breakpoint: adjust label and input sizes on small screens
+    // media-query key → nested selectors must be declaration strings
     '@media only screen and (max-width: 600px)': {
-      '.Input': {
-        fontSize: '1rem',
-        lineHeight: '1.4',
-        paddingLeft: '0',
-        paddingRight: '0',
-      },
-      '.Label': {
-        fontSize: '0.875rem',
-      },
+      '.Input':
+        'font-size: 1rem; line-height: 1.4; padding-left: 0; padding-right: 0;',
+      '.Label':
+        'font-size: 0.875rem;',
     },
   },
 };
 
 interface StripeElementsProps {
-  /** Stripe Elements options (must include clientSecret, etc.) */
   options: StripeElementsOptions;
   children: React.ReactNode;
 }
 
 const StripeElements: React.FC<StripeElementsProps> = ({ options, children }) => {
-  // Merge in our appearance settings
   const mergedOptions: StripeElementsOptions = {
     ...options,
     appearance,
