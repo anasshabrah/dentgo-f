@@ -1,4 +1,4 @@
-// File: src/api/payments.ts
+// src/api/payments.ts
 
 import { API_BASE } from "@/config";
 
@@ -79,7 +79,6 @@ export async function createPaymentIntent(
 
 /**
  * Create a Stripe subscription and return its clientSecret, subscriptionId & status
- * → Now points to the correct payments endpoint
  */
 export async function createSubscriptionIntent(
   priceId: string,
@@ -100,21 +99,5 @@ export async function createSubscriptionIntent(
     await handleErrorResponse(res, 'Failed to create subscription intent');
   }
 
-  return res.json();
-}
-
-/**
- * Create a Stripe Customer Portal session and return its URL
- * (note: backend must implement /api/payments/create-portal-session)
- */
-export async function createPortalSession(): Promise<{ url: string }> {
-  const res = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, 'Failed to create portal session');
-  }
   return res.json();
 }

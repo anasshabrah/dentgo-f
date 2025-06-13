@@ -7,7 +7,6 @@ import {
   fetchCards,
   addCard,
   fetchActiveSubscription,
-  createPortalSession,
   createSubscription,
 } from "@/modules/payments/paymentsClient";
 import { useAuth } from "@/context/AuthContext";
@@ -23,7 +22,6 @@ interface StripeContextValue {
     priceId: string,
     paymentMethodId?: string | null
   ) => Promise<{ clientSecret: string; subscriptionId: string; status: string }>;
-  openCustomerPortal: () => Promise<string>;
   refresh: () => void;
   /** Remove a saved card */
   removeCard: (id: string) => Promise<void>;
@@ -68,13 +66,6 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
     onSuccess: () => queryClient.invalidateQueries(["subscription"]),
   });
 
-  const portalMutation = useMutation<{ url: string }, Error, void>(
-    () => createPortalSession(),
-    {
-      onSuccess: () => queryClient.invalidateQueries(["subscription"]),
-    }
-  );
-
   const deleteCardMutation = useMutation<void, Error, string>(
     (id) => apiDeleteCard(id),
     {
@@ -90,13 +81,10 @@ export const StripeProvider: React.FC<{ children: React.ReactNode }> = ({
       addCardMutation.mutateAsync({ paymentMethodId, nickName }),
     subscribe: (priceId, paymentMethodId) =>
       subscribeMutation.mutateAsync({ priceId, paymentMethodId }),
-    openCustomerPortal: () =>
-      portalMutation.mutateAsync().then((res) => res.url),
     refresh: () => {
       queryClient.invalidateQueries(["cards"]);
       queryClient.invalidateQueries(["subscription"]);
     },
-    /** Remove a saved card */
     removeCard: (id: string) => deleteCardMutation.mutateAsync(id),
   };
 

@@ -50,26 +50,6 @@ export async function fetchActiveSubscription(): Promise<ActiveSubscription> {
 }
 
 /**
- * Create a Stripe Customer Portal session.
- */
-export async function createPortalSession(
-  args?: { return_url: string }
-): Promise<{ url: string }> {
-  const body = args ? JSON.stringify(args) : undefined;
-  const resp = await fetch(`${API_BASE}/api/payments/create-portal-session`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body,
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error || "Failed to create portal session.");
-  }
-  return resp.json();
-}
-
-/**
  * Initialize a Stripe SetupIntent (for adding a new card).
  */
 export async function createSetupIntent(): Promise<string> {
