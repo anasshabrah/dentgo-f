@@ -1,12 +1,14 @@
-// frontend/src/index.tsx
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
 
 // Initialize Sentry at the very top before any other imports
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN as string,
-  integrations: [new BrowserTracing()],
-  // Adjust this value in production as needed
+  integrations: [
+    new BrowserTracing({
+      tracingOrigins: ['localhost', /^\//],
+    }),
+  ],
   tracesSampleRate: 1.0,
 });
 
@@ -29,17 +31,19 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ToastProvider>
-          <StripeProvider>
-            <DarkModeProvider>
-              <App />
-            </DarkModeProvider>
-          </StripeProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <Sentry.ErrorBoundary fallback={<p>Something went wrong</p>}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <StripeProvider>
+              <DarkModeProvider>
+                <App />
+              </DarkModeProvider>
+            </StripeProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
   </React.StrictMode>
 );
 
