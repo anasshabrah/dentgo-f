@@ -1,5 +1,4 @@
-// pages/Login.tsx – re-worked Google sign-in flow with graceful fallback
-
+// src/pages/Login.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import Loader from '@components/ui/Loader';
@@ -8,7 +7,7 @@ import AppleIcon from '@/assets/images/Icon-apple.png';
 import GoogleIcon from '@/assets/images/Icon-google.png';
 import dentaiBottom from '@/assets/images/dentaiBottom.png';
 import { GOOGLE_CLIENT_ID, API_BASE } from '@/config';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 
 // --- Local helpers ---------------------------------------------------------
@@ -44,7 +43,8 @@ const triggerGoogleSignin = () => {
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated, loginLoading, loginWithGoogle } = useAuth();
+  const { isAuthenticated, initializing, loginWithGoogle } = useAuth();
+  const loginLoading = initializing;
   const [googleReady, setGoogleReady] = useState(false);
 
   // Initialise Google Identity Services once the script is available.
