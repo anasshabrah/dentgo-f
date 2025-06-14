@@ -18,19 +18,17 @@ import ChatBubble from '@/components/chat/ChatBubble';
 import TypingDots from '@/components/chat/TypingDots';
 import ChatInput from '@/components/chat/ChatInput';
 
-// Retry a fetch call if 401, using /api/auth/refresh
 const withTokenRetry = async <T,>(fetchFn: () => Promise<T>): Promise<T> => {
   try {
     return await fetchFn();
   } catch (err: any) {
     if (err?.response?.status === 401 || err?.status === 401) {
-      // Attempt refresh
       const res = await fetch(`${API_BASE}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
       });
       if (res.ok) {
-        return await fetchFn(); // Retry original request
+        return await fetchFn();
       }
     }
     throw err;
@@ -49,7 +47,6 @@ const DentgoChat = () => {
   const [sessionId, setSessionId] = useState<number | null>(null);
   const PLUS = Boolean(subscription?.subscriptionId);
 
-  // ---------------- Initial Load ----------------
   useEffect(() => {
     const init = async () => {
       try {
@@ -85,7 +82,6 @@ const DentgoChat = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ---------------- Send Message ----------------
   const send = useCallback(
     async (text: string, images: File[]) => {
       if (!text.trim() && images.length === 0) return;
@@ -108,7 +104,7 @@ const DentgoChat = () => {
           askDentgo(
             text,
             msgs.map((m) => ({ role: m.role, text: m.html })),
-            sessionId ?? undefined // Ensure it's undefined not null
+            sessionId ?? undefined
           );
 
         const { answer, sessionId: sid } = await withTokenRetry(fetchFn);
@@ -130,10 +126,10 @@ const DentgoChat = () => {
     [add, replaceLast, msgs, PLUS, usedToday, sessionId, navigate, addToast]
   );
 
-  // ---------------- Render ----------------
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)]">
-      <ScrollToBottom className="flex-1 overflow-y-auto px-3 py-4 bg-background">
+    <div className="flex flex-col h-[calc(100vh-56px)] bg-background">
+      {/* Main scroll area centred & padded */}
+      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mx-auto w-full max-w-3xl">
         {msgs.map((m) => (
           <Fragment key={m.id}>
             <ChatBubble
@@ -146,7 +142,10 @@ const DentgoChat = () => {
         {isTyping && <TypingDots />}
       </ScrollToBottom>
 
-      <ChatInput onSubmit={send} disabled={isTyping} />
+      {/* Input bar centred & padded */}
+      <div className="mx-auto w-full max-w-3xl">
+        <ChatInput onSubmit={send} disabled={isTyping} />
+      </div>
     </div>
   );
 };

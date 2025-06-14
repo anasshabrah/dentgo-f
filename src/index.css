@@ -21,16 +21,25 @@
 }
 
 body {
-  @apply bg-[var(--background-color)] text-[var(--text-color)] font-sans;
+  /* Better readability on every page */
+  @apply bg-[var(--background-color)] text-[var(--text-color)] font-sans leading-relaxed antialiased;
 }
 
 /* Loader + typing pulse keyframes (re‑used in chat) */
 @keyframes dg-pulse {
-  0%   { transform: translateY(0);   opacity: .25; }
-  50%  { transform: translateY(-4px);opacity: 1;   }
-  100% { transform: translateY(0);   opacity: .25; }
+  0%   { transform: translateY(0);   opacity: 0.25; }
+  50%  { transform: translateY(-4px);opacity: 1;    }
+  100% { transform: translateY(0);   opacity: 0.25; }
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------- Custom utilities ---------- */
+@layer utilities {
+  /* Adds safe‑area inset **plus** reasonable padding */
+  .safe-bottom {
+    padding-bottom: calc(theme('spacing.3') + env(safe-area-inset-bottom));
+  }
+}

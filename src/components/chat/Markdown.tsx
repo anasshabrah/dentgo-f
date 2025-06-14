@@ -10,13 +10,19 @@ import 'highlight.js/styles/github.css';
 export default function Markdown({ children }: { children: string }) {
   return (
     <ReactMarkdown
-      className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed
-                 prose-p:my-2 prose-h1:mt-6 prose-h1:mb-3
-                 prose-h2:mt-5 prose-h2:mb-2
-                 prose-ul:my-2 prose-ol:my-2 prose-li:my-1
-                 prose-table:my-4 prose-img:my-2
-                 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-md prose-pre:p-4
-                 prose-code:before:content-none prose-code:after:content-none"
+      className="
+        prose dark:prose-invert max-w-none
+        text-[15px] sm:text-base
+        leading-relaxed
+        prose-p:my-3
+        prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+        prose-h1:mt-6 prose-h1:mb-3
+        prose-h2:mt-5 prose-h2:mb-2
+        prose-ul:my-3 prose-ol:my-3 prose-li:my-1
+        prose-img:my-2 prose-table:my-4
+        prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-md prose-pre:p-4
+        prose-code:before:content-none prose-code:after:content-none
+      "
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
       linkTarget="_blank"
