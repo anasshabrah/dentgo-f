@@ -39,10 +39,9 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    if (subscription?.subscriptionId && subscription.status === "active") {
-      // Reset any existing chat state
+    // Allow both FREE and PLUS plans to start chat
+    if (subscription?.plan === "FREE" || subscription?.plan === "PLUS") {
       resetMessages();
-      // Navigate to a fresh chat session
       navigate("/dentgo-chat");
     } else {
       navigate("/subscribe");
