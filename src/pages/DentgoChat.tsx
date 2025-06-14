@@ -86,8 +86,7 @@ const DentgoChat: React.FC = () => {
   });
 
   const isBasic = !subscription || subscription.subscriptionId === null;
-  const greetingPlaceholder =
-    "How can I assist you today?";
+  const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist today?";
 
   const scrollToBottom = useCallback(() => {
     containerRef.current?.scrollTo({
@@ -195,13 +194,13 @@ const DentgoChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
-      {/* Chat content */}
       <main className="flex flex-col flex-1 relative">
+        {/* 🚀 Added bg-gray-100 so the scroll area never shows white */}
         <div
           ref={containerRef}
           role="log"
           aria-live="polite"
-          className="flex-1 overflow-y-auto px-4 pt-3 pb-2 space-y-1"
+          className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900 px-4 pt-3 pb-2 space-y-1"
         >
           {messages.map((m, i) => (
             <MessageBubble key={i} {...m} />
@@ -219,12 +218,13 @@ const DentgoChat: React.FC = () => {
                 ))}
               </span>
             </div>
-          )}
+          ))}
         </div>
 
         {showScrollHint && (
           <>
-            <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-white dark:from-gray-900 to-transparent" />
+            {/* 🚀 Changed gradient from white to gray-100 to match background */}
+            <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-gray-100 dark:from-gray-900 to-transparent" />
             <button
               onClick={scrollToBottom}
               aria-label="Scroll to latest message"
@@ -235,7 +235,6 @@ const DentgoChat: React.FC = () => {
           </>
         )}
 
-        {/* Upgrade Banner for Basic Plan Limit */}
         {showUpgradeBanner && (
           <div className="bg-yellow-100 text-yellow-900 p-3 text-center">
             You’ve reached your free message limit ({usedToday}/{FREE_MESSAGES_PER_DAY}).{" "}
