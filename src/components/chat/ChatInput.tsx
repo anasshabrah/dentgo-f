@@ -1,5 +1,5 @@
 // src/components/chat/ChatInput.tsx
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDropzone } from 'react-dropzone';
 import useAutoResizeTextarea from '@/hooks/useAutoResizeTextarea';
@@ -51,7 +51,6 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
     <div
       {...dropzone.getRootProps()}
       className={clsx(
-        // safe-bottom keeps the bar above device home‑indicator
         'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom',
         dropzone.isDragActive && 'ring-2 ring-primary rounded'
       )}
@@ -63,7 +62,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
             ref={ref}
             rows={1}
             disabled={disabled}
-            placeholder="Message Dentgo…"
+            placeholder="Ask about dentistry or upload dental images…"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className={clsx(
@@ -125,7 +124,6 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
               }}
             />
           </label>
-          {/* Add voice or mic support here in future */}
         </div>
       </div>
     </div>

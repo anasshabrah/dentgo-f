@@ -18,6 +18,10 @@ import ChatBubble from '@/components/chat/ChatBubble';
 import TypingDots from '@/components/chat/TypingDots';
 import ChatInput from '@/components/chat/ChatInput';
 
+// Simple front-end check for dentistry-related text
+const isDentistryRelated = (text: string) =>
+  /dental|dentistry|tooth|teeth|oral|gum|mouth|x-?ray|dentist/i.test(text);
+
 const withTokenRetry = async <T,>(fetchFn: () => Promise<T>): Promise<T> => {
   try {
     return await fetchFn();
@@ -51,9 +55,10 @@ const DentgoChat = () => {
     const init = async () => {
       try {
         const today = new Date().toISOString().slice(0, 10);
-        const countRes = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
-          credentials: 'include',
-        });
+        const countRes = await fetch(
+          `${API_BASE}/api/chat/count?date=${today}`,
+          { credentials: 'include' }
+        );
         const countData = await (countRes.ok ? countRes.json() : { count: 0 });
         setUsedToday(countData.count);
 
@@ -67,7 +72,9 @@ const DentgoChat = () => {
               role: m.role === 'USER' ? 'user' : 'assistant',
               html: m.content,
               timestamp: Date.parse(
-                m.role === 'USER' ? session.startedAt : session.endedAt ?? session.startedAt
+                m.role === 'USER'
+                  ? session.startedAt
+                  : session.endedAt ?? session.startedAt
               ),
             })
           );
@@ -86,6 +93,16 @@ const DentgoChat = () => {
     async (text: string, images: File[]) => {
       if (!text.trim() && images.length === 0) return;
 
+      // Enforce dentistry-related content for text
+      if (text.trim() && !isDentistryRelated(text)) {
+        addToast({
+          message: 'Please enter a dentistry-related message.',
+          type: 'error',
+        });
+        return;
+      }
+
+      // Enforce free-tier limits
       if (!PLUS && usedToday >= FREE_MESSAGES_PER_DAY) {
         addToast({
           message: `Daily limit reached (${FREE_MESSAGES_PER_DAY}). Upgrade for unlimited chats.`,
@@ -94,17 +111,40 @@ const DentgoChat = () => {
         return;
       }
 
-      const id = uuid();
-      add({ id, role: 'user', html: text, timestamp: Date.now() });
-      add({ id: id + '-ai', role: 'assistant', html: '', timestamp: Date.now() });
+      const userMsgId = uuid();
+      add({ id: userMsgId, role: 'user', html: text, timestamp: Date.now() });
+      add({ id: userMsgId + '-ai', role: 'assistant', html: '', timestamp: Date.now() });
       setTyping(true);
 
       try {
+        // Analyze uploaded images before sending (e.g., to confirm dental content)
+        if (images.length > 0) {
+          const analyses = await Promise.all(
+            images.map(async (file) => {
+              const form = new FormData();
+              form.append('image', file);
+              const res = await fetch(
+                `${API_BASE}/api/chat/analyze-image`,
+                {
+                  method: 'POST',
+                  credentials: 'include',
+                  body: form,
+                }
+              );
+              if (!res.ok) throw new Error('Image analysis failed');
+              return res.json();
+            })
+          );
+          // Optional: inspect analyses, show warnings if not dental
+          // (not blocking, per requirements)
+        }
+
         const fetchFn = () =>
           askDentgo(
             text,
             msgs.map((m) => ({ role: m.role, text: m.html })),
-            sessionId ?? undefined
+            sessionId ?? undefined,
+            images
           );
 
         const { answer, sessionId: sid } = await withTokenRetry(fetchFn);
