@@ -11,16 +11,12 @@ import ScrollToBottom from 'react-scroll-to-bottom';
 import { useMessageStore } from '@/hooks/useMessageStore';
 import { askDentgo } from '@/api/chat';
 import { fetchChatSession } from '@/api/chats';
-import { FREE_MESSAGES_PER_DAY, API_BASE } from '@/config';
+import { API_BASE } from '@/config';
 import { useStripeData } from '@/context/StripeContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import ChatBubble from '@/components/chat/ChatBubble';
 import TypingDots from '@/components/chat/TypingDots';
 import ChatInput from '@/components/chat/ChatInput';
-
-// Simple front-end check for dentistry-related text
-const isDentistryRelated = (text: string) =>
-  /dental|dentistry|tooth|teeth|oral|gum|mouth|x-?ray|dentist/i.test(text);
 
 const withTokenRetry = async <T,>(fetchFn: () => Promise<T>): Promise<T> => {
   try {
@@ -47,21 +43,11 @@ const DentgoChat = () => {
   const { msgs, add, replaceLast, reset } = useMessageStore();
 
   const [isTyping, setTyping] = useState(false);
-  const [usedToday, setUsedToday] = useState(0);
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const PLUS = Boolean(subscription?.subscriptionId);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const today = new Date().toISOString().slice(0, 10);
-        const countRes = await fetch(
-          `${API_BASE}/api/chat/count?date=${today}`,
-          { credentials: 'include' }
-        );
-        const countData = await (countRes.ok ? countRes.json() : { count: 0 });
-        setUsedToday(countData.count);
-
         const sid = new URLSearchParams(search).get('sessionId');
         if (sid) {
           const session = await fetchChatSession(Number(sid));
@@ -93,50 +79,26 @@ const DentgoChat = () => {
     async (text: string, images: File[]) => {
       if (!text.trim() && images.length === 0) return;
 
-      // Enforce dentistry-related content for text
-      if (text.trim() && !isDentistryRelated(text)) {
-        addToast({
-          message: 'Please enter a dentistry-related message.',
-          type: 'error',
-        });
-        return;
-      }
-
-      // Enforce free-tier limits
-      if (!PLUS && usedToday >= FREE_MESSAGES_PER_DAY) {
-        addToast({
-          message: `Daily limit reached (${FREE_MESSAGES_PER_DAY}). Upgrade for unlimited chats.`,
-          type: 'info',
-        });
-        return;
-      }
-
       const userMsgId = uuid();
       add({ id: userMsgId, role: 'user', html: text, timestamp: Date.now() });
       add({ id: userMsgId + '-ai', role: 'assistant', html: '', timestamp: Date.now() });
       setTyping(true);
 
       try {
-        // Analyze uploaded images before sending (e.g., to confirm dental content)
         if (images.length > 0) {
-          const analyses = await Promise.all(
+          await Promise.all(
             images.map(async (file) => {
               const form = new FormData();
               form.append('image', file);
-              const res = await fetch(
-                `${API_BASE}/api/chat/analyze-image`,
-                {
-                  method: 'POST',
-                  credentials: 'include',
-                  body: form,
-                }
-              );
+              const res = await fetch(`${API_BASE}/api/chat/analyze-image`, {
+                method: 'POST',
+                credentials: 'include',
+                body: form,
+              });
               if (!res.ok) throw new Error('Image analysis failed');
               return res.json();
             })
           );
-          // Optional: inspect analyses, show warnings if not dental
-          // (not blocking, per requirements)
         }
 
         const fetchFn = () =>
@@ -155,7 +117,6 @@ const DentgoChat = () => {
         }
 
         replaceLast({ html: answer });
-        setUsedToday((n) => n + 1);
       } catch (err: any) {
         const msg = err?.message || 'Unexpected error occurred.';
         replaceLast({ html: `❌ ${msg}`, error: true });
@@ -163,12 +124,11 @@ const DentgoChat = () => {
         setTyping(false);
       }
     },
-    [add, replaceLast, msgs, PLUS, usedToday, sessionId, navigate, addToast]
+    [add, replaceLast, msgs, sessionId, navigate]
   );
 
   return (
     <div className="flex flex-col h-[calc(100vh-56px)] bg-gray-100 dark:bg-gray-900">
-      {/* Main scroll area centred & padded */}
       <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
         {msgs.map((m) => (
           <Fragment key={m.id}>
@@ -182,7 +142,6 @@ const DentgoChat = () => {
         {isTyping && <TypingDots />}
       </ScrollToBottom>
 
-      {/* Input bar centred & padded */}
       <div className="mx-auto w-full max-w-3xl px-4 pt-2 pb-4">
         <ChatInput onSubmit={send} disabled={isTyping} />
       </div>

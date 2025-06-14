@@ -1,4 +1,3 @@
-// src/components/chat/ChatInput.tsx
 import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDropzone } from 'react-dropzone';
@@ -51,7 +50,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
     <div
       {...dropzone.getRootProps()}
       className={clsx(
-        'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom rounded-xl',
+        'bg-white dark:bg-gray-800 rounded-xl px-4 py-4 shadow border border-gray-200 dark:border-gray-700',
         dropzone.isDragActive && 'ring-2 ring-primary'
       )}
     >
