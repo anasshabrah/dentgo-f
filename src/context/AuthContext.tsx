@@ -7,6 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
+import { fetchCsrfToken } from "@/api/auth";
 import { API_BASE } from "@/config";
 
 interface User {
@@ -31,43 +32,56 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // fetchUser is now explicit
   const fetchUser = async () => {
     setInitializing(true);
     try {
+      // 1) Try to fetch me
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: "include",
-        mode: "cors",
         headers: { "Content-Type": "application/json" },
       });
 
+      // 2) If 401, try to refresh
       if (response.status === 401) {
-        const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
-          method: "POST",
-          credentials: "include",
-          mode: "cors",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (refreshResp.ok) {
+        try {
+          const csrfToken = await fetchCsrfToken();
+          const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": csrfToken,
+            },
+          });
+          if (!refreshResp.ok) {
+            console.error(
+              "AuthContext: refresh failed:",
+              await refreshResp.text()
+            );
+            setUser(null);
+            return;
+          }
+          // on success, retry fetching user
           response = await fetch(`${API_BASE}/api/users/me`, {
             credentials: "include",
-            mode: "cors",
             headers: { "Content-Type": "application/json" },
           });
+        } catch (refreshErr) {
+          console.error("AuthContext: error during token refresh:", refreshErr);
+          setUser(null);
+          return;
         }
       }
 
       if (response.ok) {
-        const { user: fetched } = (await response.json()) as { user: User };
+        const { user: fetched } = (await response.json()) as {
+          user: User;
+        };
         setUser(fetched || null);
       } else {
         setUser(null);
@@ -80,15 +94,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Automatically fetch user on mount
+  // auto‐check on mount
   useEffect(() => {
     fetchUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const login = (userData: User) => {
-    setUser(userData);
-  };
+  const login = (userData: User) => setUser(userData);
 
   const loginWithGoogle = async (arg: string | { credential: string }) => {
     setError(null);
@@ -101,13 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err: any) {
       console.error("AuthContext: Google login error:", err);
       const msg = err.message || "Google login failed. Please try again.";
-      if (msg.includes("AbortError") || msg.includes("NetworkError")) {
-        setError(
-          "Google login may be blocked in Private Browsing Mode or due to browser settings. Please try using a standard browser window or allow third-party cookies."
-        );
-      } else {
-        setError(msg);
-      }
+      setError(msg);
     }
   };
 
@@ -115,9 +121,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const { logout: apiLogout } = await import("../api/auth");
       await apiLogout();
-      setUser(null);
     } catch (err) {
       console.error("AuthContext: Error logging out:", err);
+    } finally {
       setUser(null);
     }
   };
@@ -144,9 +150,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 };
 
 export const useAuth = (): AuthContextValue => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };
