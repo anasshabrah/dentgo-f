@@ -73,7 +73,7 @@ export default function RoutesConfig() {
     { path: "confirmation", element: <Confirmation /> },
 
     // DEFAULT REDIRECT
-    { path: "/", element: <Navigate to="/dentgo-gpt-home" replace /> },
+    { path: "*", element: <Navigate to="/dentgo-gpt-home" replace /> },
   ];
 
   return <Routes>{renderRoutes(routes)}</Routes>;
