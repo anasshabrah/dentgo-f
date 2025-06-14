@@ -39,12 +39,9 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    // Wait until subscription is loaded
-    if (subscription === undefined) {
-      return;
-    }
+    if (!subscription) return;
 
-    if (subscription.subscriptionId) {
+    if (subscription.status === "active") {
       resetMessages();
       navigate("/dentgo-chat");
     } else {
