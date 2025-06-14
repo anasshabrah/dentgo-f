@@ -1,238 +1,154 @@
-// src/pages/DentgoChat.tsx
-
-import React, { useEffect, useRef, useState, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+// pages/DentgoChat.tsx
 import {
-  MainContainer,
-  ChatContainer,
-  ConversationHeader,
-  MessageList,
-  Message,
-  MessageInput,
-  Avatar,
-  TypingIndicator
-} from "@chatscope/chat-ui-kit-react";
-import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeSanitize from "rehype-sanitize";
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Fragment,
+} from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
+import { useAutoScroll } from 'react-auto-scroll';
+import { useMessageStore } from '@/hooks/useMessageStore';
+import { askDentgo } from '@/api/chat';
+import { fetchChatSession } from '@/api/chats';
+import { FREE_MESSAGES_PER_DAY, API_BASE } from '@/config';
+import { useStripeData } from '@/context/StripeContext';
+import { useToast } from '@/components/ui/ToastProvider';
+import ChatBubble from '@/components/chat/ChatBubble';
+import TypingDots from '@/components/chat/TypingDots';
+import ChatInput from '@/components/chat/ChatInput';
 
-import { askDentgo } from "@/api/chat";
-import { fetchChatSession } from "@/api/chats";
-import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
-import { useStripeData } from "@/context/StripeContext";
-import { useToast } from "@/components/ui/ToastProvider";
-import Loader from "@/components/ui/Loader";
-
-function isRTL(text: string) {
-  return /[\u0600-\u06FF]/.test(text);
-}
-
-interface ChatMessage {
-  text: string;
-  sender: "You" | "Dentgo";
-}
-
-const DentgoChat: React.FC = () => {
+const DentgoChat = () => {
+  /* ---------------------------------------------------------------- */
   const navigate = useNavigate();
   const { search } = useLocation();
   const { subscription } = useStripeData();
   const { addToast } = useToast();
-
-  const [loading, setLoading] = useState(true);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { msgs, add, replaceLast, reset } = useMessageStore();
+  const listRef = useRef<HTMLDivElement>(null);
+  const { scrollToBottom } = useAutoScroll({ container: listRef });
+  /* ---------------------------------------------------------------- */
   const [isTyping, setTyping] = useState(false);
   const [usedToday, setUsedToday] = useState(0);
-  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false);
-
-  const historyRef = useRef<{ role: "user" | "assistant"; text: string }[]>([]);
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const [sessionMeta, setSessionMeta] = useState({
-    title: "Dentgo Chat",
-    isEnded: false
-  });
+  const PLUS = !!subscription?.subscriptionId;
 
-  const isBasic = !subscription?.subscriptionId;
-  const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist today?";
-
-  // Initialize: fetch usage and, if sessionId present, load past messages
+  /* ---------------------------------------------------------------- */
+  // initial load: usage + (optional) history
   useEffect(() => {
-    (async () => {
-      // Fetch today's usage count
-      try {
-        const today = new Date().toISOString().slice(0, 10);
-        const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
-          credentials: "include"
-        });
-        if (res.ok) {
-          const { count } = await res.json();
-          setUsedToday(count);
-        }
-      } catch {
-        // ignore
-      }
+    const init = async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const c = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+        credentials: 'include',
+      })
+        .then((r) => (r.ok ? r.json() : { count: 0 }))
+        .then((d) => d.count);
+      setUsedToday(c);
 
-      // Check for existing session
-      const params = new URLSearchParams(search);
-      const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
+      const sid = new URLSearchParams(search).get('sessionId');
       if (sid) {
-        setSessionId(sid);
         try {
-          const session = await fetchChatSession(sid);
-          const loaded = session.messages.map((m) => ({
-            text: m.content,
-            sender: m.role === "USER" ? "You" : "Dentgo"
-          }));
-          setMessages(loaded);
-          historyRef.current = loaded.map((m) => ({
-            role: m.sender === "You" ? "user" : "assistant",
-            text: m.text
-          }));
-          setSessionMeta({
-            title: session.title ?? "Dentgo Chat",
-            isEnded: session.isEnded
-          });
+          const s = await fetchChatSession(Number(sid));
+          reset();
+          s.messages.forEach((m) =>
+            add({
+              id: uuid(),
+              role: m.role === 'USER' ? 'user' : 'assistant',
+              html: m.content,
+              timestamp: Date.parse(m.role === 'USER' ? s.startedAt : s.endedAt ?? s.startedAt),
+            })
+          );
+          setSessionId(s.id);
         } catch {
-          // ignore
+          addToast({ message: 'Failed to load session.', type: 'error' });
         }
       }
+    };
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      setLoading(false);
-    })();
-  }, [search]);
+  /* ---------------------------------------------------------------- */
+  const send = useCallback(
+    async (text: string, images: File[]) => {
+      if (!text.trim() && images.length === 0) return;
 
-  const handleSend = useCallback(
-    async (text: string) => {
-      const prompt = text.trim();
-      if (!prompt || isTyping || sessionMeta.isEnded) return;
-
-      // Free-tier limit check
-      if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
+      // FREE quota enforcement
+      if (!PLUS && usedToday >= FREE_MESSAGES_PER_DAY) {
         addToast({
-          message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today.`,
-          type: "error"
+          message: `Daily limit reached (${FREE_MESSAGES_PER_DAY}). Upgrade for unlimited chats.`,
+          type: 'info',
         });
-        setShowUpgradeBanner(true);
         return;
       }
 
-      // Append user message
-      setMessages((prev) => [...prev, { text: prompt, sender: "You" }]);
-      historyRef.current.push({ role: "user", text: prompt });
-      setTyping(true);
+      /* ---- 1. display user message immediately ------------------- */
+      const id = uuid();
+      add({
+        id,
+        role: 'user',
+        html: text,
+        timestamp: Date.now(),
+      });
+      scrollToBottom();
 
+      /* ---- 2. optimistic assistant placeholder ------------------- */
+      add({
+        id: id + '-ai',
+        role: 'assistant',
+        html: '',
+        timestamp: Date.now(),
+      });
+      setTyping(true);
+      scrollToBottom();
+
+      /* ---- 3. call backend (streaming optional) ------------------ */
       try {
-        const { sessionId: newSid, answer } = await askDentgo(
-          prompt,
-          historyRef.current.slice(0, -1),
+        const { answer, sessionId: sid } = await askDentgo(
+          text,
+          msgs.map((m) => ({ role: m.role, text: m.html })),
           sessionId
         );
-
-        // Save sessionId if newly created
         if (!sessionId) {
-          setSessionId(newSid);
-          navigate(`?sessionId=${newSid}`, { replace: true });
+          setSessionId(sid);
+          navigate(`?sessionId=${sid}`, { replace: true });
         }
-
-        // Append assistant response
-        setMessages((prev) => [...prev, { text: answer, sender: "Dentgo" }]);
-        historyRef.current.push({ role: "assistant", text: answer });
-        setUsedToday((u) => u + 1);
+        replaceLast({ html: answer });
+        setUsedToday((n) => n + 1);
       } catch (err: any) {
-        setMessages((prev) => [
-          ...prev,
-          { text: `❌ ${err.message || "Something went wrong."}`, sender: "Dentgo" }
-        ]);
+        replaceLast({ html: '❌ ' + (err?.message || 'Error'), error: true });
       } finally {
         setTyping(false);
+        scrollToBottom();
       }
     },
-    [isTyping, sessionMeta.isEnded, isBasic, usedToday, addToast, sessionId, navigate]
+    [add, replaceLast, msgs, PLUS, usedToday, sessionId, navigate, addToast, scrollToBottom]
   );
 
-  if (loading) {
-    return <Loader fullscreen />;
-  }
-
+  /* ---------------------------------------------------------------- */
   return (
-    <MainContainer style={{ height: "100vh", background: "var(--background-color)" }}>
-      <ChatContainer>
-        <ConversationHeader
-          title={sessionMeta.title}
-          info={
-            sessionMeta.isEnded
-              ? "Session ended"
-              : isTyping
-              ? "Dentgo is typing..."
-              : subscription?.subscriptionId
-              ? "PLUS"
-              : `Free: ${usedToday}/${FREE_MESSAGES_PER_DAY}`
-          }
-        />
+    <div className="flex flex-col h-[calc(100vh-56px)]"> {/* header height = 56 */}
+      {/* TOP area could optionally show title & counters */}
 
-        <MessageList
-          scrollBehavior="smooth"
-          typingIndicator={isTyping ? <TypingIndicator content="Dentgo is typing…" /> : null}
-        >
-          {messages.map((m, i) => {
-            // Check for inline image markdown
-            const match =
-              m.text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ||
-              m.text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
-            const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
-            const md = match ? m.text.replace(match[0], "") : m.text;
+      {/* message list */}
+      <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-4 bg-background">
+        {msgs.map((m) => (
+          <Fragment key={m.id}>
+            <ChatBubble
+              role={m.role}
+              html={m.html || '<em>…</em>'}
+              timestamp={m.timestamp}
+            />
+          </Fragment>
+        ))}
 
-            return (
-              <Message
-                key={i}
-                model={{
-                  message: (
-                    <>
-                      {imgUrl && (
-                        <div className="mb-2">
-                          <img
-                            src={imgUrl}
-                            alt=""
-                            className="max-w-full rounded-lg border border-black/5 dark:border-white/10 mb-2"
-                          />
-                        </div>
-                      )}
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-                        {md || "*Image*"}
-                      </ReactMarkdown>
-                    </>
-                  ),
-                  sentTime: "",
-                  sender: m.sender,
-                  direction: m.sender === "Dentgo" ? "incoming" : "outgoing"
-                }}
-              >
-                {m.sender === "Dentgo" && <Avatar src="/favicon.png" name="Dentgo" />}
-              </Message>
-            );
-          })}
-        </MessageList>
+        {isTyping && <TypingDots />}
+      </div>
 
-        {showUpgradeBanner && (
-          <div className="bg-yellow-100 text-yellow-900 p-3 text-center">
-            You’ve reached your free message limit ({usedToday}/{FREE_MESSAGES_PER_DAY}).{" "}
-            <button
-              onClick={() => navigate("/subscribe")}
-              className="underline font-semibold"
-            >
-              Upgrade to Plus
-            </button>
-          </div>
-        )}
-
-        <MessageInput
-          placeholder={greetingPlaceholder}
-          disabled={sessionMeta.isEnded}
-          attachButton={false}
-          onSend={handleSend}
-        />
-      </ChatContainer>
-    </MainContainer>
+      {/* input */}
+      <ChatInput onSubmit={send} disabled={isTyping} />
+    </div>
   );
 };
 
