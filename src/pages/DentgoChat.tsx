@@ -167,9 +167,9 @@ const DentgoChat = () => {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)] bg-background">
+    <div className="flex flex-col h-[calc(100vh-56px)] bg-gray-100 dark:bg-gray-900">
       {/* Main scroll area centred & padded */}
-      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mx-auto w-full max-w-3xl">
+      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
         {msgs.map((m) => (
           <Fragment key={m.id}>
             <ChatBubble
@@ -183,7 +183,7 @@ const DentgoChat = () => {
       </ScrollToBottom>
 
       {/* Input bar centred & padded */}
-      <div className="mx-auto w-full max-w-3xl">
+      <div className="mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <ChatInput onSubmit={send} disabled={isTyping} />
       </div>
     </div>
