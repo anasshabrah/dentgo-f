@@ -1,4 +1,5 @@
 // src/context/AuthContext.tsx
+
 import React, {
   createContext,
   useContext,
@@ -6,8 +7,11 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { loginWithGoogle as loginWithGoogleAPI } from "@/api/auth";
-import { fetchCsrfToken } from "@/api/auth";
+import {
+  loginWithGoogle as loginWithGoogleAPI,
+  fetchCsrfToken,
+  logout as apiLogout,
+} from "@/api/auth";
 import { API_BASE } from "@/config";
 
 interface User {
@@ -32,7 +36,9 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [initializing, setInitializing] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,14 +46,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const fetchUser = async () => {
     setInitializing(true);
     try {
-      // 1) Try to fetch me
       let response = await fetch(`${API_BASE}/api/users/me`, {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
       });
 
-      // 2) If 401, try to refresh
       if (response.status === 401) {
+        // try refresh
         try {
           const csrfToken = await fetchCsrfToken();
           const refreshResp = await fetch(`${API_BASE}/api/auth/refresh`, {
@@ -59,20 +64,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             },
           });
           if (!refreshResp.ok) {
-            console.error(
-              "AuthContext: refresh failed:",
-              await refreshResp.text()
-            );
             setUser(null);
             return;
           }
-          // on success, retry fetching user
+          // retry fetch-me
           response = await fetch(`${API_BASE}/api/users/me`, {
             credentials: "include",
             headers: { "Content-Type": "application/json" },
           });
-        } catch (refreshErr) {
-          console.error("AuthContext: error during token refresh:", refreshErr);
+        } catch {
           setUser(null);
           return;
         }
@@ -94,7 +94,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // auto‐check on mount
   useEffect(() => {
     fetchUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,22 +103,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loginWithGoogle = async (arg: string | { credential: string }) => {
     setError(null);
-    const credential =
-      typeof arg === "string" ? arg : arg.credential;
-
+    const credential = typeof arg === "string" ? arg : arg.credential;
     try {
       const userData = await loginWithGoogleAPI(credential);
       setUser(userData);
     } catch (err: any) {
       console.error("AuthContext: Google login error:", err);
-      const msg = err.message || "Google login failed. Please try again.";
-      setError(msg);
+      setError(err.message || "Google login failed. Please try again.");
     }
   };
 
   const logout = async () => {
     try {
-      const { logout: apiLogout } = await import("../api/auth");
       await apiLogout();
     } catch (err) {
       console.error("AuthContext: Error logging out:", err);

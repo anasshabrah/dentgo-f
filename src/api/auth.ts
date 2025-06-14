@@ -30,7 +30,7 @@ async function handleErrorResponse(
 /**
  * Fetch the CSRF token from the server.
  */
-async function fetchCsrfToken(): Promise<string> {
+export async function fetchCsrfToken(): Promise<string> {
   const res = await fetch(`${API_BASE}/api/auth/csrf-token`, {
     method: "GET",
     credentials: "include",
@@ -46,9 +46,7 @@ async function fetchCsrfToken(): Promise<string> {
  * Google login via one-tap credential token
  */
 export async function loginWithGoogle(credential: string): Promise<User> {
-  // Obtain fresh CSRF token for double-submit cookie protection
   const csrfToken = await fetchCsrfToken();
-
   const res = await fetch(`${API_BASE}/api/auth/google`, {
     method: "POST",
     headers: {
@@ -58,17 +56,15 @@ export async function loginWithGoogle(credential: string): Promise<User> {
     credentials: "include",
     body: JSON.stringify({ credential }),
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, "Google login failed");
   }
-
   const { user } = (await res.json()) as { user: User };
   return user;
 }
 
 /**
- * Redirects to Apple login (OAuth)
+ * Kick off Apple OAuth login
  */
 export function loginWithApple(): void {
   window.location.href = `${API_BASE}/api/auth/apple`;
@@ -78,10 +74,7 @@ export function loginWithApple(): void {
  * Logout current user
  */
 export async function logout(): Promise<void> {
-  // 1) Obtain fresh CSRF token
   const csrfToken = await fetchCsrfToken();
-
-  // 2) Include CSRF token header on logout
   const res = await fetch(`${API_BASE}/api/auth/logout`, {
     method: "POST",
     credentials: "include",
@@ -89,7 +82,6 @@ export async function logout(): Promise<void> {
       "x-csrf-token": csrfToken,
     },
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, "Logout failed");
   }
@@ -99,10 +91,7 @@ export async function logout(): Promise<void> {
  * Permanently delete the current user's account
  */
 export async function deleteAccount(): Promise<void> {
-  // 1) Obtain fresh CSRF token
   const csrfToken = await fetchCsrfToken();
-
-  // 2) Include CSRF token header on account deletion
   const res = await fetch(`${API_BASE}/api/auth/delete`, {
     method: "DELETE",
     credentials: "include",
@@ -110,7 +99,6 @@ export async function deleteAccount(): Promise<void> {
       "x-csrf-token": csrfToken,
     },
   });
-
   if (!res.ok) {
     await handleErrorResponse(res, "Failed to delete account");
   }
