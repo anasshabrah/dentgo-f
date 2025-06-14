@@ -1,5 +1,4 @@
 // src/components/chat/ChatBubble.tsx
-
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import Markdown from './Markdown';
@@ -16,7 +15,7 @@ export default function ChatBubble({
   role,
   html,
   timestamp,
-  collapsed,
+  collapsed = false,
   onToggle,
 }: Props) {
   const isUser = role === 'user';
@@ -25,42 +24,49 @@ export default function ChatBubble({
   return (
     <div
       className={clsx(
-        'peer group my-2 flex',
+        'peer group my-2 flex px-2',
         isUser ? 'justify-end' : 'justify-start'
       )}
+      dir="auto"
     >
-      {/* avatar for assistant */}
+      {/* Avatar for assistant only */}
       {!isUser && (
         <img
           src="/favicon.png"
           alt="AI"
-          className="w-7 h-7 mr-2 mt-1 rounded"
+          className="w-7 h-7 self-start rounded me-2 mt-1"
         />
       )}
 
-      <div
+      <motion.div
         className={clsx(
-          'max-w-[85%] rounded-xl px-4 py-2 shadow-sm relative',
+          'relative max-w-[85%] md:max-w-[80%] rounded-xl px-4 py-2 shadow-sm',
           isUser
             ? 'bg-blue-600 text-white rounded-br-none'
-            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none'
+            : 'bg-muted text-foreground rounded-bl-none dark:bg-gray-800 dark:text-gray-100'
         )}
+        layout
+        transition={{ layout: { duration: 0.2 } }}
       >
-        {/* collapse bar */}
+        {/* Collapse/expand toggle button */}
         {onToggle && (
           <button
             onClick={onToggle}
-            className="absolute -right-6 top-1 text-xs text-gray-400 hover:text-gray-600"
-            aria-label="Toggle collapse"
+            className={clsx(
+              'absolute top-1 text-xs transition text-gray-400 hover:text-gray-600',
+              isUser ? '-left-6' : '-right-6'
+            )}
+            aria-label={collapsed ? 'Expand message' : 'Collapse message'}
           >
             {collapsed ? '▸' : '▾'}
           </button>
         )}
 
+        {/* Message content with animation */}
         <AnimatePresence initial={false}>
           {!collapsed && (
             <motion.div
-              key="content"
+              key="message"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -71,11 +77,17 @@ export default function ChatBubble({
           )}
         </AnimatePresence>
 
-        {/* timestamp tooltip */}
-        <span className="opacity-0 group-hover:opacity-100 absolute -bottom-5 right-0 text-[10px] text-gray-500 dark:text-gray-400 transition">
+        {/* Timestamp on hover */}
+        <span
+          className={clsx(
+            'absolute text-[10px] transition-opacity duration-200 opacity-0 group-hover:opacity-100',
+            isUser ? 'bottom-[-18px] right-0' : 'bottom-[-18px] left-0',
+            'text-gray-500 dark:text-gray-400'
+          )}
+        >
           {time}
         </span>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -3,7 +3,6 @@ import {
   useState,
   useEffect,
   useCallback,
-  useRef,
   Fragment,
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -19,6 +18,25 @@ import ChatBubble from '@/components/chat/ChatBubble';
 import TypingDots from '@/components/chat/TypingDots';
 import ChatInput from '@/components/chat/ChatInput';
 
+// Retry a fetch call if 401, using /api/auth/refresh
+const withTokenRetry = async <T,>(fetchFn: () => Promise<T>): Promise<T> => {
+  try {
+    return await fetchFn();
+  } catch (err: any) {
+    if (err?.response?.status === 401 || err?.status === 401) {
+      // Attempt refresh
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        return await fetchFn(); // Retry original request
+      }
+    }
+    throw err;
+  }
+};
+
 const DentgoChat = () => {
   const navigate = useNavigate();
   const { search } = useLocation();
@@ -29,38 +47,40 @@ const DentgoChat = () => {
   const [isTyping, setTyping] = useState(false);
   const [usedToday, setUsedToday] = useState(0);
   const [sessionId, setSessionId] = useState<number | null>(null);
-  const PLUS = !!subscription?.subscriptionId;
+  const PLUS = Boolean(subscription?.subscriptionId);
 
   // ---------------- Initial Load ----------------
   useEffect(() => {
     const init = async () => {
-      const today = new Date().toISOString().slice(0, 10);
-      const c = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
-        credentials: 'include',
-      })
-        .then((r) => (r.ok ? r.json() : { count: 0 }))
-        .then((d) => d.count);
-      setUsedToday(c);
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const countRes = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
+          credentials: 'include',
+        });
+        const countData = await (countRes.ok ? countRes.json() : { count: 0 });
+        setUsedToday(countData.count);
 
-      const sid = new URLSearchParams(search).get('sessionId');
-      if (sid) {
-        try {
-          const s = await fetchChatSession(Number(sid));
+        const sid = new URLSearchParams(search).get('sessionId');
+        if (sid) {
+          const session = await fetchChatSession(Number(sid));
           reset();
-          s.messages.forEach((m) =>
+          session.messages.forEach((m) =>
             add({
               id: uuid(),
               role: m.role === 'USER' ? 'user' : 'assistant',
               html: m.content,
-              timestamp: Date.parse(m.role === 'USER' ? s.startedAt : s.endedAt ?? s.startedAt),
+              timestamp: Date.parse(
+                m.role === 'USER' ? session.startedAt : session.endedAt ?? session.startedAt
+              ),
             })
           );
-          setSessionId(s.id);
-        } catch {
-          addToast({ message: 'Failed to load session.', type: 'error' });
+          setSessionId(session.id);
         }
+      } catch {
+        addToast({ message: 'Failed to load session.', type: 'error' });
       }
     };
+
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,36 +99,30 @@ const DentgoChat = () => {
       }
 
       const id = uuid();
-      add({
-        id,
-        role: 'user',
-        html: text,
-        timestamp: Date.now(),
-      });
-
-      add({
-        id: id + '-ai',
-        role: 'assistant',
-        html: '',
-        timestamp: Date.now(),
-      });
-
+      add({ id, role: 'user', html: text, timestamp: Date.now() });
+      add({ id: id + '-ai', role: 'assistant', html: '', timestamp: Date.now() });
       setTyping(true);
 
       try {
-        const { answer, sessionId: sid } = await askDentgo(
-          text,
-          msgs.map((m) => ({ role: m.role, text: m.html })),
-          sessionId
-        );
-        if (!sessionId) {
+        const fetchFn = () =>
+          askDentgo(
+            text,
+            msgs.map((m) => ({ role: m.role, text: m.html })),
+            sessionId ?? undefined // Ensure it's undefined not null
+          );
+
+        const { answer, sessionId: sid } = await withTokenRetry(fetchFn);
+
+        if (!sessionId && sid) {
           setSessionId(sid);
           navigate(`?sessionId=${sid}`, { replace: true });
         }
+
         replaceLast({ html: answer });
         setUsedToday((n) => n + 1);
       } catch (err: any) {
-        replaceLast({ html: '❌ ' + (err?.message || 'Error'), error: true });
+        const msg = err?.message || 'Unexpected error occurred.';
+        replaceLast({ html: `❌ ${msg}`, error: true });
       } finally {
         setTyping(false);
       }

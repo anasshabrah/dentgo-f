@@ -1,10 +1,9 @@
 // src/components/chat/ChatInput.tsx
-
 import { useState, useCallback } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDropzone } from 'react-dropzone';
 import useAutoResizeTextarea from '@/hooks/useAutoResizeTextarea';
-import { Paperclip, Image as ImageIcon, X, Send } from 'lucide-react';
+import { Image as ImageIcon, X, Send } from 'lucide-react';
 import clsx from 'clsx';
 
 interface Props {
@@ -16,12 +15,6 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
   const [value, setValue] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const ref = useAutoResizeTextarea<HTMLTextAreaElement>();
-
-  const dropzone = useDropzone({
-    accept: { 'image/*': [] },
-    onDrop: (acc) => setFiles(acc),
-    disabled,
-  });
 
   const clear = () => {
     setValue('');
@@ -35,6 +28,12 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
     clear();
   };
 
+  const dropzone = useDropzone({
+    accept: { 'image/*': [] },
+    onDrop: (accepted) => setFiles(accepted),
+    disabled,
+  });
+
   useHotkeys(
     'enter',
     (e) => {
@@ -42,56 +41,62 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
       e.preventDefault();
       submit();
     },
-    { enableOnFormTags: true, filter: () => ref.current === document.activeElement }
+    {
+      enableOnFormTags: true,
+      filter: () => ref.current === document.activeElement,
+    }
   );
 
   return (
     <div
       {...dropzone.getRootProps()}
       className={clsx(
-        'bg-background border-t border-gray-200 dark:border-gray-700 p-4',
-        dropzone.isDragActive && 'ring-2 ring-primary'
+        'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3',
+        dropzone.isDragActive && 'ring-2 ring-primary rounded'
       )}
     >
-      <div className="flex flex-col gap-2">
-        {/* Text Input Box */}
-        <div className="relative w-full">
+      <div className="flex flex-col gap-3">
+        {/* Text input area */}
+        <div className="relative">
           <textarea
             ref={ref}
             rows={1}
             disabled={disabled}
-            placeholder="Send a message or drop an image…"
-            className="w-full resize-none rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 pr-12 shadow-sm text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            placeholder="Message Dentgo…"
             value={value}
             onChange={(e) => setValue(e.target.value)}
+            className={clsx(
+              'w-full resize-none rounded-md border text-sm bg-white dark:bg-gray-900',
+              'border-gray-300 dark:border-gray-700 px-4 py-2 pr-11 shadow-sm',
+              'text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/50'
+            )}
           />
-
-          {/* Send Button */}
           {(!disabled && (value.trim() || files.length > 0)) && (
             <button
               onClick={submit}
-              className="absolute right-2 bottom-2 p-1.5 rounded-lg text-primary hover:bg-primary/10 transition"
-              aria-label="Send"
+              aria-label="Send message"
+              className="absolute right-2 bottom-2 text-primary hover:bg-primary/10 rounded-full p-1.5 transition"
             >
               <Send size={18} />
             </button>
           )}
         </div>
 
-        {/* Image Preview Thumbnails */}
+        {/* Image Previews */}
         {files.length > 0 && (
           <div className="flex gap-2 flex-wrap">
-            {files.map((f, i) => (
-              <div key={i} className="relative w-20 h-20 rounded overflow-hidden border border-gray-300 dark:border-gray-700">
+            {files.map((file, i) => (
+              <div
+                key={i}
+                className="relative w-20 h-20 rounded border border-gray-300 dark:border-gray-700 overflow-hidden"
+              >
                 <img
-                  src={URL.createObjectURL(f)}
-                  alt="upload"
+                  src={URL.createObjectURL(file)}
+                  alt="Upload preview"
                   className="w-full h-full object-cover"
                 />
                 <button
-                  onClick={() =>
-                    setFiles((arr) => arr.filter((_, idx) => idx !== i))
-                  }
+                  onClick={() => setFiles((prev) => prev.filter((_, idx) => idx !== i))}
                   className="absolute top-0 right-0 bg-black/60 hover:bg-black/80 text-white p-1 rounded-bl"
                   aria-label="Remove image"
                 >
@@ -102,9 +107,9 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
           </div>
         )}
 
-        {/* Action Row */}
-        <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 text-sm">
-          <label className="flex items-center gap-1 cursor-pointer hover:text-primary">
+        {/* Action bar */}
+        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          <label className="flex items-center gap-1 cursor-pointer hover:text-primary transition">
             <ImageIcon size={16} />
             <span className="hidden sm:inline">Upload</span>
             <input
@@ -119,8 +124,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
               }}
             />
           </label>
-
-          {/* You can enable voice input here later */}
+          {/* Add voice or mic support here in future */}
         </div>
       </div>
     </div>

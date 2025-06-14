@@ -1,5 +1,4 @@
 // src/api/chat.ts
-
 import { API_BASE } from "@/config";
 
 export interface ChatMessage {
@@ -17,21 +16,25 @@ export interface ChatResponse {
  */
 async function handleErrorResponse(
   res: Response,
-  defaultMessage: string
+  fallbackMessage: string
 ): Promise<never> {
-  const text = await res.text().catch(() => "");
-  let errorMsg = defaultMessage;
+  let errorMsg = fallbackMessage;
   try {
-    const body = JSON.parse(text);
-    errorMsg = body.error || errorMsg;
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      errorMsg = json?.error || fallbackMessage;
+    } catch {
+      if (text) errorMsg = text;
+    }
   } catch {
-    errorMsg = text || errorMsg;
+    // silent
   }
   throw new Error(errorMsg);
 }
 
 /**
- * Sends a message to the Dentgo chat assistant.
+ * Sends a message to the Dentgo chat assistant, retrying once on 401.
  */
 export async function askDentgo(
   prompt: string,
@@ -39,25 +42,47 @@ export async function askDentgo(
   sessionId: number | null = null,
   signal?: AbortSignal
 ): Promise<ChatResponse> {
-  const payload: Record<string, any> = {
-    prompt,
-    history,
-    ...(sessionId !== null ? { sessionId } : {})
+  const makeRequest = async (): Promise<ChatResponse> => {
+    const payload: Record<string, any> = {
+      prompt,
+      history,
+      ...(sessionId !== null ? { sessionId } : {}),
+    };
+
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+      signal,
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("Unauthorized");
+      await handleErrorResponse(res, "Chat failed");
+    }
+
+    return res.json();
   };
 
-  const res = await fetch(`${API_BASE}/api/chat`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-    body: JSON.stringify(payload),
-    signal,
-  });
+  try {
+    return await makeRequest();
+  } catch (err: any) {
+    if (err.message === "Unauthorized") {
+      const refresh = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
 
-  if (!res.ok) {
-    await handleErrorResponse(res, "Chat failed");
+      if (!refresh.ok) {
+        await handleErrorResponse(refresh, "Session expired. Please log in again.");
+      }
+
+      return await makeRequest(); // retry after refresh
+    }
+
+    throw err;
   }
-
-  return res.json();
 }

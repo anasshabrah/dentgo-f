@@ -15,52 +15,92 @@ export interface ChatSession {
   messages: ChatMessage[];
 }
 
+type ChatSessionSummary = Omit<ChatSession, "messages">;
+
 /**
  * Utility: Parses error responses consistently.
  */
 async function handleErrorResponse(
   res: Response,
-  defaultMessage: string
+  fallbackMessage: string
 ): Promise<never> {
-  const text = await res.text().catch(() => "");
-  let errorMsg = defaultMessage;
+  let errorMsg = fallbackMessage;
   try {
-    const body = JSON.parse(text);
-    errorMsg = body.error || errorMsg;
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      errorMsg = json?.error || fallbackMessage;
+    } catch {
+      if (text) errorMsg = text;
+    }
   } catch {
-    errorMsg = text || errorMsg;
+    // silent
   }
   throw new Error(errorMsg);
 }
 
 /**
+ * Utility: Makes fetch with optional 401 refresh-and-retry.
+ */
+async function fetchWithRetry<T>(
+  input: RequestInfo,
+  init: RequestInit,
+  fallbackError: string
+): Promise<T> {
+  const makeRequest = async () => {
+    const res = await fetch(input, init);
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("Unauthorized");
+      await handleErrorResponse(res, fallbackError);
+    }
+    return res.json() as Promise<T>;
+  };
+
+  try {
+    return await makeRequest();
+  } catch (err: any) {
+    if (err.message === "Unauthorized") {
+      const refresh = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!refresh.ok) {
+        await handleErrorResponse(refresh, "Session expired. Please log in again.");
+      }
+      return await makeRequest();
+    }
+    throw err;
+  }
+}
+
+/**
  * Fetches all chat sessions for the current user
  */
-export async function fetchChatSessions(): Promise<Omit<ChatSession, 'messages'>[]> {
-  const res = await fetch(`${API_BASE}/api/chats`, {
-    method: "GET",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to fetch chat sessions");
-  }
-  return res.json();
+export async function fetchChatSessions(): Promise<ChatSessionSummary[]> {
+  return fetchWithRetry<ChatSessionSummary[]>(
+    `${API_BASE}/api/chats`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    },
+    "Failed to fetch chat sessions"
+  );
 }
 
 /**
  * Fetches a specific chat session by ID
  */
 export async function fetchChatSession(id: number): Promise<ChatSession> {
-  const res = await fetch(`${API_BASE}/api/chats/${id}`, {
-    method: "GET",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to fetch chat session");
-  }
-  return res.json();
+  return fetchWithRetry<ChatSession>(
+    `${API_BASE}/api/chats/${id}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    },
+    "Failed to fetch chat session"
+  );
 }
 
 /**
@@ -70,13 +110,14 @@ export async function endChatSession(
   sessionId: number,
   title?: string
 ): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/chats/${sessionId}/end`, {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(title ? { title } : {}),
-  });
-  if (!res.ok) {
-    await handleErrorResponse(res, "Failed to end chat session");
-  }
+  await fetchWithRetry<void>(
+    `${API_BASE}/api/chats/${sessionId}/end`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(title ? { title } : {}),
+    },
+    "Failed to end chat session"
+  );
 }
