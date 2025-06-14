@@ -24,7 +24,7 @@ export default function ChatBubble({
   return (
     <div
       className={clsx(
-        'peer group my-2 flex px-2',
+        'peer group my-2 flex px-4',
         isUser ? 'justify-end' : 'justify-start'
       )}
       dir="auto"
@@ -33,7 +33,7 @@ export default function ChatBubble({
       {!isUser && (
         <img
           src="/favicon.png"
-          alt="AI"
+          alt="Assistant avatar"
           className="w-7 h-7 self-start rounded me-2 mt-1"
         />
       )}
@@ -48,7 +48,7 @@ export default function ChatBubble({
         layout
         transition={{ layout: { duration: 0.2 } }}
       >
-        {/* Collapse/expand toggle button */}
+        {/* Collapse/expand toggle */}
         {onToggle && (
           <button
             onClick={onToggle}
@@ -62,7 +62,6 @@ export default function ChatBubble({
           </button>
         )}
 
-        {/* Message content with animation */}
         <AnimatePresence initial={false}>
           {!collapsed && (
             <motion.div
@@ -77,13 +76,14 @@ export default function ChatBubble({
           )}
         </AnimatePresence>
 
-        {/* Timestamp on hover */}
+        {/* Timestamp tooltip */}
         <span
           className={clsx(
             'absolute text-[10px] transition-opacity duration-200 opacity-0 group-hover:opacity-100',
             isUser ? 'bottom-[-18px] right-0' : 'bottom-[-18px] left-0',
             'text-gray-500 dark:text-gray-400'
           )}
+          aria-label="Message timestamp"
         >
           {time}
         </span>

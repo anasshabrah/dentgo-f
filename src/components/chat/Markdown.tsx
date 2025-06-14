@@ -3,25 +3,22 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import rehypeSanitize from 'rehype-sanitize';
 import rehypeHighlight from 'rehype-highlight';
-import 'highlight.js/styles/github.css'; // Alternatively use a custom theme
+import 'highlight.js/styles/github.css';
 
 export default function Markdown({ children }: { children: string }) {
   return (
     <ReactMarkdown
-      className="prose dark:prose-invert max-w-none text-[15px]
+      className="prose dark:prose-invert max-w-none text-[15px] leading-relaxed
                  prose-p:my-2 prose-h1:mt-6 prose-h1:mb-3
                  prose-h2:mt-5 prose-h2:mb-2
                  prose-ul:my-2 prose-ol:my-2 prose-li:my-1
                  prose-table:my-4 prose-img:my-2
-                 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-md prose-pre:p-4 prose-code:before:content-none prose-code:after:content-none"
+                 prose-pre:bg-gray-100 dark:prose-pre:bg-gray-900 prose-pre:rounded-md prose-pre:p-4
+                 prose-code:before:content-none prose-code:after:content-none"
       remarkPlugins={[remarkGfm]}
-      rehypePlugins={[
-        rehypeRaw,
-        rehypeSanitize,
-        rehypeHighlight
-      ]}
+      rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
       linkTarget="_blank"
       components={{
         a: ({ href, children }) => (
@@ -46,7 +43,7 @@ export default function Markdown({ children }: { children: string }) {
               {children}
             </code>
           );
-        }
+        },
       }}
     >
       {children}
