@@ -39,7 +39,7 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    if (subscription?.status === "active") {
+    if (subscription?.subscriptionId && subscription.status === "active") {
       // Reset any existing chat state
       resetMessages();
       // Navigate to a fresh chat session
@@ -90,6 +90,7 @@ const DentgoGptHome: React.FC = () => {
               onClick={handleStartChat}
               className="w-full bg-primary text-white font-medium text-lg rounded-xl py-4 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
               aria-label="Start chat with Dentgo"
+              disabled={subscription === undefined}
             >
               Start Chat with Dentgo
             </button>

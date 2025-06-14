@@ -1,16 +1,17 @@
-// src/components/SideMenu.tsx
 import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useModal } from "@/context/ModalContext";
 import { useAuth } from "@/context/AuthContext";
 import { useMessageStore } from "@/hooks/useMessageStore";
+import { useStripeData } from "@/context/StripeContext";
 
 export default function SideMenu() {
   const { isOpen, close } = useModal();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const resetMessages = useMessageStore((state) => state.reset);
+  const { subscription } = useStripeData();
 
   const goToDeletePage = () => {
     close();
@@ -21,6 +22,16 @@ export default function SideMenu() {
     await logout();
     navigate("/", { replace: true });
     close();
+  };
+
+  const handleNewChat = () => {
+    close();
+    if (subscription?.subscriptionId && subscription.status === "active") {
+      resetMessages();
+      navigate("/dentgo-chat");
+    } else {
+      navigate("/subscribe");
+    }
   };
 
   return (
@@ -49,13 +60,9 @@ export default function SideMenu() {
 
                   <nav className="flex-1 space-y-2">
                     {/* New Chat */}
-                    <Link
-                      to="/dentgo-chat"
-                      onClick={() => {
-                        resetMessages();
-                        close();
-                      }}
-                      className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                    <button
+                      onClick={handleNewChat}
+                      className="flex w-full items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                     >
                       <div className="flex items-center gap-4">
                         <svg
@@ -104,7 +111,7 @@ export default function SideMenu() {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                    </Link>
+                    </button>
 
                     {/* History */}
                     <Link
