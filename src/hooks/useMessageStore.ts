@@ -1,5 +1,5 @@
 // src/hooks/useMessageStore.ts
-import create from 'zustand';
+import { create } from 'zustand';
 
 type Role = 'user' | 'assistant';
 
