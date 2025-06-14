@@ -39,13 +39,19 @@ export async function askDentgo(
   sessionId: number | null = null,
   signal?: AbortSignal
 ): Promise<ChatResponse> {
+  const payload: Record<string, any> = {
+    prompt,
+    history,
+    ...(sessionId !== null ? { sessionId } : {})
+  };
+
   const res = await fetch(`${API_BASE}/api/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     credentials: "include",
-    body: JSON.stringify({ prompt, history, sessionId }),
+    body: JSON.stringify(payload),
     signal,
   });
 
