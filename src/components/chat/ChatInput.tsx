@@ -51,12 +51,11 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
     <div
       {...dropzone.getRootProps()}
       className={clsx(
-        'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom',
-        dropzone.isDragActive && 'ring-2 ring-primary rounded'
+        'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom rounded-xl',
+        dropzone.isDragActive && 'ring-2 ring-primary'
       )}
     >
       <div className="flex flex-col gap-3">
-        {/* Text input area */}
         <div className="relative">
           <textarea
             ref={ref}
@@ -82,7 +81,6 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
           )}
         </div>
 
-        {/* Image Previews */}
         {files.length > 0 && (
           <div className="flex gap-2 flex-wrap">
             {files.map((file, i) => (
@@ -107,7 +105,6 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
           </div>
         )}
 
-        {/* Action bar */}
         <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
           <label className="flex items-center gap-1 cursor-pointer hover:text-primary transition">
             <ImageIcon size={16} />
