@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import logo from "@/assets/images/logo.png";
 import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
-import { useStripeData } from "@/context/StripeContext";
+import { useStripeData } from "@context/StripeContext";
 import Loader from "@components/ui/Loader";
 import { useMessageStore } from "@/hooks/useMessageStore";
 
@@ -15,17 +15,15 @@ const DentgoGptHome: React.FC = () => {
   const resetMessages = useMessageStore((state) => state.reset);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show loading while auth initializes
   if (initializing) {
     return <Loader />;
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Clean up any off-canvas backdrops left over
+  // Clean up any leftover off-canvas backdrops
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -39,13 +37,12 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    // subscription.plan will be "PLUS" for paid users
-    if (subscription?.plan === "PLUS") {
-      // Reset any existing chat state
+    // subscription.subscriptionId is non-null when they have an active paid plan
+    if (subscription?.subscriptionId) {
       resetMessages();
-      // Navigate to a fresh chat session
       navigate("/dentgo-chat");
     } else {
+      // Not yet subscribed → send them to subscribe flow
       navigate("/subscribe");
     }
   };
