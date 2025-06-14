@@ -1,3 +1,4 @@
+// src/pages/DentgoGptHome.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import logo from "@/assets/images/logo.png";
@@ -12,20 +13,11 @@ const DentgoGptHome: React.FC = () => {
   const { subscription } = useStripeData();
   const resetMessages = useMessageStore((state) => state.reset);
 
-  // State for showing the AI xRay modal
   const [showXRayModal, setShowXRayModal] = useState(false);
 
-  // Show loading while auth initializes
-  if (initializing) {
-    return <Loader />;
-  }
+  if (initializing) return <Loader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Clean up any off-canvas backdrops left over
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -34,12 +26,7 @@ const DentgoGptHome: React.FC = () => {
     }
   }, []);
 
-  const handlePlusSubscription = () => {
-    navigate("/subscribe");
-  };
-
   const handleStartChat = () => {
-    // Allow both FREE and PLUS plans to start chat
     if (subscription?.plan === "FREE" || subscription?.plan === "PLUS") {
       resetMessages();
       navigate("/dentgo-chat");
@@ -48,76 +35,70 @@ const DentgoGptHome: React.FC = () => {
     }
   };
 
-  const handleTryXRay = () => {
-    setShowXRayModal(true);
-  };
-
-  const handleXRaySubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleXRaySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: handle x-ray upload, send to Google Drive, etc.
-    setShowXRayModal(false);
-    // Optionally navigate or show confirmation
+    const form = e.currentTarget;
+    const name = (form.querySelector("#patient-name") as HTMLInputElement)?.value;
+    const age = (form.querySelector("#patient-age") as HTMLInputElement)?.value;
+    const fileNumber = (form.querySelector("#file-number") as HTMLInputElement)?.value;
+    const fileInput = form.querySelector("#xray-file") as HTMLInputElement;
+    const file = fileInput?.files?.[0];
+
+    if (!name || !file) {
+      alert("Patient name and x-ray image are required.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("age", age);
+    formData.append("fileNumber", fileNumber);
+    formData.append("image", file);
+
+    try {
+      const res = await fetch("/api/xray-upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      alert("Upload successful!");
+      setShowXRayModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while uploading.");
+    }
   };
 
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
       <main className="flex-1 bg-gray-100">
         <div className="mx-auto max-w-lg px-4">
-          {/* Show Dentgo Plus promo only if not PLUS */}
-          {subscription?.plan !== "PLUS" && (
-            <section
-              className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
-              aria-labelledby="dentgo-plus-title"
-            >
-              <div className="flex flex-col sm:flex-row">
-                <div className="flex-1 p-6 space-y-2">
-                  <h2
-                    id="dentgo-plus-title"
-                    className="text-2xl font-semibold text-gray-800"
-                  >
-                    Dentgo Plus
-                  </h2>
-                  <p className="text-gray-500 text-base">
-                    Unlock Dentgo premium to access all features.
-                  </p>
-                  <button
-                    onClick={handlePlusSubscription}
-                    className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                    aria-label="Upgrade to Dentgo Plus"
-                  >
-                    Upgrade
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
 
-          {/* Show AI xRay Reporter for PLUS users */}
-          {subscription?.plan === "PLUS" && (
-            <section
-              className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
-              aria-labelledby="xray-reporter-title"
-            >
-              <div className="p-6 space-y-2 text-center">
-                <h2
-                  id="xray-reporter-title"
-                  className="text-2xl font-semibold text-gray-800"
-                >
-                  Try our AI xRay Reporter
-                </h2>
-                <p className="text-gray-500 text-base">
-                  Upload dental x-rays to generate detailed AI reports.
-                </p>
-                <button
-                  onClick={handleTryXRay}
-                  className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                  aria-label="Try AI xRay Reporter"
-                >
-                  Try AI xRay Reporter
-                </button>
-              </div>
-            </section>
-          )}
+          {/* Always show AI xRay Reporter */}
+          <section
+            className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
+            aria-labelledby="xray-reporter-title"
+          >
+            <div className="p-6 space-y-2 text-center">
+              <h2
+                id="xray-reporter-title"
+                className="text-2xl font-semibold text-gray-800"
+              >
+                Try our AI xRay Reporter
+              </h2>
+              <p className="text-gray-500 text-base">
+                Upload dental x-rays to generate detailed AI reports.
+              </p>
+              <button
+                onClick={() => setShowXRayModal(true)}
+                className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                aria-label="Try AI xRay Reporter"
+              >
+                Try AI xRay Reporter
+              </button>
+            </div>
+          </section>
 
           <div className="mt-8 flex justify-center">
             <button
@@ -174,7 +155,7 @@ const DentgoGptHome: React.FC = () => {
                   type="file"
                   accept="image/*"
                   required
-                  className="w-full" 
+                  className="w-full"
                 />
               </div>
               <div>
