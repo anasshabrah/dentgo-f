@@ -13,6 +13,9 @@ import {
   TypingIndicator
 } from "@chatscope/chat-ui-kit-react";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeSanitize from "rehype-sanitize";
 
 import { askDentgo } from "@/api/chat";
 import { fetchChatSession } from "@/api/chats";
@@ -20,6 +23,10 @@ import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import { useStripeData } from "@/context/StripeContext";
 import { useToast } from "@/components/ui/ToastProvider";
 import Loader from "@/components/ui/Loader";
+
+function isRTL(text: string) {
+  return /[\u0600-\u06FF]/.test(text);
+}
 
 interface ChatMessage {
   text: string;
@@ -48,10 +55,10 @@ const DentgoChat: React.FC = () => {
   const isBasic = !subscription?.subscriptionId;
   const greetingPlaceholder = "Hey, I'm Dentgo 😊 How can I assist today?";
 
-  // Load usage count and existing session (if any)
+  // Initialize: fetch usage and, if sessionId present, load past messages
   useEffect(() => {
     (async () => {
-      // fetch today's usage count
+      // Fetch today's usage count
       try {
         const today = new Date().toISOString().slice(0, 10);
         const res = await fetch(`${API_BASE}/api/chat/count?date=${today}`, {
@@ -65,7 +72,7 @@ const DentgoChat: React.FC = () => {
         // ignore
       }
 
-      // check for sessionId in URL
+      // Check for existing session
       const params = new URLSearchParams(search);
       const sid = params.has("sessionId") ? Number(params.get("sessionId")) : null;
       if (sid) {
@@ -94,12 +101,12 @@ const DentgoChat: React.FC = () => {
     })();
   }, [search]);
 
-  // Send a message to Dentgo
   const handleSend = useCallback(
     async (text: string) => {
       const prompt = text.trim();
       if (!prompt || isTyping || sessionMeta.isEnded) return;
 
+      // Free-tier limit check
       if (isBasic && usedToday >= FREE_MESSAGES_PER_DAY) {
         addToast({
           message: `You’ve used ${usedToday}/${FREE_MESSAGES_PER_DAY} free messages today.`,
@@ -109,7 +116,7 @@ const DentgoChat: React.FC = () => {
         return;
       }
 
-      // add user message
+      // Append user message
       setMessages((prev) => [...prev, { text: prompt, sender: "You" }]);
       historyRef.current.push({ role: "user", text: prompt });
       setTyping(true);
@@ -120,12 +127,14 @@ const DentgoChat: React.FC = () => {
           historyRef.current.slice(0, -1),
           sessionId
         );
-        // set sessionId in URL if new
+
+        // Save sessionId if newly created
         if (!sessionId) {
           setSessionId(newSid);
           navigate(`?sessionId=${newSid}`, { replace: true });
         }
-        // add bot response
+
+        // Append assistant response
         setMessages((prev) => [...prev, { text: answer, sender: "Dentgo" }]);
         historyRef.current.push({ role: "assistant", text: answer });
         setUsedToday((u) => u + 1);
@@ -141,41 +150,67 @@ const DentgoChat: React.FC = () => {
     [isTyping, sessionMeta.isEnded, isBasic, usedToday, addToast, sessionId, navigate]
   );
 
-  if (loading) return <Loader fullscreen />;
+  if (loading) {
+    return <Loader fullscreen />;
+  }
 
   return (
     <MainContainer style={{ height: "100vh", background: "var(--background-color)" }}>
       <ChatContainer>
         <ConversationHeader
-          info={sessionMeta.title}
-          status={
+          title={sessionMeta.title}
+          info={
             sessionMeta.isEnded
               ? "Session ended"
               : isTyping
               ? "Dentgo is typing..."
-              : "Online"
-          }
-          typingIndicator={
-            isTyping ? <TypingIndicator content="Dentgo is typing…" /> : undefined
+              : subscription?.subscriptionId
+              ? "PLUS"
+              : `Free: ${usedToday}/${FREE_MESSAGES_PER_DAY}`
           }
         />
 
-        <MessageList>
-          {messages.map((m, i) => (
-            <Message
-              key={i}
-              model={{
-                message: m.text,
-                sender: m.sender,
-                direction: m.sender === "Dentgo" ? "incoming" : "outgoing"
-              }}
-            >
-              <Avatar
-                src={m.sender === "Dentgo" ? "/favicon.png" : undefined}
-                name={m.sender}
-              />
-            </Message>
-          ))}
+        <MessageList
+          scrollBehavior="smooth"
+          typingIndicator={isTyping ? <TypingIndicator content="Dentgo is typing…" /> : null}
+        >
+          {messages.map((m, i) => {
+            // Check for inline image markdown
+            const match =
+              m.text.match(/!\[[^\]]*]\((?<url>https?:\/\/[^\s)]+)\)/) ||
+              m.text.match(/https?:\/\/[^\s]+\.(png|jpe?g|webp|gif)/);
+            const imgUrl = match ? (match.groups?.url ?? match[0]) : undefined;
+            const md = match ? m.text.replace(match[0], "") : m.text;
+
+            return (
+              <Message
+                key={i}
+                model={{
+                  message: (
+                    <>
+                      {imgUrl && (
+                        <div className="mb-2">
+                          <img
+                            src={imgUrl}
+                            alt=""
+                            className="max-w-full rounded-lg border border-black/5 dark:border-white/10 mb-2"
+                          />
+                        </div>
+                      )}
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                        {md || "*Image*"}
+                      </ReactMarkdown>
+                    </>
+                  ),
+                  sentTime: "",
+                  sender: m.sender,
+                  direction: m.sender === "Dentgo" ? "incoming" : "outgoing"
+                }}
+              >
+                {m.sender === "Dentgo" && <Avatar src="/favicon.png" name="Dentgo" />}
+              </Message>
+            );
+          })}
         </MessageList>
 
         {showUpgradeBanner && (
@@ -192,10 +227,8 @@ const DentgoChat: React.FC = () => {
 
         <MessageInput
           placeholder={greetingPlaceholder}
-          sendButton={!sessionMeta.isEnded}
           disabled={sessionMeta.isEnded}
           attachButton={false}
-          typing={isTyping}
           onSend={handleSend}
         />
       </ChatContainer>
