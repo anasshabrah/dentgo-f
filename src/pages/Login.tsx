@@ -18,9 +18,13 @@ const Login: React.FC = () => {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const { login, isAuthenticated, initializing } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [googleReady, setGoogleReady] = useState(false);
 
+  // New loading flags
+  const [initializingGoogle, setInitializingGoogle] = useState(true);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+
+  // Redirect if already logged in
   useEffect(() => {
     if (!initializing && isAuthenticated) {
       navigate("/dentgo-gpt-home", { replace: true });
@@ -31,6 +35,7 @@ const Login: React.FC = () => {
     async (response: any) => {
       const { credential } = response;
       if (!credential) {
+        setGoogleLoading(false);
         addToast({ message: "No credentials returned. Please try again.", type: "error" });
         return;
       }
@@ -46,32 +51,34 @@ const Login: React.FC = () => {
             "Authentication failed. Please try again or use a different browser mode.",
           type: "error",
         });
+      } finally {
+        setGoogleLoading(false);
       }
     },
     [login, navigate, addToast]
   );
 
+  // Load Google's One-Tap SDK and initialize
   useEffect(() => {
     let retryTimeout: number | null = null;
 
     loadGoogle(() => {
       const tryInitialize = () => {
-        if (window.google?.accounts?.id) {
+        if ((window as any).google?.accounts?.id) {
           if (!CLIENT_ID) {
             console.error("Missing VITE_GOOGLE_CLIENT_ID!");
             addToast({ message: "Google Login misconfigured: missing client ID.", type: "error" });
-            setLoading(false);
+            setInitializingGoogle(false);
             return;
           }
 
-          window.google.accounts.id.initialize({
+          (window as any).google.accounts.id.initialize({
             client_id: CLIENT_ID,
             callback: handleCredentialResponse,
             ux_mode: "popup",
           });
 
-          setGoogleReady(true);
-          setLoading(false);
+          setInitializingGoogle(false);
         } else {
           retryTimeout = window.setTimeout(tryInitialize, 100);
         }
@@ -85,8 +92,9 @@ const Login: React.FC = () => {
     };
   }, [handleCredentialResponse, addToast]);
 
-  if (initializing || loading) {
-    return <Loader />;
+  // If any login is in progress, show a full-screen loader
+  if (initializing || initializingGoogle || googleLoading || appleLoading) {
+    return <Loader fullscreen />;
   }
 
   if (!initializing && isAuthenticated) {
@@ -98,68 +106,65 @@ const Login: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col items-center justify-center bg-primary py-6">
         <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
-        <h1 className="text-white text-2xl font-semibold mt-3 text-center">
-          DentGo AI
-        </h1>
+        <h1 className="text-white text-2xl font-semibold mt-3 text-center">DentGo AI</h1>
       </div>
 
       {/* Main Login */}
       <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
         <div className="w-full max-w-md">
-          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">
-            Welcome
-          </h2>
+          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">Welcome</h2>
 
           <div className="flex flex-col gap-4 w-full">
             {/* Google Login */}
             <button
               type="button"
-              disabled={!googleReady}
+              disabled={googleLoading}
               className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
-                googleReady ? "hover:bg-gray-100" : "opacity-50 cursor-not-allowed"
+                googleLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
               }`}
               onClick={() => {
-                if (window.google?.accounts?.id && googleReady) {
-                  try {
-                    window.google.accounts.id.prompt();
-                  } catch (err: any) {
-                    if (err.name !== "AbortError") {
-                      console.error("Google prompt error:", err);
-                      addToast({
-                        message: "Unexpected error when opening Google login. Please try again.",
-                        type: "error",
-                      });
-                    }
+                setGoogleLoading(true);
+                try {
+                  (window as any).google.accounts.id.prompt();
+                } catch (err: any) {
+                  setGoogleLoading(false);
+                  if (err.name !== "AbortError") {
+                    console.error("Google prompt error:", err);
+                    addToast({
+                      message: "Unexpected error when opening Google login. Please try again.",
+                      type: "error",
+                    });
                   }
-                } else {
-                  addToast({ message: "Google login is not ready yet.", type: "error" });
                 }
               }}
             >
               <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
-              <span>Continue with Google</span>
+              <span>{googleLoading ? "Loading…" : "Continue with Google"}</span>
             </button>
 
             {/* Apple Login */}
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100 active:scale-[.97] duration-150"
+              disabled={appleLoading}
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
+                appleLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
+              }`}
               onClick={async () => {
+                setAppleLoading(true);
                 try {
                   await loginWithApple();
                 } catch (err: any) {
+                  setAppleLoading(false);
                   console.error("Apple login error:", err);
                   addToast({
-                    message:
-                      err?.message ||
-                      "Apple authentication failed. Please try again.",
+                    message: err?.message || "Apple authentication failed. Please try again.",
                     type: "error",
                   });
                 }
               }}
             >
               <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
-              <span>Continue with Apple</span>
+              <span>{appleLoading ? "Redirecting…" : "Continue with Apple"}</span>
             </button>
           </div>
         </div>
