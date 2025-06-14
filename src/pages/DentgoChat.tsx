@@ -1,156 +1,183 @@
-// src/pages/DentgoChat.tsx
-import {
-  useState,
-  useEffect,
-  useCallback,
-  Fragment,
-} from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { v4 as uuid } from 'uuid';
-import ScrollToBottom from 'react-scroll-to-bottom';
-import { useMessageStore } from '@/hooks/useMessageStore';
-import { askDentgo } from '@/api/chat';
-import { fetchChatSession } from '@/api/chats';
-import { API_BASE } from '@/config';
-import { useStripeData } from '@/context/StripeContext';
-import { useToast } from '@/components/ui/ToastProvider';
-import ChatBubble from '@/components/chat/ChatBubble';
-import TypingDots from '@/components/chat/TypingDots';
-import ChatInput from '@/components/chat/ChatInput';
+import React, { useEffect, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import { useAuth } from "@context/AuthContext";
+import { useStripeData } from "@context/StripeContext";
+import Loader from "@components/ui/Loader";
+import { useMessageStore } from "@/hooks/useMessageStore";
 
-const withTokenRetry = async <T,>(fetchFn: () => Promise<T>): Promise<T> => {
-  try {
-    return await fetchFn();
-  } catch (err: any) {
-    if (err?.response?.status === 401 || err?.status === 401) {
-      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (res.ok) {
-        return await fetchFn();
-      }
-    }
-    throw err;
-  }
-};
-
-const DentgoChat = () => {
+const DentgoGptHome: React.FC = () => {
   const navigate = useNavigate();
-  const { search } = useLocation();
+  const { isAuthenticated, initializing } = useAuth();
   const { subscription } = useStripeData();
-  const { addToast } = useToast();
-  const { msgs, add, replaceLast, reset } = useMessageStore();
+  const resetMessages = useMessageStore((state) => state.reset);
 
-  const [isTyping, setTyping] = useState(false);
-  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [showXRayModal, setShowXRayModal] = useState(false);
+
+  if (initializing) return <Loader />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const sid = new URLSearchParams(search).get('sessionId');
-        if (sid) {
-          const session = await fetchChatSession(Number(sid));
-          reset();
-          session.messages.forEach((m) =>
-            add({
-              id: uuid(),
-              role: m.role === 'USER' ? 'user' : 'assistant',
-              html: m.content,
-              timestamp: Date.parse(
-                m.role === 'USER'
-                  ? session.startedAt
-                  : session.endedAt ?? session.startedAt
-              ),
-            })
-          );
-          setSessionId(session.id);
-        }
-      } catch {
-        addToast({ message: 'Failed to load session.', type: 'error' });
-      }
-    };
-
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const backdrop = document.querySelector(".offcanvas-backdrop.show");
+    if (backdrop) {
+      backdrop.remove();
+      document.body.classList.remove("offcanvas-backdrop", "modal-open");
+    }
   }, []);
 
-  const send = useCallback(
-    async (text: string, images: File[]) => {
-      if (!text.trim() && images.length === 0) return;
+  const handleStartChat = () => {
+    if (subscription?.plan === "FREE" || subscription?.plan === "PLUS") {
+      resetMessages();
+      navigate("/dentgo-chat");
+    } else {
+      navigate("/subscribe");
+    }
+  };
 
-      const userMsgId = uuid();
-      add({ id: userMsgId, role: 'user', html: text, timestamp: Date.now() });
-      add({ id: userMsgId + '-ai', role: 'assistant', html: '', timestamp: Date.now() });
-      setTyping(true);
+  const handleXRaySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const name = (form.querySelector("#patient-name") as HTMLInputElement)?.value;
+    const fileInput = form.querySelector("#xray-file") as HTMLInputElement;
+    const file = fileInput?.files?.[0];
 
-      try {
-        if (images.length > 0) {
-          await Promise.all(
-            images.map(async (file) => {
-              const form = new FormData();
-              form.append('image', file);
-              const res = await fetch(`${API_BASE}/api/chat/analyze-image`, {
-                method: 'POST',
-                credentials: 'include',
-                body: form,
-              });
-              if (!res.ok) throw new Error('Image analysis failed');
-              return res.json();
-            })
-          );
-        }
+    if (!name || !file) {
+      alert("Patient name and x-ray image are required.");
+      return;
+    }
 
-        const fetchFn = () =>
-          askDentgo(
-            text,
-            msgs.map((m) => ({ role: m.role, text: m.html })),
-            sessionId ?? undefined,
-            images
-          );
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("image", file);
 
-        const { answer, sessionId: sid } = await withTokenRetry(fetchFn);
+    try {
+      const res = await fetch("/api/xray-upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        if (!sessionId && sid) {
-          setSessionId(sid);
-          navigate(`?sessionId=${sid}`, { replace: true });
-        }
-
-        replaceLast({ html: answer });
-      } catch (err: any) {
-        const msg = err?.message || 'Unexpected error occurred.';
-        replaceLast({ html: `❌ ${msg}`, error: true });
-      } finally {
-        setTyping(false);
-      }
-    },
-    [add, replaceLast, msgs, sessionId, navigate]
-  );
+      if (!res.ok) throw new Error("Upload failed");
+      alert("Upload successful!");
+      setShowXRayModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong while uploading.");
+    }
+  };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)] bg-gray-100 dark:bg-gray-900">
-      {/* Chat Container */}
-      <ScrollToBottom className="flex-1 overflow-y-auto mt-2 px-4 py-4 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
-        {msgs.map((m) => (
-          <Fragment key={m.id}>
-            <ChatBubble
-              role={m.role}
-              html={m.html || '<em>…</em>'}
-              timestamp={m.timestamp}
-            />
-          </Fragment>
-        ))}
-        {isTyping && <TypingDots />}
-      </ScrollToBottom>
+    <div className="bg-gray-100 min-h-screen flex flex-col font-sans">
+      <main className="flex-1 bg-gray-100">
+        <div className="mx-auto max-w-lg px-4">
+          {/* Always show AI xRay Reporter */}
+          <section
+            className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
+            aria-labelledby="xray-reporter-title"
+          >
+            <div className="p-6 space-y-2 text-center">
+              <h2
+                id="xray-reporter-title"
+                className="text-2xl font-semibold text-gray-800"
+              >
+                Try our AI xRay Reporter
+              </h2>
+              <p className="text-gray-500 text-base">
+                Upload dental x-rays to generate detailed AI reports.
+              </p>
+              <button
+                onClick={() => setShowXRayModal(true)}
+                className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                aria-label="Try AI xRay Reporter"
+              >
+                Try AI xRay Reporter
+              </button>
+            </div>
+          </section>
 
-      {/* Input Container */}
-      <div className="pt-2 pb-4">
-        <div className="mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 rounded-md px-4 py-4 shadow border border-gray-200 dark:border-gray-700">
-          <ChatInput onSubmit={send} disabled={isTyping} />
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleStartChat}
+              className="w-full bg-primary text-white font-medium text-lg rounded-xl py-4 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+              aria-label="Start chat with Dentgo"
+              disabled={subscription === undefined}
+            >
+              Start Chat with Dentgo
+            </button>
+          </div>
         </div>
-      </div>
+      </main>
+
+      {/* XRay Upload Modal */}
+      {showXRayModal && (
+        <>
+          {/* Dark overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowXRayModal(false)}
+            aria-hidden="true"
+          />
+          {/* Modal */}
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 shadow-lg">
+              <button
+                onClick={() => setShowXRayModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                aria-label="Close x-ray modal"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
+                AI xRay Reporter
+              </h3>
+              <form onSubmit={handleXRaySubmit} className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-1" htmlFor="xray-file">
+                    X-Ray Image
+                  </label>
+                  <input
+                    id="xray-file"
+                    type="file"
+                    accept="image/*"
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 mb-1" htmlFor="patient-name">
+                    Patient Name
+                  </label>
+                  <input
+                    id="patient-name"
+                    type="text"
+                    required
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-white font-medium text-base rounded-md py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                >
+                  Upload and Analyze
+                </button>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
-export default DentgoChat;
+export default DentgoGptHome;
