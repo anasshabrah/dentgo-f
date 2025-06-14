@@ -1,4 +1,4 @@
-// pages/Login.tsx
+// pages/Login.tsx – re-worked Google sign-in flow with graceful fallback
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
@@ -6,170 +6,116 @@ import Loader from '@components/ui/Loader';
 import logo from '@/assets/images/logo-w.png';
 import AppleIcon from '@/assets/images/Icon-apple.png';
 import GoogleIcon from '@/assets/images/Icon-google.png';
-import dentaiBottom from '@/assets/images/dentaiBottom.png';
+import dentaiBottom from '@/assets/images/dentai-bottom.svg';
+import { GOOGLE_CLIENT_ID, API_BASE } from '@/config';
+import useAuth from '@/hooks/useAuth';
+import { useToast } from '@/components/ui/use-toast';
 
-import { useAuth } from '@context/AuthContext';
-import { loginWithGoogle as loginWithGoogleAPI, loginWithApple } from '@/api/auth';
-import { useToast } from '@components/ui/ToastProvider';
-import { loadGoogle } from '@/lib/google';
+// --- Local helpers ---------------------------------------------------------
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+/**
+ * Trigger Google One-Tap / Popup sign-in *or* gracefully fall back to
+ * traditional OAuth redirect when the One-Tap UI is suppressed (e.g. because
+ * of iOS restrictions, user closed it recently, or third-party-cookie blocks).
+ */
+const triggerGoogleSignin = () => {
+  if (window.google?.accounts?.id) {
+    // Attempt One-Tap / Popup first. We pass a prompt callback so we know if
+    // Google decided not to display the UI (cool-down, browser unsupported…).
+    window.google.accounts.id.prompt((notification: any) => {
+      const notDisplayed = notification.isNotDisplayed?.();
+      const skipped = notification.isSkippedMoment?.();
+      if (notDisplayed || skipped) {
+        // The user won’t see any Google UI → fall back to full OAuth redirect.
+        window.location.href = `${API_BASE}/api/auth/google`;
+      }
+      // If the UI *is* displayed we don’t need to do anything else – the popup
+      // handles the flow and calls the credential callback we registered in
+      // `initialize()` below.
+    });
+  } else {
+    // Google script did not load for some reason → fallback
+    window.location.href = `${API_BASE}/api/auth/google`;
+  }
+};
+
+// ---------------------------------------------------------------------------
 
 const Login: React.FC = () => {
-  const { addToast } = useToast();
   const navigate = useNavigate();
-  const { login, isAuthenticated, initializing } = useAuth();
-
-  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const { isAuthenticated, loginLoading, loginWithGoogle } = useAuth();
   const [googleReady, setGoogleReady] = useState(false);
-  const [authenticating, setAuthenticating] = useState(false);
 
-  /* ------------------------------------------------------------------ */
-  /* Redirect if already signed-in                                       */
-  /* ------------------------------------------------------------------ */
+  // Initialise Google Identity Services once the script is available.
   useEffect(() => {
-    if (!initializing && isAuthenticated) {
-      navigate('/dentgo-gpt-home', { replace: true });
-    }
-  }, [initializing, isAuthenticated, navigate]);
+    const initialize = () => {
+      if (!window.google?.accounts?.id) return;
 
-  /* ------------------------------------------------------------------ */
-  /* Google one-tap callback                                             */
-  /* ------------------------------------------------------------------ */
-  const handleCredentialResponse = useCallback(
-    async (response: any) => {
-      const { credential } = response ?? {};
-      if (!credential) {
-        addToast({ message: 'No credentials returned. Please try again.', type: 'error' });
-        return;
-      }
-
-      setAuthenticating(true);
-      try {
-        const user = await loginWithGoogleAPI(credential);
-        login(user);
-        navigate('/dentgo-gpt-home', { replace: true });
-      } catch (err: any) {
-        console.error('Google login error:', err);
-        addToast({
-          message:
-            err?.message ??
-            'Authentication failed. Please try again or use a different browser mode.',
-          type: 'error',
-        });
-        setAuthenticating(false);
-      }
-    },
-    [login, navigate, addToast],
-  );
-
-  /* ------------------------------------------------------------------ */
-  /* Load Google Identity script                                         */
-  /* ------------------------------------------------------------------ */
-  useEffect(() => {
-    let retryTimeout: number | null = null;
-
-    loadGoogle(() => {
-      const tryInit = () => {
-        if (window.google?.accounts?.id) {
-          if (!CLIENT_ID) {
-            addToast({ message: 'Google Login misconfigured: missing client ID.', type: 'error' });
-            setLoading(false);
-            return;
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        ux_mode: 'popup', // explicitly request popup so we can fall back
+        callback: async (response: any) => {
+          try {
+            await loginWithGoogle(response.credential);
+            navigate('/dashboard');
+          } catch (err: any) {
+            toast({
+              variant: 'destructive',
+              title: 'Google sign-in failed',
+              description: err?.message || 'Please try again.',
+            });
           }
-          window.google.accounts.id.initialize({
-            client_id: CLIENT_ID,
-            callback: handleCredentialResponse,
-            ux_mode: 'popup',
-          });
-          setGoogleReady(true);
-          setLoading(false);
-        } else {
-          retryTimeout = window.setTimeout(tryInit, 100);
-        }
-      };
-      tryInit();
-    });
+        },
+      });
 
-    return () => {
-      if (retryTimeout) clearTimeout(retryTimeout);
+      setGoogleReady(true);
     };
-  }, [handleCredentialResponse, addToast]);
 
-  /* ------------------------------------------------------------------ */
-  /* Global loading / redirect states                                    */
-  /* ------------------------------------------------------------------ */
-  if (initializing || loading || authenticating) {
-    return <Loader fullscreen />;
-  }
+    // If the script has already been injected by index.html we can initialise
+    // immediately. Otherwise, wait until it’s loaded.
+    if (window.google?.accounts?.id) {
+      initialize();
+    } else {
+      // Attach a listener for when the Google script finishes loading.
+      const listener = () => initialize();
+      window.addEventListener('load', listener, { once: true });
+      return () => window.removeEventListener('load', listener);
+    }
+  }, [loginWithGoogle, navigate, toast]);
 
-  if (!initializing && isAuthenticated) {
-    return <Navigate to="/dentgo-gpt-home" replace />;
-  }
+  // -------------------------------------------------------------------------
 
-  /* ------------------------------------------------------------------ */
-  /* Render login page                                                   */
-  /* ------------------------------------------------------------------ */
+  if (isAuthenticated) return <Navigate to="/dashboard" />;
+
   return (
-    <div className="bg-white h-screen w-full overflow-hidden flex flex-col relative">
-      {/* Header */}
-      <div className="flex flex-col items-center justify-center bg-primary py-6">
-        <img src={logo} alt="Dentgo logo" className="w-24 h-auto object-contain" />
-        <h1 className="text-white text-2xl font-semibold mt-3 text-center">DentGo AI</h1>
+    <div className="flex h-full flex-col items-center justify-center bg-gradient-to-br from-purple-950 to-blue-950 p-6 text-slate-200">
+      <img src={logo} alt="DentAI" className="mb-8 w-40" />
+
+      {/* Login buttons -----------------------------------------------------*/}
+      <div className="flex w-full max-w-sm flex-col gap-4">
+        {/* Google ---------------------------------------------------------*/}
+        <button
+          onClick={triggerGoogleSignin}
+          disabled={!googleReady || loginLoading}
+          className="flex items-center justify-center gap-3 rounded-xl bg-white py-3 font-medium text-slate-900 shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <img src={GoogleIcon} alt="Google" className="h-5 w-5" />
+          Continue with Google
+        </button>
+
+        {/* Apple (future) --------------------------------------------------*/}
+        <button className="flex items-center justify-center gap-3 rounded-xl bg-slate-800 py-3 font-medium shadow-md transition hover:shadow-lg">
+          <img src={AppleIcon} alt="Apple" className="h-5 w-5" />
+          Continue with Apple
+        </button>
       </div>
 
-      {/* Main */}
-      <div className="flex-1 w-full flex flex-col items-center justify-start px-4 pt-4 relative z-10">
-        <div className="w-full max-w-md">
-          <h2 className="text-center text-gray-800 text-2xl font-semibold mb-4">Welcome</h2>
+      {/* Footer -----------------------------------------------------------*/}
+      <img src={dentaiBottom} aria-hidden className="pointer-events-none fixed bottom-0 left-1/2 w-[1500px] -translate-x-1/2 select-none" />
 
-          <div className="flex flex-col gap-4 w-full">
-            {/* Google */}
-            <button
-              type="button"
-              disabled={!googleReady}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
-                googleReady ? 'hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'
-              }`}
-              onClick={() => {
-                if (window.google?.accounts?.id && googleReady) {
-                  window.google.accounts.id.prompt();
-                } else {
-                  addToast({ message: 'Google login is not ready yet.', type: 'error' });
-                }
-              }}
-            >
-              <img src={GoogleIcon} alt="Google logo" className="w-5 h-5" />
-              <span>Continue with Google</span>
-            </button>
-
-            {/* Apple */}
-            <button
-              type="button"
-              className="flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition hover:bg-gray-100 active:scale-[.97] duration-150"
-              onClick={() => {
-                setAuthenticating(true);
-                loginWithApple().catch((err: any) => {
-                  console.error('Apple login error:', err);
-                  addToast({
-                    message: err?.message || 'Apple authentication failed. Please try again.',
-                    type: 'error',
-                  });
-                  setAuthenticating(false);
-                });
-              }}
-            >
-              <img src={AppleIcon} alt="Apple logo" className="w-5 h-5" />
-              <span>Continue with Apple</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer illustration */}
-      <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
-        <img src={dentaiBottom} alt="" className="w-full h-full object-cover" />
-      </div>
+      {/* Loader overlay when processing login -----------------------------*/}
+      {loginLoading && <Loader />}
     </div>
   );
 };
