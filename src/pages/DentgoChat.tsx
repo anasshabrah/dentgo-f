@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
-import { useAutoScroll } from 'react-auto-scroll';
+import ScrollToBottom from 'react-scroll-to-bottom';
 import { useMessageStore } from '@/hooks/useMessageStore';
 import { askDentgo } from '@/api/chat';
 import { fetchChatSession } from '@/api/chats';
@@ -20,22 +20,18 @@ import TypingDots from '@/components/chat/TypingDots';
 import ChatInput from '@/components/chat/ChatInput';
 
 const DentgoChat = () => {
-  /* ---------------------------------------------------------------- */
   const navigate = useNavigate();
   const { search } = useLocation();
   const { subscription } = useStripeData();
   const { addToast } = useToast();
   const { msgs, add, replaceLast, reset } = useMessageStore();
-  const listRef = useRef<HTMLDivElement>(null);
-  const { scrollToBottom } = useAutoScroll({ container: listRef });
-  /* ---------------------------------------------------------------- */
+
   const [isTyping, setTyping] = useState(false);
   const [usedToday, setUsedToday] = useState(0);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const PLUS = !!subscription?.subscriptionId;
 
-  /* ---------------------------------------------------------------- */
-  // initial load: usage + (optional) history
+  // ---------------- Initial Load ----------------
   useEffect(() => {
     const init = async () => {
       const today = new Date().toISOString().slice(0, 10);
@@ -69,12 +65,11 @@ const DentgoChat = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ---------------------------------------------------------------- */
+  // ---------------- Send Message ----------------
   const send = useCallback(
     async (text: string, images: File[]) => {
       if (!text.trim() && images.length === 0) return;
 
-      // FREE quota enforcement
       if (!PLUS && usedToday >= FREE_MESSAGES_PER_DAY) {
         addToast({
           message: `Daily limit reached (${FREE_MESSAGES_PER_DAY}). Upgrade for unlimited chats.`,
@@ -83,7 +78,6 @@ const DentgoChat = () => {
         return;
       }
 
-      /* ---- 1. display user message immediately ------------------- */
       const id = uuid();
       add({
         id,
@@ -91,19 +85,16 @@ const DentgoChat = () => {
         html: text,
         timestamp: Date.now(),
       });
-      scrollToBottom();
 
-      /* ---- 2. optimistic assistant placeholder ------------------- */
       add({
         id: id + '-ai',
         role: 'assistant',
         html: '',
         timestamp: Date.now(),
       });
-      setTyping(true);
-      scrollToBottom();
 
-      /* ---- 3. call backend (streaming optional) ------------------ */
+      setTyping(true);
+
       try {
         const { answer, sessionId: sid } = await askDentgo(
           text,
@@ -120,19 +111,15 @@ const DentgoChat = () => {
         replaceLast({ html: '❌ ' + (err?.message || 'Error'), error: true });
       } finally {
         setTyping(false);
-        scrollToBottom();
       }
     },
-    [add, replaceLast, msgs, PLUS, usedToday, sessionId, navigate, addToast, scrollToBottom]
+    [add, replaceLast, msgs, PLUS, usedToday, sessionId, navigate, addToast]
   );
 
-  /* ---------------------------------------------------------------- */
+  // ---------------- Render ----------------
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)]"> {/* header height = 56 */}
-      {/* TOP area could optionally show title & counters */}
-
-      {/* message list */}
-      <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-4 bg-background">
+    <div className="flex flex-col h-[calc(100vh-56px)]">
+      <ScrollToBottom className="flex-1 overflow-y-auto px-3 py-4 bg-background">
         {msgs.map((m) => (
           <Fragment key={m.id}>
             <ChatBubble
@@ -142,11 +129,9 @@ const DentgoChat = () => {
             />
           </Fragment>
         ))}
-
         {isTyping && <TypingDots />}
-      </div>
+      </ScrollToBottom>
 
-      {/* input */}
       <ChatInput onSubmit={send} disabled={isTyping} />
     </div>
   );
