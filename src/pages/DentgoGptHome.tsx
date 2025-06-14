@@ -4,7 +4,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import logo from "@/assets/images/logo.png";
 import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
-import { useStripeData } from "@context/StripeContext";
+import { useStripeData } from "@/context/StripeContext";
 import Loader from "@components/ui/Loader";
 import { useMessageStore } from "@/hooks/useMessageStore";
 
@@ -39,7 +39,8 @@ const DentgoGptHome: React.FC = () => {
   };
 
   const handleStartChat = () => {
-    if (subscription?.status === "active") {
+    // subscription.plan will be "PLUS" for paid users
+    if (subscription?.plan === "PLUS") {
       // Reset any existing chat state
       resetMessages();
       // Navigate to a fresh chat session
