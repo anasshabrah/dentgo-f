@@ -15,17 +15,17 @@ const DentgoGptHome: React.FC = () => {
   const resetMessages = useMessageStore((state) => state.reset);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Show loader while auth state settles
+  // Show loading while auth initializes
   if (initializing) {
     return <Loader />;
   }
 
-  // If not logged in, force login
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Cleanup any stray off-canvas backdrops
+  // Clean up any off-canvas backdrops left over
   useEffect(() => {
     const backdrop = document.querySelector(".offcanvas-backdrop.show");
     if (backdrop) {
@@ -38,10 +38,15 @@ const DentgoGptHome: React.FC = () => {
     navigate("/subscribe");
   };
 
-  // Simplified: always reset and navigate, let RequireSubscription handle access
   const handleStartChat = () => {
-    resetMessages();
-    navigate("/dentgo-chat");
+    if (subscription?.status === "active") {
+      // Reset any existing chat state
+      resetMessages();
+      // Navigate to a fresh chat session
+      navigate("/dentgo-chat");
+    } else {
+      navigate("/subscribe");
+    }
   };
 
   return (
