@@ -8,7 +8,7 @@ import GoogleIcon from '@/assets/images/Icon-google.png';
 import dentaiBottom from '@/assets/images/dentaiBottom.png';
 import { GOOGLE_CLIENT_ID, API_BASE } from '@/config';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/ToastProvider';
 
 // --- Local helpers ---------------------------------------------------------
 
