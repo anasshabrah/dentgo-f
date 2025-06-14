@@ -142,7 +142,7 @@ const DentgoChat = () => {
         {isTyping && <TypingDots />}
       </ScrollToBottom>
 
-      <div className="mx-auto w-full max-w-3xl px-4 pt-2 pb-4">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-4">
         <ChatInput onSubmit={send} disabled={isTyping} />
       </div>
     </div>
