@@ -51,7 +51,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
     <div
       {...dropzone.getRootProps()}
       className={clsx(
-        'bg-transparent border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom rounded-xl',
+        'bg-background border-t border-gray-200 dark:border-gray-700 px-4 py-3 safe-bottom rounded-xl',
         dropzone.isDragActive && 'ring-2 ring-primary'
       )}
     >

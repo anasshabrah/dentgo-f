@@ -183,7 +183,7 @@ const DentgoChat = () => {
       </ScrollToBottom>
 
       {/* Input bar centred & padded */}
-      <div className="mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <div className="mx-auto w-full max-w-3xl px-4 pt-2 pb-4">
         <ChatInput onSubmit={send} disabled={isTyping} />
       </div>
     </div>
