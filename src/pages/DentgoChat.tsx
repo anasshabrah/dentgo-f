@@ -195,7 +195,6 @@ const DentgoChat: React.FC = () => {
   return (
     <div className="flex flex-col h-dvh bg-gray-100 dark:bg-gray-900">
       <main className="flex flex-col flex-1 relative">
-        {/* 🚀 Added bg-gray-100 so the scroll area never shows white */}
         <div
           ref={containerRef}
           role="log"
@@ -218,12 +217,11 @@ const DentgoChat: React.FC = () => {
                 ))}
               </span>
             </div>
-          ))}
+          )}
         </div>
 
         {showScrollHint && (
           <>
-            {/* 🚀 Changed gradient from white to gray-100 to match background */}
             <div className="pointer-events-none absolute bottom-16 left-0 right-0 h-6 bg-gradient-to-t from-gray-100 dark:from-gray-900 to-transparent" />
             <button
               onClick={scrollToBottom}
