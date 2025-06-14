@@ -39,8 +39,6 @@ const DentgoGptHome: React.FC = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const name = (form.querySelector("#patient-name") as HTMLInputElement)?.value;
-    const age = (form.querySelector("#patient-age") as HTMLInputElement)?.value;
-    const fileNumber = (form.querySelector("#file-number") as HTMLInputElement)?.value;
     const fileInput = form.querySelector("#xray-file") as HTMLInputElement;
     const file = fileInput?.files?.[0];
 
@@ -51,8 +49,6 @@ const DentgoGptHome: React.FC = () => {
 
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("age", age);
-    formData.append("fileNumber", fileNumber);
     formData.append("image", file);
 
     try {
@@ -115,90 +111,62 @@ const DentgoGptHome: React.FC = () => {
 
       {/* XRay Upload Modal */}
       {showXRayModal && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-lg bg-white rounded-t-3xl z-60 p-6 shadow-lg">
+          <button
             onClick={() => setShowXRayModal(false)}
-            aria-hidden="true"
-          />
-          <div className="fixed inset-x-0 bottom-0 mx-auto w-full max-w-lg bg-white rounded-t-3xl z-60 p-6 shadow-lg">
-            <button
-              onClick={() => setShowXRayModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
-              aria-label="Close x-ray modal"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            aria-label="Close x-ray modal"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
+            AI xRay Reporter
+          </h3>
+          <form onSubmit={handleXRaySubmit} className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-1" htmlFor="xray-file">
+                X-Ray Image
+              </label>
+              <input
+                id="xray-file"
+                type="file"
+                accept="image/*"
+                required
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-1" htmlFor="patient-name">
+                Patient Name
+              </label>
+              <input
+                id="patient-name"
+                type="text"
+                required
+                className="w-full border rounded p-2"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-primary text-white font-medium text-base rounded-md py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+            >
+              Upload and Analyze
             </button>
-            <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
-              AI xRay Reporter
-            </h3>
-            <form onSubmit={handleXRaySubmit} className="space-y-4">
-              <div>
-                <label className="block text-gray-700 mb-1" htmlFor="xray-file">
-                  X-Ray Image
-                </label>
-                <input
-                  id="xray-file"
-                  type="file"
-                  accept="image/*"
-                  required
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1" htmlFor="patient-name">
-                  Patient Name
-                </label>
-                <input
-                  id="patient-name"
-                  type="text"
-                  required
-                  className="w-full border rounded p-2"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1" htmlFor="patient-age">
-                  Patient Age
-                </label>
-                <input
-                  id="patient-age"
-                  type="number"
-                  required
-                  className="w-full border rounded p-2"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 mb-1" htmlFor="file-number">
-                  File Number (Optional)
-                </label>
-                <input
-                  id="file-number"
-                  type="text"
-                  className="w-full border rounded p-2"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-primary text-white font-medium text-base rounded-md py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-              >
-                Upload and Analyze
-              </button>
-            </form>
-          </div>
-        </>
+          </form>
+        </div>
       )}
     </div>
   );
