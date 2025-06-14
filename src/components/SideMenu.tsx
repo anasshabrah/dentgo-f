@@ -1,7 +1,7 @@
 // src/components/SideMenu.tsx
 import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Removed Link import
 import { useModal } from "@/context/ModalContext";
 import { useAuth } from "@/context/AuthContext";
 import { useMessageStore } from "@/hooks/useMessageStore";
@@ -49,13 +49,14 @@ export default function SideMenu() {
 
                   <nav className="flex-1 space-y-2">
                     {/* New Chat */}
-                    <Link
-                      to="/dentgo-chat"
+                    <button
                       onClick={() => {
                         resetMessages();
                         close();
+                        // will hit our RequireSubscription wrapper
+                        navigate("/dentgo-chat");
                       }}
-                      className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                      className="flex items-center justify-between p-4 rounded-lg hover:bg-primary/10 transition"
                     >
                       <div className="flex items-center gap-4">
                         <svg
@@ -104,7 +105,7 @@ export default function SideMenu() {
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                    </Link>
+                    </button>
 
                     {/* History */}
                     <Link

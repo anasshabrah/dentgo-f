@@ -5,6 +5,7 @@ import RootLayout from "./layouts/RootLayout";
 import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import RequireAuth from "@components/RequireAuth";
+import RequireSubscription from "@components/RequireSubscription";
 import paymentRoutes from "@/modules/payments/routes";
 import DentgoGptHome from "../pages/DentgoGptHome";
 
@@ -57,7 +58,14 @@ export default function RoutesConfig() {
           element: <DashboardLayout />,
           children: [
             { path: "dentgo-gpt-home", element: <DentgoGptHome /> },
-            { path: "dentgo-chat", element: <DentgoChat /> },
+            {
+              path: "dentgo-chat",
+              element: (
+                <RequireSubscription>
+                  <DentgoChat />
+                </RequireSubscription>
+              ),
+            },
             { path: "history", element: <History /> },
             { path: "notification", element: <Notification /> },
             { path: "terms-and-privacy", element: <TermsAndPrivacy /> },

@@ -38,15 +38,10 @@ const DentgoGptHome: React.FC = () => {
     navigate("/subscribe");
   };
 
+  // Simplified: always reset and navigate, let RequireSubscription handle access
   const handleStartChat = () => {
-    if (!subscription) return;
-
-    if (subscription.status === "active") {
-      resetMessages();
-      navigate("/dentgo-chat");
-    } else {
-      navigate("/subscribe");
-    }
+    resetMessages();
+    navigate("/dentgo-chat");
   };
 
   return (
@@ -88,8 +83,7 @@ const DentgoGptHome: React.FC = () => {
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleStartChat}
-              disabled={subscription === undefined}
-              className="w-full bg-primary text-white font-medium text-lg rounded-xl py-4 shadow hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+              className="w-full bg-primary text-white font-medium text-lg rounded-xl py-4 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
               aria-label="Start chat with Dentgo"
             >
               Start Chat with Dentgo
