@@ -129,7 +129,7 @@ const DentgoChat = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-56px)] bg-gray-100 dark:bg-gray-900">
-      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mt-2 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
         {msgs.map((m) => (
           <Fragment key={m.id}>
             <ChatBubble

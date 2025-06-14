@@ -69,7 +69,7 @@ const DentgoGptHome: React.FC = () => {
                 </p>
                 <button
                   onClick={handlePlusSubscription}
-                  className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-lg px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   aria-label="Upgrade to Dentgo Plus"
                 >
                   Upgrade
@@ -140,7 +140,7 @@ const DentgoGptHome: React.FC = () => {
               </p>
               <div className="mt-6 flex justify-center">
                 <button
-                  className="inline-flex items-center bg-primary text-white text-lg font-medium py-3 px-6 rounded-lg shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+                  className="inline-flex items-center bg-primary text-white text-lg font-medium py-3 px-6 rounded-md shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   aria-label="Add Home Screen"
                 >
                   Add Home Screen

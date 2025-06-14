@@ -119,7 +119,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               disabled={googleLoading}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-md bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
                 googleLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
               }`}
               onClick={() => {
@@ -146,7 +146,7 @@ const Login: React.FC = () => {
             <button
               type="button"
               disabled={appleLoading}
-              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-lg bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
+              className={`flex items-center justify-center gap-3 w-full py-3 border border-gray-300 rounded-md bg-white font-semibold text-base text-black transition active:scale-[.97] duration-150 ${
                 appleLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
               }`}
               onClick={async () => {
