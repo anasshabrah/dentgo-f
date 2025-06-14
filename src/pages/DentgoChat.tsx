@@ -1,3 +1,4 @@
+// src/pages/DentgoChat.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext";
@@ -111,12 +112,13 @@ const DentgoGptHome: React.FC = () => {
         <>
           {/* Dark overlay */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[99]"
             onClick={() => setShowXRayModal(false)}
             aria-hidden="true"
           />
-          {/* Modal */}
-          <div className="fixed inset-0 flex items-center justify-center z-50">
+
+          {/* Modal container */}
+          <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto px-4">
             <div className="relative bg-white w-full max-w-lg rounded-2xl p-6 shadow-lg">
               <button
                 onClick={() => setShowXRayModal(false)}
