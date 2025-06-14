@@ -1,5 +1,4 @@
 // src/pages/Splash.tsx
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -78,11 +77,7 @@ const Splash: React.FC = () => {
     <div className="flex flex-col h-screen w-screen">
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         <img src={img} alt={title} className="w-full max-w-xs mb-6" />
-        <h2
-          className="text-2xl font-bold text-center text-gray-800 mb-2
-                     transition-transform duration-300 ease-in-out
-                     motion-safe:hover:scale-[1.02]"
-        >
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-2 transition-transform duration-300 ease-in-out motion-safe:hover:scale-[1.02]">
           {title}
         </h2>
         <p className="text-center text-gray-500 max-w-md">{text}</p>
