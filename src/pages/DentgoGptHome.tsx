@@ -6,11 +6,13 @@ import plusRobot from "@/assets/images/plus-robort.png";
 import { useAuth } from "@context/AuthContext";
 import { useStripeData } from "@context/StripeContext";
 import Loader from "@components/ui/Loader";
+import { useMessageStore } from "@/hooks/useMessageStore";
 
 const DentgoGptHome: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, initializing } = useAuth();
   const { subscription } = useStripeData();
+  const resetMessages = useMessageStore((state) => state.reset);
   const [isVisible, setIsVisible] = useState(false);
 
   // Show loading while auth initializes
@@ -38,6 +40,9 @@ const DentgoGptHome: React.FC = () => {
 
   const handleStartChat = () => {
     if (subscription?.status === "active") {
+      // Reset any existing chat state
+      resetMessages();
+      // Navigate to a fresh chat session
       navigate("/dentgo-chat");
     } else {
       navigate("/subscribe");
