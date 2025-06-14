@@ -55,7 +55,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
             ref={ref}
             rows={1}
             disabled={disabled}
-            placeholder="Ask about dentistry or upload dental images…"
+            placeholder="Ask me about dentistry..."
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className={clsx(
