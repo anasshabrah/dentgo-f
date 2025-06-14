@@ -1,10 +1,11 @@
 // src/modules/payments/SubscribeWizard/StepSuccess.tsx
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { useStripeData } from '@/context/StripeContext';
-import { FREE_MESSAGES_PER_DAY } from '@/config';
+import { FREE_MESSAGES_PER_DAY, API_BASE } from '@/config';
+import type { ActiveSubscription } from '@/api/subscriptions';
+import { fetchActiveSubscription } from '@/api/subscriptions';
 
 export interface StepSuccessProps {
   planId: string;
@@ -15,11 +16,22 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
   const queryClient = useQueryClient();
   const { refresh } = useStripeData();
 
+  // Trigger cache invalidation for cards and subscription once on mount
   useEffect(() => {
     queryClient.invalidateQueries(['cards']);
     queryClient.invalidateQueries(['subscription']);
     refresh();
   }, [queryClient, refresh]);
+
+  // Fetch latest subscription from server
+  const {
+    data: subscription,
+    isFetching: loadingSubscription,
+  } = useQuery<ActiveSubscription>(
+    ['subscription'],
+    fetchActiveSubscription,
+    { enabled: true }
+  );
 
   const isFree = planId === 'basic';
   const title = isFree ? 'Free Plan Activated!' : 'Subscription Successful!';
@@ -27,7 +39,9 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
     ? `You're on the Basic plan with ${FREE_MESSAGES_PER_DAY} free message${FREE_MESSAGES_PER_DAY > 1 ? 's' : ''} per day. Enjoy your Dentgo experience!`
     : 'Thank you for subscribing. You now have unlimited access.';
 
-  const handleStart = () => {
+  const handleStart = async () => {
+    // Ensure subscription data is up to date
+    await queryClient.refetchQueries(['subscription']);
     navigate('/dentgo-chat');
   };
 
@@ -37,9 +51,13 @@ const StepSuccess: React.FC<StepSuccessProps> = ({ planId }) => {
       <p className="text-gray-600">{message}</p>
       <button
         onClick={handleStart}
-        className="mt-4 px-6 py-3 bg-primary text-white text-lg font-semibold rounded shadow hover:bg-primary/90 transition active:scale-95 duration-150"
+        disabled={loadingSubscription}
+        className={`mt-4 px-6 py-3 text-lg font-semibold rounded shadow transition active:scale-95 duration-150
+          ${loadingSubscription
+            ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+            : 'bg-primary text-white hover:bg-primary/90'}`}
       >
-        Start Now
+        {loadingSubscription ? 'Loading…' : 'Start Now'}
       </button>
     </div>
   );
