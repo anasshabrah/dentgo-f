@@ -1,3 +1,4 @@
+// src/components/chat/ChatInput.tsx
 import { useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useDropzone } from 'react-dropzone';
@@ -47,13 +48,7 @@ export default function ChatInput({ onSubmit, disabled }: Props) {
   );
 
   return (
-    <div
-      {...dropzone.getRootProps()}
-      className={clsx(
-        'bg-white dark:bg-gray-800 rounded-xl px-4 py-4 shadow border border-gray-200 dark:border-gray-700',
-        dropzone.isDragActive && 'ring-2 ring-primary'
-      )}
-    >
+    <div {...dropzone.getRootProps()} className={clsx(dropzone.isDragActive && 'ring-2 ring-primary')}>
       <div className="flex flex-col gap-3">
         <div className="relative">
           <textarea

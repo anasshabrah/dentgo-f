@@ -1,4 +1,4 @@
-// pages/DentgoChat.tsx
+// src/pages/DentgoChat.tsx
 import {
   useState,
   useEffect,
@@ -129,7 +129,8 @@ const DentgoChat = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-56px)] bg-gray-100 dark:bg-gray-900">
-      <ScrollToBottom className="flex-1 overflow-y-auto px-4 py-4 mt-2 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+      {/* Chat Container */}
+      <ScrollToBottom className="flex-1 overflow-y-auto mt-2 px-4 py-4 mx-auto w-full max-w-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
         {msgs.map((m) => (
           <Fragment key={m.id}>
             <ChatBubble
@@ -142,8 +143,11 @@ const DentgoChat = () => {
         {isTyping && <TypingDots />}
       </ScrollToBottom>
 
-      <div className="mx-auto w-full max-w-3xl px-4 pb-4">
-        <ChatInput onSubmit={send} disabled={isTyping} />
+      {/* Input Container */}
+      <div className="mx-auto w-full max-w-3xl px-4 pt-2 pb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-md px-4 py-4 shadow border border-gray-200 dark:border-gray-700">
+          <ChatInput onSubmit={send} disabled={isTyping} />
+        </div>
       </div>
     </div>
   );
