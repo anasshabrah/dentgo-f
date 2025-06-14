@@ -6,7 +6,7 @@ import Loader from '@components/ui/Loader';
 import logo from '@/assets/images/logo-w.png';
 import AppleIcon from '@/assets/images/Icon-apple.png';
 import GoogleIcon from '@/assets/images/Icon-google.png';
-import dentaiBottom from '@/assets/images/dentai-bottom.svg';
+import dentaiBottom from '@/assets/images/dentaiBottom.png';
 import { GOOGLE_CLIENT_ID, API_BASE } from '@/config';
 import useAuth from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
