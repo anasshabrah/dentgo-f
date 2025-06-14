@@ -4,12 +4,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useModal } from "@/context/ModalContext";
 import SideMenu from "./SideMenu";
 
-// Chat‑specific imports
+// Chat-specific imports
 import { useStripeData } from "@/context/StripeContext";
-import {
-  API_BASE,
-  FREE_MESSAGES_PER_DAY,
-} from "@/config";
+import { API_BASE, FREE_MESSAGES_PER_DAY } from "@/config";
 import EndSessionModal from "@/components/modal/EndSessionModal";
 
 interface Props {
@@ -40,7 +37,7 @@ const AppHeader: React.FC<Props> = ({
   const { open } = useModal();
 
   /* ----------------------------------------------------------------------- */
-  /* Chat‑specific state – rendered only on the /dentgo-chat route            */
+  /* Chat-specific state – rendered only on the /dentgo-chat route            */
   /* ----------------------------------------------------------------------- */
   const isChat = location.pathname.startsWith("/dentgo-chat");
   const query = new URLSearchParams(location.search);
@@ -81,7 +78,7 @@ const AppHeader: React.FC<Props> = ({
   };
 
   /* ----------------------------------------------------------------------- */
-  /* Chat End‑session button                                                  */
+  /* Chat End-session button                                                  */
   /* ----------------------------------------------------------------------- */
   const endSessionBtn = isChat ? (
     <button
@@ -98,7 +95,10 @@ const AppHeader: React.FC<Props> = ({
   /* Chat badge / counter                                                     */
   /* ----------------------------------------------------------------------- */
   const chatStatus = isChat ? (
-    subscription?.subscriptionId ? (
+    subscription === undefined ? (
+      // still loading—render a placeholder
+      <span className="h-[14px] w-[40px] bg-gray-300 rounded animate-pulse" />
+    ) : subscription.subscriptionId ? (
       <span className="px-1.5 py-0.5 bg-green-100 text-green-800 text-[10px] font-semibold rounded-full">
         PLUS
       </span>
@@ -179,7 +179,7 @@ const AppHeader: React.FC<Props> = ({
         </button>
       )}
 
-      {/* End‑session button (chat only) */}
+      {/* End-session button (chat only) */}
       {endSessionBtn}
     </header>
   );
