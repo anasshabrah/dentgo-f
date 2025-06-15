@@ -71,7 +71,6 @@ const DentgoGptHome: React.FC = () => {
       <main className="flex-1 bg-gray-100">
         <div className="mx-auto max-w-lg px-4">
 
-          {/* Always show AI xRay Reporter */}
           <section
             className="mt-6 bg-white rounded-xl shadow-md overflow-hidden"
             aria-labelledby="xray-reporter-title"
@@ -133,7 +132,7 @@ const DentgoGptHome: React.FC = () => {
             </svg>
           </button>
           <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
-            AI xRay Reporter
+            Upload X-Ray
           </h3>
           <form onSubmit={handleXRaySubmit} className="space-y-4">
             <div>
