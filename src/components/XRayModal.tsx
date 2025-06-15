@@ -37,11 +37,11 @@ const XRayModal: React.FC<XRayModalProps> = ({ setShowXRayModal }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-60 bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+    <div className="fixed inset-0 flex items-center justify-center z-60 bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-lg transform transition-all duration-300 ease-in-out scale-95 hover:scale-100">
         <button
           onClick={() => setShowXRayModal(false)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50"
+          className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/50"
           aria-label="Close x-ray modal"
         >
           <svg
@@ -59,12 +59,15 @@ const XRayModal: React.FC<XRayModalProps> = ({ setShowXRayModal }) => {
             />
           </svg>
         </button>
-        <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
+        <h3 className="text-gray-800 text-2xl font-bold mb-6 text-center">
           AI xRay Reporter
         </h3>
-        <form onSubmit={handleXRaySubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 mb-1" htmlFor="xray-file">
+        <p className="text-gray-500 text-lg mb-6 text-center">
+          Upload dental x-rays and generate detailed AI reports instantly.
+        </p>
+        <form onSubmit={handleXRaySubmit} className="space-y-6">
+          <div className="relative">
+            <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="xray-file">
               X-Ray Image
             </label>
             <input
@@ -72,26 +75,26 @@ const XRayModal: React.FC<XRayModalProps> = ({ setShowXRayModal }) => {
               type="file"
               accept="image/*"
               required
-              className="w-full"
+              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
           </div>
-          <div>
-            <label className="block text-gray-700 mb-1" htmlFor="patient-name">
+          <div className="relative">
+            <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="patient-name">
               Patient Name
             </label>
             <input
               id="patient-name"
               type="text"
               required
-              className="w-full border rounded p-2"
+              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               value={patientName}
               onChange={(e) => setPatientName(e.target.value)}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-primary text-white font-medium text-base rounded-md py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
+            className="w-full bg-primary text-white font-semibold text-lg py-3 rounded-md shadow-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition duration-300"
           >
             Upload and Analyze
           </button>
