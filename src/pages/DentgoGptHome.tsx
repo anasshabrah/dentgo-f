@@ -80,7 +80,7 @@ const DentgoGptHome: React.FC = () => {
                 id="xray-reporter-title"
                 className="text-2xl font-semibold text-gray-800"
               >
-                Upload X-Ray
+                AI xRay Reporter
               </h2>
               <p className="text-gray-500 text-base">
                 Upload dental x-rays to generate detailed AI reports.
