@@ -80,7 +80,7 @@ const DentgoGptHome: React.FC = () => {
                 id="xray-reporter-title"
                 className="text-2xl font-semibold text-gray-800"
               >
-                Try our AI xRay Reporter
+                Upload X-Ray
               </h2>
               <p className="text-gray-500 text-base">
                 Upload dental x-rays to generate detailed AI reports.
@@ -88,9 +88,9 @@ const DentgoGptHome: React.FC = () => {
               <button
                 onClick={() => setShowXRayModal(true)}
                 className="mt-4 inline-flex items-center justify-center bg-primary text-white font-medium text-base rounded-md px-4 py-3 shadow hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-                aria-label="Try AI xRay Reporter"
+                aria-label="Upload X-Ray"
               >
-                Try AI xRay Reporter
+                Upload X-Ray
               </button>
             </div>
           </section>
@@ -132,7 +132,7 @@ const DentgoGptHome: React.FC = () => {
             </svg>
           </button>
           <h3 className="text-gray-800 text-xl font-semibold mb-4 text-center">
-            Upload X-Ray
+            AI xRay Reporter
           </h3>
           <form onSubmit={handleXRaySubmit} className="space-y-4">
             <div>
